@@ -2,33 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { SHLService } from '../services/shlService';
+import { LeagueService } from '../../services/leagueService';
+import { GameInfo } from '../../types/game';
 
-interface TeamInfo {
-  code: string;
-  names: {
-    short: string;
-    long: string;
-    full: string;
-  };
-  icon: string;
-  score: number;
+interface FirstGameProps {
+  league?: 'shl' | 'sdhl';
 }
 
-interface VenueInfo {
-  name: string;
-}
-
-interface GameInfo {
-  uuid: string;
-  startDateTime: string;
-  state: string;
-  homeTeamInfo: TeamInfo;
-  awayTeamInfo: TeamInfo;
-  venueInfo: VenueInfo;
-}
-
-export default function FirstGame() {
+export default function FirstGame({ league = 'shl' }: FirstGameProps) {
   const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,15 +18,15 @@ export default function FirstGame() {
     const loadGame = async () => {
       try {
         setLoading(true);
-        const shlService = new SHLService();
+        const leagueService = new LeagueService(league);
         
         // Try to get stored game first
-        let storedGame = shlService.getFirstGame();
+        let storedGame = leagueService.getFirstGame();
         
         if (!storedGame) {
           // Fetch fresh data if none stored
-          await shlService.fetchGames();
-          storedGame = shlService.getFirstGame();
+          await leagueService.fetchGames();
+          storedGame = leagueService.getFirstGame();
         }
         
         setGame(storedGame);
@@ -58,7 +39,7 @@ export default function FirstGame() {
     };
 
     loadGame();
-  }, []);
+  }, [league]);
 
   const formatDateTime = (dateTimeStr: string) => {
     try {
@@ -103,7 +84,7 @@ export default function FirstGame() {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 w-full md:w-80">
       <h3 className="text-xl font-semibold text-center text-gray-800 mb-4">
-        Next SHL Game
+        Next {league.toUpperCase()} Game
       </h3>
       
       <div className="text-center mb-4">

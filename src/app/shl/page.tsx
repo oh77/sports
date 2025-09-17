@@ -3,31 +3,9 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { SHLService } from '../services/shlService';
-
-interface TeamInfo {
-  code: string;
-  names: {
-    short: string;
-    long: string;
-    full: string;
-  };
-  icon: string;
-  score: number;
-}
-
-interface VenueInfo {
-  name: string;
-}
-
-interface GameInfo {
-  uuid: string;
-  startDateTime: string;
-  state: string;
-  homeTeamInfo: TeamInfo;
-  awayTeamInfo: TeamInfo;
-  venueInfo: VenueInfo;
-}
+import { LeagueService } from '../services/leagueService';
+import { GameContainer } from '../components/game-container';
+import { GameInfo } from '../types/game';
 
 export default function SHLPage() {
   const [games, setGames] = useState<GameInfo[]>([]);
@@ -39,14 +17,14 @@ export default function SHLPage() {
     const loadGames = async () => {
       try {
         setLoading(true);
-        const shlService = new SHLService();
+        const leagueService = new LeagueService('shl');
         
         // Try to get stored games first
-        let storedGames = shlService.getStoredGames();
+        let storedGames = leagueService.getStoredGames();
         
         if (storedGames.length === 0) {
           // Fetch fresh data if none stored
-          storedGames = await shlService.fetchGames();
+          storedGames = await leagueService.fetchGames();
         }
         
         if (storedGames.length > 0) {
@@ -86,17 +64,6 @@ export default function SHLPage() {
     loadGames();
   }, []);
 
-  const formatTime = (dateTimeStr: string) => {
-    try {
-      const date = new Date(dateTimeStr);
-      return date.toLocaleTimeString('sv-SE', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return dateTimeStr;
-    }
-  };
 
   if (loading) {
     return (
@@ -223,73 +190,7 @@ export default function SHLPage() {
 
         <div className="max-w-4xl mx-auto space-y-4">
           {games.map((game) => (
-            <div key={game.uuid} className="rounded-lg shadow-lg p-6  style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}">
-              <div className="text-center mb-4">
-                <p className="text-xl font-medium text-gray-800">
-                  {formatTime(game.startDateTime)}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="text-center flex-1">
-                  <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                    {game.homeTeamInfo.icon ? (
-                      <Image 
-                        src={game.homeTeamInfo.icon} 
-                        alt={game.homeTeamInfo.names.short}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 object-contain"
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-xl">🏒</span>
-                    )}
-                  </div>
-                <Link 
-                  href={`/shl/${game.homeTeamInfo.code}`}
-                  className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                  {game.homeTeamInfo.names.short}
-                </Link>
-                </div>
-                
-                <div className="text-center mx-6">
-                  <Image 
-                    src="https://www.shl.se/assets/stadium-460843bd.svg"
-                    alt="Stadium"
-                    width={40}
-                    height={40}
-                    className="mx-auto mb-2 brightness-0"
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    {game.venueInfo.name}
-                  </p>
-                </div>
-                
-                <div className="text-center flex-1">
-                  <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                    {game.awayTeamInfo.icon ? (
-                      <Image 
-                        src={game.awayTeamInfo.icon} 
-                        alt={game.awayTeamInfo.names.short}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 object-contain"
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-xl">🏒</span>
-                    )}
-                  </div>
-                <Link 
-                  href={`/shl/${game.awayTeamInfo.code}`}
-                  className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                  {game.awayTeamInfo.names.short}
-                </Link>
-                </div>
-              </div>
-
-            </div>
+            <GameContainer key={game.uuid} game={game} league="shl" />
           ))}
         </div>
 
