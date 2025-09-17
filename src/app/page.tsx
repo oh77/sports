@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { SHLService } from './services/shlService';
 
 interface TeamInfo {
@@ -157,9 +158,11 @@ export default function Home() {
                 <div className="text-center flex-1">
                   <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                     {game.homeTeamInfo.icon ? (
-                      <img 
+                      <Image 
                         src={game.homeTeamInfo.icon} 
                         alt={game.homeTeamInfo.names.short}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 object-contain"
                       />
                     ) : (
@@ -182,9 +185,11 @@ export default function Home() {
                 <div className="text-center flex-1">
                   <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                     {game.awayTeamInfo.icon ? (
-                      <img 
+                      <Image 
                         src={game.awayTeamInfo.icon} 
                         alt={game.awayTeamInfo.names.short}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 object-contain"
                       />
                     ) : (

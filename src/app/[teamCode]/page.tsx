@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { SHLService } from '../services/shlService';
 
 interface TeamInfo {
@@ -158,12 +160,12 @@ export default function TeamPage() {
             <p className="text-gray-600 mb-6">
               {error || `No upcoming games found for team code: ${teamCode}`}
             </p>
-            <a 
+            <Link 
               href="/" 
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
               Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </main>
@@ -182,9 +184,11 @@ export default function TeamPage() {
           </h1>
           <div className="flex items-center justify-center gap-4">
             {teamInfo.icon ? (
-              <img 
+              <Image 
                 src={teamInfo.icon} 
                 alt={teamInfo.names.short}
+                width={64}
+                height={64}
                 className="w-16 h-16 object-contain"
               />
             ) : (
@@ -249,9 +253,11 @@ export default function TeamPage() {
               <div className="text-center flex-1">
                 <div className="w-20 h-20 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                   {teamInfo.icon ? (
-                    <img 
+                    <Image 
                       src={teamInfo.icon} 
                       alt={teamInfo.names.short}
+                      width={64}
+                      height={64}
                       className="w-16 h-16 object-contain"
                     />
                   ) : (
@@ -274,9 +280,11 @@ export default function TeamPage() {
               <div className="text-center flex-1">
                 <div className="w-20 h-20 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                   {opponentInfo.icon ? (
-                    <img 
+                    <Image 
                       src={opponentInfo.icon} 
                       alt={opponentInfo.names.short}
+                      width={64}
+                      height={64}
                       className="w-16 h-16 object-contain"
                     />
                   ) : (
@@ -300,12 +308,12 @@ export default function TeamPage() {
         </div>
 
         <div className="text-center mt-8">
-          <a 
+          <Link 
             href="/" 
             className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
           >
             Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     </main>
