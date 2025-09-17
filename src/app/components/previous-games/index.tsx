@@ -18,7 +18,7 @@ export default function PreviousGames({ games, currentTeamCode, league }: Previo
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-4 text-center">Previous Games</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Tidigare Matcher</h2>
       <div className="space-y-3">
         {games.map((prevGame) => {
           const isHomeTeam = getTeamCode(prevGame.homeTeamInfo) === currentTeamCode;
@@ -62,7 +62,7 @@ export default function PreviousGames({ games, currentTeamCode, league }: Previo
         })}
         {games.length === 0 && (
           <div className="text-center text-gray-200 py-4">
-            No previous games found
+            Inga tidigare matcher hittades
           </div>
         )}
       </div>

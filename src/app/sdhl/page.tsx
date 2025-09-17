@@ -48,13 +48,13 @@ export default function SDHLPage() {
               day: 'numeric'
             }));
           } else {
-            setError('No upcoming games found');
+            setError('Inga kommande matcher hittades');
           }
         } else {
-          setError('No game data available');
+          setError('Ingen matchdata tillgänglig');
         }
       } catch (err) {
-        setError('Failed to load game data');
+        setError('Misslyckades att ladda matchdata');
         console.error(err);
       } finally {
         setLoading(false);
@@ -127,10 +127,10 @@ export default function SDHLPage() {
             />
             <div className="text-center">
               <h1 className="text-5xl font-bold text-white uppercase tracking-wider">
-                GAME DAY
+                MATCHDAG
               </h1>
               <p className="text-2xl text-gray-600 mt-2">
-                {gameDate || 'No Games Available'}
+                {gameDate || 'Inga Matcher Tillgängliga'}
               </p>
             </div>
           </div>
@@ -138,16 +138,16 @@ export default function SDHLPage() {
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <h2 className="text-3xl font-bold text-white mb-4">
-              {error || 'No Games Found'}
+              {error || 'Inga Matcher Hittades'}
             </h2>
             <p className="text-gray-600 mb-6">
-              {error || 'No upcoming games available at the moment'}
+              {error || 'Inga kommande matcher tillgängliga just nu'}
             </p>
             <Link 
               href="/" 
               className="bg-blue-500 hover:bg-blue-600 text-gray-800 px-6 py-3 rounded-lg transition-colors"
             >
-              Back to Home
+              Tillbaka till Hem
             </Link>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function SDHLPage() {
           />
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white uppercase tracking-wider">
-              GAME DAY
+              MATCHDAG
             </h1>
             <p className="text-2xl text-gray-600 mt-2">
               {gameDate}
@@ -199,13 +199,13 @@ export default function SDHLPage() {
             href="/sdhl/standings" 
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
           >
-            View Standings
+            Visa Ligatabell
           </Link>
           <Link 
             href="/" 
             className="bg-gray-500 hover:bg-gray-600 text-gray-800 px-6 py-3 rounded-lg transition-colors"
           >
-            Back to Home
+            Tillbaka till Hem
           </Link>
         </div>
       </div>

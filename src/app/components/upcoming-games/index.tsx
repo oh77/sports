@@ -44,7 +44,7 @@ export default function UpcomingGames({ games, currentTeamCode, league }: Upcomi
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-4 text-center">Upcoming Games</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Kommande Matcher</h2>
       <div className="space-y-3">
         {games.map((upcomingGame) => {
           const isHomeTeam = getTeamCode(upcomingGame.homeTeamInfo) === currentTeamCode;
@@ -89,7 +89,7 @@ export default function UpcomingGames({ games, currentTeamCode, league }: Upcomi
         })}
         {games.length === 0 && (
           <div className="text-center text-gray-200 py-4">
-            No upcoming games found
+            Inga kommande matcher hittades
           </div>
         )}
       </div>

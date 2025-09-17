@@ -55,9 +55,9 @@ export default function SDHLStandingsPage() {
         }
         
         const data = await response.json();
-        setStandings(data[0]);
+        setStandings(data);
       } catch (err) {
-        setError('Failed to load standings');
+        setError('Misslyckades att ladda ligatabellen');
         console.error(err);
       } finally {
         setLoading(false);
@@ -125,10 +125,10 @@ export default function SDHLStandingsPage() {
             />
             <div className="text-center">
               <h1 className="text-5xl font-bold text-white uppercase tracking-wider">
-                STANDINGS
+                LIGATABELL
               </h1>
               <p className="text-2xl text-gray-200 mt-2">
-                SDHL League Table
+                SDHL Ligatabell
               </p>
             </div>
           </div>
@@ -136,16 +136,16 @@ export default function SDHLStandingsPage() {
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <h2 className="text-3xl font-bold text-white mb-4">
-              {error || 'Standings Not Available'}
+              {error || 'Ligatabell Inte Tillgänglig'}
             </h2>
             <p className="text-gray-200 mb-6">
-              {error || 'Unable to load standings data at the moment'}
+              {error || 'Kunde inte ladda ligatabell just nu'}
             </p>
             <Link 
               href="/sdhl" 
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
-              Back to SDHL
+              Tillbaka till SDHL
             </Link>
           </div>
         </div>
@@ -178,10 +178,10 @@ export default function SDHLStandingsPage() {
           />
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white uppercase tracking-wider">
-              STANDINGS
+              LIGATABELL
             </h1>
             <p className="text-2xl text-gray-200 mt-2">
-              SDHL League Table
+              SDHL Ligatabell
             </p>
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function SDHLStandingsPage() {
             href="/sdhl" 
             className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
           >
-            Back to SDHL
+            Tillbaka till SDHL
           </Link>
         </div>
       </div>

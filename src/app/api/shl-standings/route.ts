@@ -18,7 +18,7 @@ export async function GET() {
 
     const data = await response.json();
     
-    return NextResponse.json(data);
+    return NextResponse.json(data[0]);
   } catch (error) {
     console.error('Error fetching SHL standings:', error);
     return NextResponse.json(

@@ -3,6 +3,32 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+interface TeamStats {
+  Rank: number | null;
+  Team: number;
+  GP: number;
+  W: number;
+  T: number;
+  L: number;
+  G: number;
+  GPG: string;
+  GA: number;
+  GAPG: string;
+  OTW: number;
+  OTL: number;
+  SOW: number;
+  SOL: number;
+  info: {
+    teamNames: {
+      code: string;
+      short: string;
+      long: string;
+      full: string;
+    };
+    logo: string;
+  };
+}
+
 interface StandingsData {
   dataColumns: Array<{
     name: string;
@@ -10,31 +36,7 @@ interface StandingsData {
     highlighted: boolean;
     group: string;
   }>;
-  stats: Array<{
-    Rank: number | null;
-    Team: number;
-    GP: number;
-    W: number;
-    T: number;
-    L: number;
-    G: number;
-    GPG: string;
-    GA: number;
-    GAPG: string;
-    OTW: number;
-    OTL: number;
-    SOW: number;
-    SOL: number;
-    info: {
-      teamNames: {
-        code: string;
-        short: string;
-        long: string;
-        full: string;
-      };
-      logo: string;
-    };
-  }>;
+  stats: TeamStats[];
 }
 
 interface FullStandingsProps {
@@ -43,15 +45,15 @@ interface FullStandingsProps {
 }
 
 export function FullStandings({ standings, league }: FullStandingsProps) {
-  const getTeamCode = (team: any): string => {
+  const getTeamCode = (team: TeamStats): string => {
     return team.info.teamNames.code;
   };
 
-  const getTeamName = (team: any): string => {
+  const getTeamName = (team: TeamStats): string => {
     return team.info.teamNames.short;
   };
 
-  const getTeamLogo = (team: any): string => {
+  const getTeamLogo = (team: TeamStats): string => {
     return team.info.logo;
   };
 
@@ -60,7 +62,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
     return rank.toString();
   };
 
-  const getPoints = (team: any): number => {
+  const getPoints = (team: TeamStats): number => {
     // Calculate points: 3 for win, 1 for tie, 0 for loss
     return (team.W * 3) + (team.T * 1);
   };
@@ -84,7 +86,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Table Header */}
         <div className="bg-gray-800 text-white px-6 py-4">
-          <h2 className="text-2xl font-bold text-center">League Standings</h2>
+          <h2 className="text-2xl font-bold text-center">Ligatabell</h2>
         </div>
 
         {/* Table */}
@@ -93,15 +95,15 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">GP</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">W</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">T</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">L</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PTS</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lag</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">M</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">V</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">O</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">F</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">G</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">GA</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">GD</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">GM</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -197,7 +199,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
               }) : (
                 <tr>
                   <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
-                    No standings data available
+                    Ingen ligatabell tillgänglig
                   </td>
                 </tr>
               )}
@@ -211,18 +213,18 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-yellow-200 rounded"></div>
               <span>
-                {league === 'shl' ? 'Top 6 (Playoff spots)' : 'Top 8 (Playoff spots)'}
+                {league === 'shl' ? 'Topp 6 (Slutspel)' : 'Topp 8 (Slutspel)'}
               </span>
             </div>
             {league === 'shl' && (
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-blue-200 rounded"></div>
-                <span>Playoff qualification (7-10)</span>
+                <span>Kvalspel (7-10)</span>
               </div>
             )}
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-red-200 rounded"></div>
-              <span>Relegation zone (last 2)</span>
+              <span>Nedflyttning/Kval (sista 2)</span>
             </div>
           </div>
         </div>

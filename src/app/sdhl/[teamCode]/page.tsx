@@ -8,6 +8,7 @@ import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
+import { CompactStandings } from '../../components/compact-standings';
 import { GameInfo, TeamInfo } from '../../types/game';
 
 export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
@@ -19,6 +20,39 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [standings, setStandings] = useState<{
+    dataColumns: Array<{
+      name: string;
+      type: string;
+      highlighted: boolean;
+      group: string;
+    }>;
+    stats: Array<{
+      Rank: number | null;
+      Team: number;
+      GP: number;
+      W: number;
+      T: number;
+      L: number;
+      G: number;
+      GPG: string;
+      GA: number;
+      GAPG: string;
+      OTW: number;
+      OTL: number;
+      SOW: number;
+      SOL: number;
+      info: {
+        teamNames: {
+          code: string;
+          short: string;
+          long: string;
+          full: string;
+        };
+        logo: string;
+      };
+    }>;
+  } | null>(null);
 
   useEffect(() => {
     const loadTeamData = async () => {
@@ -30,7 +64,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         const games = await leagueService.fetchGames();
         
         if (games.length === 0) {
-          setError('No game data available');
+          setError('Ingen matchdata tillgänglig');
           return;
         }
 
@@ -41,7 +75,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         );
 
         if (!teamGame) {
-          setError('Team not found');
+          setError('Lag inte hittat');
           return;
         }
 
@@ -61,8 +95,19 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         setPreviousGames(prev);
         setUpcomingGames(upcoming);
 
+        // Load standings data
+        try {
+          const standingsResponse = await fetch('/api/sdhl-standings');
+          if (standingsResponse.ok) {
+            const standingsData = await standingsResponse.json();
+            setStandings(standingsData);
+          }
+        } catch (err) {
+          console.error('Failed to load standings:', err);
+        }
+
       } catch (err) {
-        setError('Failed to load team data');
+        setError('Misslyckades att ladda lagdata');
         console.error(err);
       } finally {
         setLoading(false);
@@ -105,16 +150,16 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <h1 className="text-4xl font-bold text-white mb-4">
-              {error || 'Team Not Found'}
+              {error || 'Lag Inte Hittat'}
             </h1>
             <p className="text-gray-600 mb-6">
-              {error || `Team "${teamCode}" could not be found`}
+              {error || `Lag "${teamCode}" kunde inte hittas`}
             </p>
             <Link 
               href="/sdhl" 
               className="bg-blue-500 hover:bg-blue-600 text-gray-800 px-6 py-3 rounded-lg transition-colors"
             >
-              Back to SDHL
+              Tillbaka till SDHL
             </Link>
           </div>
         </div>
@@ -163,6 +208,18 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
           currentTeamCode={teamCode} 
           league="sdhl" 
         />
+
+        {/* Compact Standings */}
+        {standings && nextGame && (
+          <div className="max-w-4xl mx-auto mb-8">
+            <CompactStandings 
+              standings={standings} 
+              league="sdhl" 
+              teamCode1={nextGame.homeTeamInfo.names?.code || nextGame.homeTeamInfo.code}
+              teamCode2={nextGame.awayTeamInfo.names?.code || nextGame.awayTeamInfo.code}
+            />
+          </div>
+        )}
 
         {/* Previous and Upcoming Games */}
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">

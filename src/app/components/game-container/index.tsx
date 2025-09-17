@@ -64,7 +64,7 @@ export function GameContainer({ game, league }: GameContainerProps) {
         <div className="text-center mx-6">
           <Image 
             src={getStadiumIcon()}
-            alt="Stadium"
+            alt="Arena"
             width={40}
             height={40}
             className="mx-auto mb-2 brightness-0"

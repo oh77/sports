@@ -8,6 +8,7 @@ import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
+import { CompactStandings } from '../../components/compact-standings';
 import { GameInfo, TeamInfo } from '../../types/game';
 
 
@@ -20,6 +21,39 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
   const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
+  const [standings, setStandings] = useState<{
+    dataColumns: Array<{
+      name: string;
+      type: string;
+      highlighted: boolean;
+      group: string;
+    }>;
+    stats: Array<{
+      Rank: number | null;
+      Team: number;
+      GP: number;
+      W: number;
+      T: number;
+      L: number;
+      G: number;
+      GPG: string;
+      GA: number;
+      GAPG: string;
+      OTW: number;
+      OTL: number;
+      SOW: number;
+      SOL: number;
+      info: {
+        teamNames: {
+          code: string;
+          short: string;
+          long: string;
+          full: string;
+        };
+        logo: string;
+      };
+    }>;
+  } | null>(null);
 
   useEffect(() => {
     const loadTeamGame = async () => {
@@ -47,11 +81,22 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           const upcGames = leagueService.getUpcomingGamesForTeam(teamCode, 3);
           setPreviousGames(prevGames);
           setUpcomingGames(upcGames);
+
+          // Load standings data
+          try {
+            const standingsResponse = await fetch('/api/shl-standings');
+            if (standingsResponse.ok) {
+              const standingsData = await standingsResponse.json();
+              setStandings(standingsData);
+            }
+          } catch (err) {
+            console.error('Failed to load standings:', err);
+          }
         } else {
-          setError('No upcoming games found for this team');
+          setError('Inga kommande matcher hittades för detta lag');
         }
       } catch (err) {
-        setError('Failed to load team game data');
+        setError('Misslyckades att ladda lagdata');
         console.error(err);
       } finally {
         setLoading(false);
@@ -87,16 +132,16 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <h1 className="text-3xl font-bold text-gray-800 mb-4">
-              {error || 'Team Not Found'}
+              {error || 'Lag Inte Hittat'}
             </h1>
             <p className="text-gray-600 mb-6">
-              {error || `No upcoming games found for team code: ${teamCode}`}
+              {error || `Inga kommande matcher hittades för lagkod: ${teamCode}`}
             </p>
             <Link 
               href="/shl" 
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
-              Back to SHL
+              Tillbaka till SHL
             </Link>
           </div>
         </div>
@@ -157,6 +202,18 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           currentTeamCode={teamCode} 
           league="shl" 
         />
+
+        {/* Compact Standings */}
+        {standings && game && (
+          <div className="max-w-4xl mx-auto mb-8">
+            <CompactStandings 
+              standings={standings} 
+              league="shl" 
+              teamCode1={game.homeTeamInfo.names?.code || game.homeTeamInfo.code}
+              teamCode2={game.awayTeamInfo.names?.code || game.awayTeamInfo.code}
+            />
+          </div>
+        )}
 
         {/* Previous and Upcoming Games */}
         <div className="max-w-6xl mx-auto mt-8">

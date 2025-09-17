@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { GameInfo, TeamInfo } from '../../types/game';
+import { GameInfo } from '../../types/game';
 
 interface NextGameProps {
   game: GameInfo | null;
@@ -81,7 +81,7 @@ export default function NextGame({ game, league }: NextGameProps) {
           <div className="text-center mx-6">
             <Image
               src={stadiumIconUrl}
-              alt="Stadium"
+              alt="Arena"
               width={40}
               height={40}
               className="mx-auto mb-2 brightness-0"
