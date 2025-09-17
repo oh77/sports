@@ -194,7 +194,13 @@ export default function SDHLPage() {
           ))}
         </div>
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 space-x-4">
+          <Link 
+            href="/sdhl/standings" 
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
+          >
+            View Standings
+          </Link>
           <Link 
             href="/" 
             className="bg-gray-500 hover:bg-gray-600 text-gray-800 px-6 py-3 rounded-lg transition-colors"
