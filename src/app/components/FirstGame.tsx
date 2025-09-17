@@ -12,7 +12,7 @@ interface TeamInfo {
     full: string;
   };
   icon: string;
-  score: string;
+  score: number;
 }
 
 interface VenueInfo {

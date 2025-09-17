@@ -6,7 +6,7 @@ interface TeamInfo {
     full: string;
   };
   icon: string;
-  score: string;
+  score: number;
 }
 
 interface VenueInfo {
@@ -88,6 +88,44 @@ export class SHLService {
     });
     
     return nextGame || null;
+  }
+
+  getPreviousGamesForTeam(teamCode: string, limit: number = 3): GameInfo[] {
+    const games = this.getStoredGames();
+    const now = new Date();
+    
+    // Get all previous games for this team (home or away)
+    const previousGames = games
+      .filter(game => {
+        const gameDate = new Date(game.startDateTime);
+        const isHomeTeam = game.homeTeamInfo.code === teamCode;
+        const isAwayTeam = game.awayTeamInfo.code === teamCode;
+        
+        return (isHomeTeam || isAwayTeam) && gameDate < now;
+      })
+      .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime())
+      .slice(0, limit);
+    
+    return previousGames;
+  }
+
+  getUpcomingGamesForTeam(teamCode: string, limit: number = 3): GameInfo[] {
+    const games = this.getStoredGames();
+    const now = new Date();
+    
+    // Get all upcoming games for this team (home or away)
+    const upcomingGames = games
+      .filter(game => {
+        const gameDate = new Date(game.startDateTime);
+        const isHomeTeam = game.homeTeamInfo.code === teamCode;
+        const isAwayTeam = game.awayTeamInfo.code === teamCode;
+        
+        return (isHomeTeam || isAwayTeam) && gameDate > now;
+      })
+      .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
+      .slice(1, limit + 1); // Skip the first one (next game) and get the next 3
+    
+    return upcomingGames;
   }
 
   async refreshGames(): Promise<GameInfo[]> {
