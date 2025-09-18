@@ -3,15 +3,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { StandingsData, TeamStats } from '../../types/standings';
+import { CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl-standings';
+import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 
 interface CompactStandingsProps {
-  standings: StandingsData;
-  league: 'shl' | 'sdhl';
+  standings: StandingsData | CHLStandingsDataTransformed;
+  league: 'shl' | 'sdhl' | 'chl';
   teamCode1: string;
   teamCode2: string;
 }
 
 export function CompactStandings({ standings, league, teamCode1, teamCode2 }: CompactStandingsProps) {
+  // Helper functions for SHL/SDHL data
   const getTeamCode = (team: TeamStats): string => {
     return team.info.teamNames.code;
   };
@@ -34,25 +37,77 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
     return (team.W * 3) + (team.T * 1);
   };
 
+  // Helper functions for CHL data
+  const getCHLTeamCode = (team: CHLStandingsTeam): string => {
+    return team.shortName;
+  };
+
+  const getCHLTeamName = (team: CHLStandingsTeam): string => {
+    return team.shortName;
+  };
+
+  const getCHLTeamLogo = (team: CHLStandingsTeam): string | undefined => {
+    return team.logo;
+  };
+
+  const getCHLPoints = (team: CHLStandingsTeam): number => {
+    return team.points;
+  };
+
+  // Universal helper functions
+  const isCHLData = (data: StandingsData | CHLStandingsDataTransformed): data is CHLStandingsDataTransformed => {
+    return 'teams' in data && Array.isArray(data.teams) && data.teams.length > 0 && 'rank' in data.teams[0];
+  };
+
+  const getTeams = () => {
+    if (isCHLData(standings)) {
+      return standings.teams;
+    }
+    return standings.stats || [];
+  };
+
 
   // Find teams and their neighbors
   const getCompactTeams = () => {
-    if (!standings.stats?.length) return [];
+    const teams = getTeams();
+    if (!teams.length) return [];
 
-    const teams = standings.stats;
     const selectedTeams = new Set<string>();
-    const result: Array<{ team: TeamStats; index: number; rank: number }> = [];
+    const result: Array<{ team: TeamStats | CHLStandingsTeam; index: number; rank: number }> = [];
 
     // Find the two target teams
-    const team1Index = teams.findIndex(team => getTeamCode(team) === teamCode1);
-    const team2Index = teams.findIndex(team => getTeamCode(team) === teamCode2);
+    const team1Index = teams.findIndex(team => {
+      if (isCHLData(standings)) {
+        return getCHLTeamCode(team as CHLStandingsTeam) === teamCode1;
+      } else {
+        return getTeamCode(team as TeamStats) === teamCode1;
+      }
+    });
+    const team2Index = teams.findIndex(team => {
+      if (isCHLData(standings)) {
+        return getCHLTeamCode(team as CHLStandingsTeam) === teamCode2;
+      } else {
+        return getTeamCode(team as TeamStats) === teamCode2;
+      }
+    });
 
     // Add teams and their neighbors
     [team1Index, team2Index].forEach(teamIndex => {
       if (teamIndex === -1) return; // Team not found
 
       const team = teams[teamIndex];
-      const teamCode = getTeamCode(team);
+      let teamCode: string;
+      let rank: number;
+
+      if (isCHLData(standings)) {
+        const chlTeam = team as CHLStandingsTeam;
+        teamCode = getCHLTeamCode(chlTeam);
+        rank = chlTeam.rank;
+      } else {
+        const shlTeam = team as TeamStats;
+        teamCode = getTeamCode(shlTeam);
+        rank = shlTeam.Rank || teamIndex + 1;
+      }
       
       // Add the team itself
       if (!selectedTeams.has(teamCode)) {
@@ -60,20 +115,32 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
         result.push({
           team,
           index: teamIndex,
-          rank: team.Rank || teamIndex + 1
+          rank
         });
       }
 
       // Add team above (if exists and not already added)
       if (teamIndex > 0) {
         const teamAbove = teams[teamIndex - 1];
-        const teamAboveCode = getTeamCode(teamAbove);
+        let teamAboveCode: string;
+        let teamAboveRank: number;
+
+        if (isCHLData(standings)) {
+          const chlTeamAbove = teamAbove as CHLStandingsTeam;
+          teamAboveCode = getCHLTeamCode(chlTeamAbove);
+          teamAboveRank = chlTeamAbove.rank;
+        } else {
+          const shlTeamAbove = teamAbove as TeamStats;
+          teamAboveCode = getTeamCode(shlTeamAbove);
+          teamAboveRank = shlTeamAbove.Rank || teamIndex;
+        }
+
         if (!selectedTeams.has(teamAboveCode)) {
           selectedTeams.add(teamAboveCode);
           result.push({
             team: teamAbove,
             index: teamIndex - 1,
-            rank: teamAbove.Rank || teamIndex
+            rank: teamAboveRank
           });
         }
       }
@@ -81,13 +148,25 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
       // Add team below (if exists and not already added)
       if (teamIndex < teams.length - 1) {
         const teamBelow = teams[teamIndex + 1];
-        const teamBelowCode = getTeamCode(teamBelow);
+        let teamBelowCode: string;
+        let teamBelowRank: number;
+
+        if (isCHLData(standings)) {
+          const chlTeamBelow = teamBelow as CHLStandingsTeam;
+          teamBelowCode = getCHLTeamCode(chlTeamBelow);
+          teamBelowRank = chlTeamBelow.rank;
+        } else {
+          const shlTeamBelow = teamBelow as TeamStats;
+          teamBelowCode = getTeamCode(shlTeamBelow);
+          teamBelowRank = shlTeamBelow.Rank || teamIndex + 2;
+        }
+
         if (!selectedTeams.has(teamBelowCode)) {
           selectedTeams.add(teamBelowCode);
           result.push({
             team: teamBelow,
             index: teamIndex + 1,
-            rank: teamBelow.Rank || teamIndex + 2
+            rank: teamBelowRank
           });
         }
       }
@@ -125,11 +204,33 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {compactTeams.map(({ team, rank }) => {
-              const teamCode = getTeamCode(team);
-              const teamName = getTeamName(team);
-              const teamLogo = getTeamLogo(team);
-              const points = getPoints(team);
-              const goalDifference = team.G - team.GA;
+              let teamCode: string;
+              let teamName: string;
+              let teamLogo: string | undefined;
+              let points: number;
+              let goalDifference: number;
+              let gamesPlayed: number;
+
+              if (isCHLData(standings)) {
+                const chlTeam = team as CHLStandingsTeam;
+                teamCode = getCHLTeamCode(chlTeam);
+                teamName = getCHLTeamName(chlTeam);
+                teamLogo = getTeamLogoWithFallback({
+                  shortName: chlTeam.shortName,
+                  externalId: chlTeam.externalId
+                });
+                points = getCHLPoints(chlTeam);
+                goalDifference = chlTeam.goalDifference;
+                gamesPlayed = chlTeam.gamesPlayed;
+              } else {
+                const shlTeam = team as TeamStats;
+                teamCode = getTeamCode(shlTeam);
+                teamName = getTeamName(shlTeam);
+                teamLogo = getTeamLogo(shlTeam);
+                points = getPoints(shlTeam);
+                goalDifference = shlTeam.G - shlTeam.GA;
+                gamesPlayed = shlTeam.GP;
+              }
 
               return (
                 <tr 
@@ -168,7 +269,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
 
                   {/* Games Played */}
                   <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
-                    {team.GP}
+                    {gamesPlayed}
                   </td>
 
                   {/* Points */}
