@@ -5,7 +5,7 @@ import { LeagueService } from '../../services/leagueService';
 import { TeamInfo } from '../../types/game';
 
 interface LeagueFooterProps {
-  league: 'shl' | 'sdhl';
+  league: 'shl' | 'sdhl' | 'chl';
   currentTeamCode?: string;
 }
 

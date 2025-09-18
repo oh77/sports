@@ -8,7 +8,7 @@ import { GameInfo, TeamInfo } from '../../types/game';
 interface UpcomingGamesProps {
   games: GameInfo[];
   currentTeamCode: string;
-  league: 'shl' | 'sdhl';
+  league: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function UpcomingGames({ games, currentTeamCode, league }: UpcomingGamesProps) {

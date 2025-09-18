@@ -74,7 +74,7 @@ export interface CHLMatch {
 export interface CHLApiResponse {
   _type: string;
   data: CHLMatch[];
-  errors: any[];
+  errors: unknown[];
 }
 
 export interface CHLTeamInfo {
@@ -98,8 +98,8 @@ export interface CHLTeamInfo {
 export interface CHLTeamsApiResponse {
   _type: string;
   data: CHLTeamInfo[];
-  errors: any[];
-  includes: any[];
+  errors: unknown[];
+  includes: unknown[];
 }
 
 export interface CHLGame {

@@ -20,6 +20,8 @@ interface GameInfo {
   homeTeamInfo: TeamInfo;
   awayTeamInfo: TeamInfo;
   venueInfo: VenueInfo;
+  overtime?: boolean;
+  shootout?: boolean;
 }
 
 interface SHLResponse {

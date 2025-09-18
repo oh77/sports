@@ -69,7 +69,7 @@ export interface CHLStandingsData {
 export interface CHLStandingsApiResponse {
   _type: string;
   data: CHLStandingsData[];
-  errors: any[];
+  errors: unknown[];
 }
 
 // Transformed data structure for components

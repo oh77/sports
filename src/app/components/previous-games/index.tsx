@@ -8,7 +8,7 @@ import { GameInfo, TeamInfo } from '../../types/game';
 interface PreviousGamesProps {
   games: GameInfo[];
   currentTeamCode: string;
-  league: 'shl' | 'sdhl';
+  league: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function PreviousGames({ games, currentTeamCode, league }: PreviousGamesProps) {
@@ -55,6 +55,13 @@ export default function PreviousGames({ games, currentTeamCode, league }: Previo
                   <div className="text-sm font-bold text-gray-800">
                     {currentTeamScore} - {opponentScore}
                   </div>
+                  {((prevGame.state && (prevGame.state.includes('Shootout') || prevGame.state.includes('Overtime'))) || 
+                    ('shootout' in prevGame && prevGame.shootout) || 
+                    ('overtime' in prevGame && prevGame.overtime)) && (
+                    <div className="text-xs text-orange-600 font-medium">
+                      {((prevGame.state && prevGame.state.includes('Shootout')) || ('shootout' in prevGame && prevGame.shootout)) ? 'SO' : 'OT'}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

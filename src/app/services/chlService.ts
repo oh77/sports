@@ -1,7 +1,6 @@
 import { CHLApiResponse, CHLGame, CHLMatch, CHLTeamsApiResponse, CHLTeamInfo } from '../types/chl';
 
 const CHL_API_URL = 'https://www.chl.hockey/api/s3/live?q=live-events.json';
-const CHL_TEAMS_URL = 'https://www.chl.hockey/api/s3?q=teams-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json';
 
 export class CHLService {
   private static async fetchCHLData(): Promise<CHLApiResponse> {
@@ -19,7 +18,7 @@ export class CHLService {
 
   private static async fetchCHLTeams(): Promise<CHLTeamsApiResponse> {
     try {
-      const response = await fetch(CHL_TEAMS_URL);
+      const response = await fetch('https://www.chl.hockey/api/s3?q=teams-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -88,7 +87,8 @@ export class CHLService {
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
 
-      return upcomingMatches.map(match => this.transformMatchToGame(match, teamsMap));
+      // Return only the next 3 upcoming games
+      return upcomingMatches.slice(0, 3).map(match => this.transformMatchToGame(match, teamsMap));
     } catch (error) {
       console.error('Error getting upcoming CHL games:', error);
       return [];
@@ -153,8 +153,8 @@ export class CHLService {
         new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       );
 
-      // Return only the 10 most recent games
-      return finishedMatches.slice(0, 10).map(match => this.transformMatchToGame(match, teamsMap));
+      // Return only the 3 most recent games
+      return finishedMatches.slice(0, 3).map(match => this.transformMatchToGame(match, teamsMap));
     } catch (error) {
       console.error('Error getting recent CHL games:', error);
       return [];

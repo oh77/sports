@@ -6,7 +6,7 @@ import { LeagueService } from '../../services/leagueService';
 import { GameInfo } from '../../types/game';
 
 interface FirstGameProps {
-  league?: 'shl' | 'sdhl';
+  league?: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function FirstGame({ league = 'shl' }: FirstGameProps) {

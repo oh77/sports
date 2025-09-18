@@ -5,11 +5,11 @@ import { CHLTeamInfo } from '../types/chl';
  * Uses CHL's Cloudinary CDN for real team logos
  */
 export function getTeamLogo(team: CHLTeamInfo | { shortName: string; externalId?: string; country?: { code: string } }): string {
-  const externalId = 'externalId' in team ? team.externalId : team.externalId;
-  const shortName = 'shortName' in team ? team.shortName : team.shortName;
+  const externalId = 'externalId' in team ? team.externalId : undefined;
+  const shortName = team.shortName;
   
   // Use CHL's Cloudinary CDN for team logos
-  if (externalId && externalId !== 'n/a') {
+  if (externalId && externalId !== 'n/a' && externalId !== '') {
     return `https://res.cloudinary.com/chl-production/image/upload/c_fit,dpr_1.0,f_webp,g_center,h_50,q_auto,w_50/v1/chl-prod/assets/teams/${externalId}`;
   }
   

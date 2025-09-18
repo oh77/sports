@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { CHLGame } from '../types/chl';
 import { getTeamLogoWithFallback } from '../utils/teamLogos';
 
@@ -48,6 +49,11 @@ export default function CHLPage() {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  // Generate team code from team short name for URL routing
+  const generateTeamCode = (teamShortName: string): string => {
+    return teamShortName.toUpperCase();
   };
 
   if (loading) {
@@ -115,16 +121,23 @@ export default function CHLPage() {
                   <div className="text-center flex-1">
                     <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                       <Image
-                        src={getTeamLogoWithFallback(game.homeTeam)}
+                        src={getTeamLogoWithFallback({ 
+                          shortName: game.homeTeam.shortName, 
+                          externalId: game.homeTeam.externalId,
+                          country: game.homeTeam.country ? { code: game.homeTeam.country } : undefined 
+                        })}
                         alt={`${game.homeTeam.name} logo`}
                         width={48}
                         height={48}
                         className="w-12 h-12 object-contain"
                       />
                     </div>
-                    <p className="text-lg font-medium text-blue-600">
+                    <Link 
+                      href={`/chl/${generateTeamCode(game.homeTeam.shortName)}`}
+                      className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    >
                       {game.homeTeam.name}
-                    </p>
+                    </Link>
                   </div>
                   
                   {/* Venue */}
@@ -145,16 +158,23 @@ export default function CHLPage() {
                   <div className="text-center flex-1">
                     <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                       <Image
-                        src={getTeamLogoWithFallback(game.awayTeam)}
+                        src={getTeamLogoWithFallback({ 
+                          shortName: game.awayTeam.shortName, 
+                          externalId: game.awayTeam.externalId,
+                          country: game.awayTeam.country ? { code: game.awayTeam.country } : undefined 
+                        })}
                         alt={`${game.awayTeam.name} logo`}
                         width={48}
                         height={48}
                         className="w-12 h-12 object-contain"
                       />
                     </div>
-                    <p className="text-lg font-medium text-blue-600">
+                    <Link 
+                      href={`/chl/${generateTeamCode(game.awayTeam.shortName)}`}
+                      className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    >
                       {game.awayTeam.name}
-                    </p>
+                    </Link>
                   </div>
                 </div>
               </div>

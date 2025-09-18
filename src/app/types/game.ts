@@ -28,6 +28,8 @@ export interface GameInfo {
   homeTeamInfo: TeamInfo;
   awayTeamInfo: TeamInfo;
   venueInfo: VenueInfo;
+  overtime?: boolean;
+  shootout?: boolean;
 }
 
 export interface LeagueResponse {

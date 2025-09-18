@@ -3,9 +3,9 @@ import { TeamInfo, GameInfo, LeagueResponse } from '../types/game';
 export class LeagueService {
   private readonly API_URL: string;
   private readonly STORAGE_KEY: string;
-  private readonly league: 'shl' | 'sdhl';
+  private readonly league: 'shl' | 'sdhl' | 'chl';
 
-  constructor(league: 'shl' | 'sdhl') {
+  constructor(league: 'shl' | 'sdhl' | 'chl') {
     this.API_URL = `/api/${league}-games`;
     this.STORAGE_KEY = `${league}_games`;
     this.league = league;

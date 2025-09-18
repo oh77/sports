@@ -7,7 +7,7 @@ import { GameInfo } from '../../types/game';
 interface NextGameProps {
   game: GameInfo | null;
   currentTeamCode: string;
-  league: 'shl' | 'sdhl';
+  league: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function NextGame({ game, league }: NextGameProps) {
@@ -44,6 +44,8 @@ export default function NextGame({ game, league }: NextGameProps) {
 
   const stadiumIconUrl = league === 'sdhl' 
     ? 'https://www.sdhl.se/assets/stadium-460843bd.svg'
+    : league === 'chl'
+    ? 'https://www.shl.se/assets/stadium-460843bd.svg' // Use SHL stadium icon for CHL
     : 'https://www.shl.se/assets/stadium-460843bd.svg';
 
   return (

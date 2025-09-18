@@ -4,7 +4,7 @@ import { GameInfo, TeamInfo } from '../../types/game';
 
 interface GameContainerProps {
   game: GameInfo;
-  league: 'shl' | 'sdhl';
+  league: 'shl' | 'sdhl' | 'chl';
 }
 
 export function GameContainer({ game, league }: GameContainerProps) {
