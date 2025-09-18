@@ -4,40 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FullStandings } from '../../components/full-standings';
-
-interface StandingsData {
-  dataColumns: Array<{
-    name: string;
-    type: string;
-    highlighted: boolean;
-    group: string;
-  }>;
-  stats: Array<{
-    Rank: number | null;
-    Team: number;
-    GP: number;
-    W: number;
-    T: number;
-    L: number;
-    G: number;
-    GPG: string;
-    GA: number;
-    GAPG: string;
-    OTW: number;
-    OTL: number;
-    SOW: number;
-    SOL: number;
-    info: {
-      teamNames: {
-        code: string;
-        short: string;
-        long: string;
-        full: string;
-      };
-      logo: string;
-    };
-  }>;
-}
+import { StandingsData } from '../../types/standings';
 
 export default function SDHLStandingsPage() {
   const [standings, setStandings] = useState<StandingsData | null>(null);

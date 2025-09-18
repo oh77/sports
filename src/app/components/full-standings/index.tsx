@@ -2,42 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-
-interface TeamStats {
-  Rank: number | null;
-  Team: number;
-  GP: number;
-  W: number;
-  T: number;
-  L: number;
-  G: number;
-  GPG: string;
-  GA: number;
-  GAPG: string;
-  OTW: number;
-  OTL: number;
-  SOW: number;
-  SOL: number;
-  info: {
-    teamNames: {
-      code: string;
-      short: string;
-      long: string;
-      full: string;
-    };
-    logo: string;
-  };
-}
-
-interface StandingsData {
-  dataColumns: Array<{
-    name: string;
-    type: string;
-    highlighted: boolean;
-    group: string;
-  }>;
-  stats: TeamStats[];
-}
+import { StandingsData, TeamStats } from '../../types/standings';
 
 interface FullStandingsProps {
   standings: StandingsData;
