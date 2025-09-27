@@ -58,25 +58,62 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
   };
 
   const getTeams = () => {
+    let teams;
     if (isCHLData(standings)) {
-      return standings.teams;
+      teams = standings.teams;
+    } else {
+      teams = standings.stats || [];
     }
-    return standings.stats || [];
+    
+    // Sort by rank first, then by goal difference descending
+    return teams.sort((a, b) => {
+      // First sort by rank
+      let aRank: number;
+      let bRank: number;
+      
+      if (isCHLData(standings)) {
+        aRank = (a as CHLStandingsTeam).rank;
+        bRank = (b as CHLStandingsTeam).rank;
+      } else {
+        aRank = (a as TeamStats).Rank || 0;
+        bRank = (b as TeamStats).Rank || 0;
+      }
+      
+      if (aRank !== bRank) {
+        return aRank - bRank;
+      }
+      
+      // If ranks are equal, sort by goal difference (descending)
+      let aGoalDiff: number;
+      let bGoalDiff: number;
+      
+      if (isCHLData(standings)) {
+        aGoalDiff = (a as CHLStandingsTeam).goalDifference;
+        bGoalDiff = (b as CHLStandingsTeam).goalDifference;
+      } else {
+        const aTeam = a as TeamStats;
+        const bTeam = b as TeamStats;
+        aGoalDiff = aTeam.G - aTeam.GA;
+        bGoalDiff = bTeam.G - bTeam.GA;
+      }
+      
+      return bGoalDiff - aGoalDiff; // Descending order
+    });
   };
 
-  const getTeamRowClass = (actualRank: number, totalTeams: number): string => {
+  const getRankBorderClass = (tablePosition: number, totalTeams: number): string => {
     if (league === 'shl') {
       // SHL: playoff (top 6), playoff qualification (next 4), relegation (last 2)
-      if (actualRank <= 6) return 'bg-yellow-50'; // Playoff spots
-      if (actualRank <= 10) return 'bg-blue-50'; // Playoff qualification
-      if (actualRank >= totalTeams - 1) return 'bg-red-50'; // Relegation zone
+      if (tablePosition <= 6) return 'border-r-4 border-yellow-400'; // Playoff spots
+      if (tablePosition <= 10) return 'border-r-4 border-blue-400'; // Playoff qualification
+      if (tablePosition >= totalTeams - 1) return 'border-r-4 border-red-400'; // Relegation zone
     } else if (league === 'sdhl') {
       // SDHL: playoff (top 8), no playoff qualification, relegation (last 2)
-      if (actualRank <= 8) return 'bg-yellow-50'; // Playoff spots
-      if (actualRank >= totalTeams - 1) return 'bg-red-50'; // Relegation zone
+      if (tablePosition <= 8) return 'border-r-4 border-yellow-400'; // Playoff spots
+      if (tablePosition >= totalTeams - 1) return 'border-r-4 border-red-400'; // Relegation zone
     } else if (league === 'chl') {
       // CHL: playoff (top 16), no playoff qualification, no relegation
-      if (actualRank <= 16) return 'bg-yellow-50'; // Playoff spots
+      if (tablePosition <= 16) return 'border-r-4 border-yellow-400'; // Playoff spots
     }
     return '';
   };
@@ -160,10 +197,10 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 return (
                   <tr 
                     key={teamCode} 
-                    className={`hover:bg-gray-50 transition-colors ${getTeamRowClass(actualRank, getTeams().length)}`}
+                    className="hover:bg-gray-50 transition-colors"
                   >
                     {/* Rank */}
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className={`px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(index + 1, getTeams().length)}`}>
                       {getRankDisplay(actualRank)}
                     </td>
 

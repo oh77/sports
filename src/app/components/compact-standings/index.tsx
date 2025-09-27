@@ -172,11 +172,111 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
       }
     });
 
-    // Sort by rank to maintain standings order
-    return result.sort((a, b) => a.rank - b.rank);
+    // Sort by rank first, then by goal difference descending
+    return result.sort((a, b) => {
+      // First sort by rank
+      if (a.rank !== b.rank) {
+        return a.rank - b.rank;
+      }
+      
+      // If ranks are equal, sort by goal difference (descending)
+      let aGoalDiff: number;
+      let bGoalDiff: number;
+      
+      if (isCHLData(standings)) {
+        aGoalDiff = (a.team as CHLStandingsTeam).goalDifference;
+        bGoalDiff = (b.team as CHLStandingsTeam).goalDifference;
+      } else {
+        const aTeam = a.team as TeamStats;
+        const bTeam = b.team as TeamStats;
+        aGoalDiff = aTeam.G - aTeam.GA;
+        bGoalDiff = bTeam.G - bTeam.GA;
+      }
+      
+      return bGoalDiff - aGoalDiff; // Descending order
+    });
+  };
+
+  // Helper function to get full standings position for a team
+  const getFullStandingsPosition = (teamCode: string): number => {
+    let allTeams;
+    if (isCHLData(standings)) {
+      allTeams = standings.teams;
+    } else {
+      allTeams = standings.stats || [];
+    }
+    
+    // Sort all teams the same way as FullStandings
+    const sortedTeams = allTeams.sort((a, b) => {
+      // First sort by rank
+      let aRank: number;
+      let bRank: number;
+      
+      if (isCHLData(standings)) {
+        aRank = (a as CHLStandingsTeam).rank;
+        bRank = (b as CHLStandingsTeam).rank;
+      } else {
+        aRank = (a as TeamStats).Rank || 0;
+        bRank = (b as TeamStats).Rank || 0;
+      }
+      
+      if (aRank !== bRank) {
+        return aRank - bRank;
+      }
+      
+      // If ranks are equal, sort by goal difference (descending)
+      let aGoalDiff: number;
+      let bGoalDiff: number;
+      
+      if (isCHLData(standings)) {
+        aGoalDiff = (a as CHLStandingsTeam).goalDifference;
+        bGoalDiff = (b as CHLStandingsTeam).goalDifference;
+      } else {
+        const aTeam = a as TeamStats;
+        const bTeam = b as TeamStats;
+        aGoalDiff = aTeam.G - aTeam.GA;
+        bGoalDiff = bTeam.G - bTeam.GA;
+      }
+      
+      return bGoalDiff - aGoalDiff; // Descending order
+    });
+    
+    // Find the position of the team
+    const position = sortedTeams.findIndex(team => {
+      if (isCHLData(standings)) {
+        return (team as CHLStandingsTeam).shortName === teamCode;
+      } else {
+        return (team as TeamStats).info.teamNames.code === teamCode;
+      }
+    });
+    
+    return position + 1; // Return 1-based position
   };
 
   const compactTeams = getCompactTeams();
+  
+  // Get total number of teams for colorization
+  const totalTeams = isCHLData(standings) ? standings.teams.length : (standings.stats?.length || 0);
+
+  // Helper function for rank column border based on full standings position
+  const getRankBorderClass = (teamCode: string, totalTeams: number): string => {
+    const fullPosition = getFullStandingsPosition(teamCode);
+    
+    if (league === 'shl') {
+      // SHL: playoff (top 6), playoff qualification (next 4), relegation (last 2)
+      if (fullPosition <= 6) return 'border-r-4 border-yellow-400'; // Playoff spots
+      if (fullPosition <= 10) return 'border-r-4 border-blue-400'; // Playoff qualification
+      if (fullPosition >= totalTeams - 1) return 'border-r-4 border-red-400'; // Relegation zone
+    } else if (league === 'sdhl') {
+      // SDHL: playoff (top 8), no playoff qualification, relegation (last 2)
+      if (fullPosition <= 8) return 'border-r-4 border-yellow-400'; // Playoff spots
+      if (fullPosition >= totalTeams - 1) return 'border-r-4 border-red-400'; // Relegation zone
+    } else if (league === 'chl') {
+      // CHL: playoff (top 16), no playoff qualification, no relegation
+      if (fullPosition <= 16) return 'border-r-4 border-yellow-400'; // Playoff spots
+    }
+    return '';
+  };
 
   if (!compactTeams.length) {
     return (
@@ -203,7 +303,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {compactTeams.map(({ team, rank }) => {
+            {compactTeams.map(({ team, rank }, index) => {
               let teamCode: string;
               let teamName: string;
               let teamLogo: string | undefined;
@@ -238,7 +338,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
                   className="hover:bg-gray-50 transition-colors"
                 >
                   {/* Rank */}
-                  <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className={`px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(teamCode, totalTeams)}`}>
                     {getRankDisplay(rank)}
                   </td>
 
