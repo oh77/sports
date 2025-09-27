@@ -20,7 +20,6 @@ export async function GET() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      debugger;
       return await response.json();
     });
     

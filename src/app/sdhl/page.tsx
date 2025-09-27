@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { LeagueService } from '../services/leagueService';
 import { GameContainer } from '../components/game-container';
 import { GameInfo } from '../types/game';
+import { GameGroup } from '../components/game-group';
 
 export default function SDHLPage() {
   const [games, setGames] = useState<GameInfo[]>([]);
@@ -14,7 +15,7 @@ export default function SDHLPage() {
   const [gameDate, setGameDate] = useState<string>('');
 
   useEffect(() => {
-    const loadGames = async () => {
+    const loadNextGameDay = async () => {
       try {
         setLoading(true);
         const leagueService = new LeagueService('sdhl');
@@ -28,25 +29,38 @@ export default function SDHLPage() {
         }
         
         if (storedGames.length > 0) {
-          // Find the next game day (all games on the same date)
           const now = new Date();
-          const futureGames = storedGames.filter(game => new Date(game.startDateTime) > now);
+          const today = new Date();
+          const todayString = today.toDateString();
+          
+          // Find the next available game date
+          const futureGames = storedGames.filter(game => new Date(game.startDateTime) >= now);
           
           if (futureGames.length > 0) {
             // Get the first future game date
             const firstGameDate = new Date(futureGames[0].startDateTime);
-            const nextGameDay = futureGames.filter(game => {
+            const firstGameDateString = firstGameDate.toDateString();
+            
+            // Check if the next game date is today
+            const targetDateString = firstGameDateString === todayString ? todayString : firstGameDateString;
+            
+            // Get all games for the target date
+            const targetGames = storedGames.filter(game => {
               const gameDate = new Date(game.startDateTime);
-              return gameDate.toDateString() === firstGameDate.toDateString();
+              return gameDate.toDateString() === targetDateString;
             });
             
-            setGames(nextGameDay);
-            setGameDate(firstGameDate.toLocaleDateString('sv-SE', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }));
+            if (targetGames.length > 0) {
+              setGames(targetGames);
+              setGameDate(firstGameDate.toLocaleDateString('sv-SE', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }));
+            } else {
+              setError('Inga matcher hittades');
+            }
           } else {
             setError('Inga kommande matcher hittades');
           }
@@ -61,8 +75,41 @@ export default function SDHLPage() {
       }
     };
 
-    loadGames();
+    loadNextGameDay();
   }, []);
+
+  const formatGameTime = (startDateTime: string) => {
+    const date = new Date(startDateTime);
+    return date.toLocaleTimeString('sv-SE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  };
+
+  // Group games by time
+  const groupGamesByTime = (games: GameInfo[]) => {
+    const grouped = games.reduce((acc, game) => {
+      const time = formatGameTime(game.startDateTime);
+      if (!acc[time]) {
+        acc[time] = [];
+      }
+      acc[time].push(game);
+      return acc;
+    }, {} as Record<string, GameInfo[]>);
+
+    // Sort times
+    const sortedTimes = Object.keys(grouped).sort((a, b) => {
+      const [aHour, aMin] = a.split(':').map(Number);
+      const [bHour, bMin] = b.split(':').map(Number);
+      return (aHour * 60 + aMin) - (bHour * 60 + bMin);
+    });
+
+    return sortedTimes.map(time => ({
+      time,
+      games: grouped[time]
+    }));
+  };
 
 
   if (loading) {
@@ -188,9 +235,14 @@ export default function SDHLPage() {
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto space-y-4">
-          {games.map((game) => (
-            <GameContainer key={game.uuid} game={game} league="sdhl" />
+        <div className="max-w-4xl mx-auto">
+          {groupGamesByTime(games).map((group) => (
+            <GameGroup
+              key={group.time}
+              time={group.time}
+              games={group.games}
+              league="sdhl"
+            />
           ))}
         </div>
 

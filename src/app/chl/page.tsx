@@ -5,21 +5,55 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CHLGame } from '../types/chl';
 import { getTeamLogoWithFallback } from '../utils/teamLogos';
+import { GameGroup } from '../components/game-group';
 
 export default function CHLPage() {
-  const [upcomingGames, setUpcomingGames] = useState<CHLGame[]>([]);
+  const [todaysGames, setTodaysGames] = useState<CHLGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [gameDate, setGameDate] = useState<string>('');
 
   useEffect(() => {
-    const fetchUpcomingGames = async () => {
+    const fetchNextGameDay = async () => {
       try {
-        const response = await fetch('/api/chl-games?type=upcoming');
-        if (!response.ok) {
-          throw new Error('Failed to fetch games');
+        // First try to get upcoming games to find the next available date
+        const upcomingResponse = await fetch('/api/chl-games?type=upcoming');
+        if (!upcomingResponse.ok) {
+          throw new Error('Failed to fetch upcoming games');
         }
-        const data = await response.json();
-        setUpcomingGames(data.games);
+        const upcomingData = await upcomingResponse.json();
+        
+        if (upcomingData.games && upcomingData.games.length > 0) {
+          // Get the date of the first upcoming game
+          const firstUpcomingGame = upcomingData.games[0];
+          const nextGameDate = new Date(firstUpcomingGame.startDate);
+          const nextGameDateString = nextGameDate.toISOString().split('T')[0];
+          
+          // Check if the next game date is today
+          const today = new Date().toISOString().split('T')[0];
+          const targetDate = nextGameDateString === today ? today : nextGameDateString;
+          
+          // Fetch games for the target date
+          const dateResponse = await fetch(`/api/chl-games?type=date&date=${targetDate}`);
+          if (!dateResponse.ok) {
+            throw new Error('Failed to fetch games for date');
+          }
+          const dateData = await dateResponse.json();
+          
+          if (dateData.games && dateData.games.length > 0) {
+            setTodaysGames(dateData.games);
+            setGameDate(nextGameDate.toLocaleDateString('sv-SE', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }));
+          } else {
+            setTodaysGames([]);
+          }
+        } else {
+          setTodaysGames([]);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -27,7 +61,7 @@ export default function CHLPage() {
       }
     };
 
-    fetchUpcomingGames();
+    fetchNextGameDay();
   }, []);
 
   const formatGameTime = (startDate: string) => {
@@ -39,16 +73,28 @@ export default function CHLPage() {
     });
   };
 
-  const getNextGameDay = () => {
-    if (upcomingGames.length === 0) return null;
-    const nextGame = upcomingGames[0];
-    const gameDate = new Date(nextGame.startDate);
-    return gameDate.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+  // Group games by time
+  const groupGamesByTime = (games: CHLGame[]) => {
+    const grouped = games.reduce((acc, game) => {
+      const time = formatGameTime(game.startDate);
+      if (!acc[time]) {
+        acc[time] = [];
+      }
+      acc[time].push(game);
+      return acc;
+    }, {} as Record<string, CHLGame[]>);
+
+    // Sort times
+    const sortedTimes = Object.keys(grouped).sort((a, b) => {
+      const [aHour, aMin] = a.split(':').map(Number);
+      const [bHour, bMin] = b.split(':').map(Number);
+      return (aHour * 60 + aMin) - (bHour * 60 + bMin);
     });
+
+    return sortedTimes.map(time => ({
+      time,
+      games: grouped[time]
+    }));
   };
 
   // Generate team code from team short name for URL routing
@@ -97,96 +143,29 @@ export default function CHLPage() {
             MATCHDAG
           </h1>
           <p className="text-white text-2xl">
-            {upcomingGames.length > 0 ? getNextGameDay() : 'Inga Matcher Tillgängliga'}
+            {gameDate || 'Inga Matcher Tillgängliga'}
           </p>
         </div>
 
         {/* Games List */}
-        {upcomingGames.length > 0 && (
-          <div className="max-w-4xl mx-auto space-y-4">
-            {upcomingGames.map((game) => (
-              <div 
-                key={game.id} 
-                className="rounded-lg shadow-lg p-6"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
-              >
-                <div className="text-center mb-4">
-                  <p className="text-xl font-medium text-gray-800">
-                    {formatGameTime(game.startDate)}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  {/* Home Team */}
-                  <div className="text-center flex-1">
-                    <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                      <Image
-                        src={getTeamLogoWithFallback({ 
-                          shortName: game.homeTeam.shortName, 
-                          externalId: game.homeTeam.externalId,
-                          country: game.homeTeam.country ? { code: game.homeTeam.country } : undefined 
-                        })}
-                        alt={`${game.homeTeam.name} logo`}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 object-contain"
-                      />
-                    </div>
-                    <Link 
-                      href={`/chl/${generateTeamCode(game.homeTeam.shortName)}`}
-                      className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                    >
-                      {game.homeTeam.name}
-                    </Link>
-                  </div>
-                  
-                  {/* Venue */}
-                  <div className="text-center mx-6">
-                    <Image 
-                      src="https://www.shl.se/assets/stadium-460843bd.svg"
-                      alt="Arena"
-                      width={40}
-                      height={40}
-                      className="mx-auto mb-2 brightness-0"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      {game.venue}
-                    </p>
-                  </div>
-                  
-                  {/* Away Team */}
-                  <div className="text-center flex-1">
-                    <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                      <Image
-                        src={getTeamLogoWithFallback({ 
-                          shortName: game.awayTeam.shortName, 
-                          externalId: game.awayTeam.externalId,
-                          country: game.awayTeam.country ? { code: game.awayTeam.country } : undefined 
-                        })}
-                        alt={`${game.awayTeam.name} logo`}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 object-contain"
-                      />
-                    </div>
-                    <Link 
-                      href={`/chl/${generateTeamCode(game.awayTeam.shortName)}`}
-                      className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                    >
-                      {game.awayTeam.name}
-                    </Link>
-                  </div>
-                </div>
-              </div>
+        {todaysGames.length > 0 && (
+          <div className="max-w-4xl mx-auto">
+            {groupGamesByTime(todaysGames).map((group) => (
+              <GameGroup
+                key={group.time}
+                time={group.time}
+                games={group.games}
+                league="chl"
+              />
             ))}
           </div>
         )}
 
         {/* No Games Message */}
-        {upcomingGames.length === 0 && (
+        {todaysGames.length === 0 && (
           <div className="px-6">
             <div className="text-center text-white text-xl">
-              No upcoming games scheduled
+              Inga matcher idag
             </div>
           </div>
         )}

@@ -81,7 +81,6 @@ export class LeagueService {
   }
 
   getPreviousGamesForTeam(teamCode: string, limit: number = 3): GameInfo[] {
-    debugger;
     const games = this.getStoredGames();
     const now = new Date();
     
