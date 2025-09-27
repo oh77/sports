@@ -22,6 +22,15 @@ export async function GET(request: NextRequest) {
         case 'recent':
           games = await CHLService.getRecentGames();
           break;
+        case 'all-upcoming':
+          games = await CHLService.getAllUpcomingGames();
+          break;
+        case 'all-recent':
+          games = await CHLService.getAllRecentGames();
+          break;
+        case 'all':
+          games = await CHLService.getAllGames();
+          break;
         case 'date':
           if (!date) {
             throw new Error('Date parameter is required for date type');

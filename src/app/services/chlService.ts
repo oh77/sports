@@ -171,6 +171,92 @@ export class CHLService {
     }
   }
 
+  static async getAllGames(): Promise<CHLGame[]> {
+    try {
+      const [data, teamsData] = await Promise.all([
+        this.fetchCHLData(),
+        this.fetchCHLTeams()
+      ]);
+      
+      // Create teams map for quick lookup
+      const teamsMap = new Map<string, CHLTeamInfo>();
+      teamsData.data.forEach(team => {
+        teamsMap.set(team.externalId, team);
+      });
+
+      // Return ALL games (both finished and upcoming)
+      return data.data.map(match => this.transformMatchToGame(match, teamsMap));
+    } catch (error) {
+      console.error('Error getting all CHL games:', error);
+      return [];
+    }
+  }
+
+  static async getAllUpcomingGames(): Promise<CHLGame[]> {
+    try {
+      const [data, teamsData] = await Promise.all([
+        this.fetchCHLData(),
+        this.fetchCHLTeams()
+      ]);
+      
+      // Create teams map for quick lookup
+      const teamsMap = new Map<string, CHLTeamInfo>();
+      teamsData.data.forEach(team => {
+        teamsMap.set(team.externalId, team);
+      });
+
+      const now = new Date();
+      
+      // Filter for upcoming games (not-started status and future dates)
+      const upcomingMatches = data.data.filter(match => 
+        match.status === 'not-started' && 
+        new Date(match.startDate) > now
+      );
+
+      // Sort by start date
+      upcomingMatches.sort((a, b) => 
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+      );
+
+      // Return ALL upcoming games (not limited to 3)
+      return upcomingMatches.map(match => this.transformMatchToGame(match, teamsMap));
+    } catch (error) {
+      console.error('Error getting all upcoming CHL games:', error);
+      return [];
+    }
+  }
+
+  static async getAllRecentGames(): Promise<CHLGame[]> {
+    try {
+      const [data, teamsData] = await Promise.all([
+        this.fetchCHLData(),
+        this.fetchCHLTeams()
+      ]);
+      
+      // Create teams map for quick lookup
+      const teamsMap = new Map<string, CHLTeamInfo>();
+      teamsData.data.forEach(team => {
+        teamsMap.set(team.externalId, team);
+      });
+
+      // Filter for finished games
+      const finishedMatches = data.data.filter(match => 
+        match.status === 'finished'
+      );
+
+      // Sort by start date (most recent first)
+      finishedMatches.sort((a, b) => 
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+      );
+
+      // Return ALL recent games (not limited to 3)
+      return finishedMatches.map(match => this.transformMatchToGame(match, teamsMap));
+    } catch (error) {
+      console.error('Error getting all recent CHL games:', error);
+      return [];
+    }
+  }
+
   static getNextGameDay(games: CHLGame[]): string | null {
     if (games.length === 0) return null;
     

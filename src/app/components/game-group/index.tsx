@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 
 interface GameGroupProps {
   time: string;
@@ -8,10 +9,14 @@ interface GameGroupProps {
 }
 
 export function GameGroup({ time, games, league }: GameGroupProps) {
-  const getTeamLogoWithFallback = (team: any) => {
+  const getTeamLogo = (team: any) => {
     if (league === 'chl') {
-      // CHL specific logic
-      return team.logo || 'https://www.chl.hockey/static/img/logo.png';
+      // Use the proper CHL logo utility
+      return getTeamLogoWithFallback({
+        shortName: team.shortName,
+        externalId: team.externalId,
+        country: team.country ? { code: team.country } : undefined
+      });
     }
     return team.icon || 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg';
   };
@@ -53,7 +58,7 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
   return (
     <div className="mb-8">
       <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+        <h2 className={`text-2xl font-bold mb-2 ${league === 'chl' ? 'text-white' : 'text-gray-800'}`}>
           {time}
         </h2>
       </div>
@@ -70,7 +75,7 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
               <div className="text-center flex-1">
                 <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                   <Image
-                    src={getTeamLogoWithFallback(league === 'chl' ? game.homeTeam : game.homeTeamInfo)}
+                    src={getTeamLogo(league === 'chl' ? game.homeTeam : game.homeTeamInfo)}
                     alt={`${getTeamName(league === 'chl' ? game.homeTeam : game.homeTeamInfo)} logo`}
                     width={48}
                     height={48}
@@ -103,7 +108,7 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
               <div className="text-center flex-1">
                 <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                   <Image
-                    src={getTeamLogoWithFallback(league === 'chl' ? game.awayTeam : game.awayTeamInfo)}
+                    src={getTeamLogo(league === 'chl' ? game.awayTeam : game.awayTeamInfo)}
                     alt={`${getTeamName(league === 'chl' ? game.awayTeam : game.awayTeamInfo)} logo`}
                     width={48}
                     height={48}

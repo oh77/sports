@@ -98,10 +98,10 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
       try {
         setLoading(true);
         
-        // Fetch CHL games and teams
+        // Fetch CHL games and teams - use all games to get complete data
         const [upcomingGamesResponse, recentGamesResponse, teamsResponse] = await Promise.all([
-          fetch('/api/chl-games?type=upcoming'),
-          fetch('/api/chl-games?type=recent'),
+          fetch('/api/chl-games?type=all-upcoming'),
+          fetch('/api/chl-games?type=all-recent'),
           fetch('/api/chl-teams')
         ]);
 
@@ -142,6 +142,10 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           game.homeTeam.shortName === foundTeam.shortName || game.awayTeam.shortName === foundTeam.shortName
         );
 
+        // Debug logging to see what games we have
+        console.log(`Found ${teamGames.length} total games for team ${foundTeam.shortName}`);
+        console.log('Game statuses:', teamGames.map(g => ({ id: g.id, status: g.status, date: g.startDate })));
+
         // Find next game - get the chronologically next game for this team
         const now = new Date();
         const nextGame = teamGames
@@ -154,12 +158,12 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         const previous = teamGames
           .filter((game: CHLGame) => game.status === 'finished')
           .sort((a: CHLGame, b: CHLGame) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-          .slice(0, 3);
+          .slice(0, 5); // Show up to 5 previous games
 
         const upcoming = teamGames
           .filter((game: CHLGame) => game.status === 'not-started' && game.id !== nextGame?.id)
           .sort((a: CHLGame, b: CHLGame) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-          .slice(0, 3); // Get next 3 upcoming games (excluding the next game)
+          .slice(0, 5); // Show up to 5 upcoming games (excluding the next game)
 
         setPreviousGames(previous);
         setUpcomingGames(upcoming);
