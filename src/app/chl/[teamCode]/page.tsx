@@ -8,6 +8,7 @@ import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
+import { CompactStandings } from '../../components/compact-standings';
 import { GameInfo } from '../../types/game';
 
 
@@ -240,7 +241,17 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
       {/* Background Team Logo */}
       <div className="absolute inset-0 flex items-center justify-center z-0 px-8">
         <div className="opacity-10 w-full h-full flex items-center justify-center">
-          <span className="text-9xl">🏒</span>
+          <Image
+            src={getTeamLogoWithFallback({
+              shortName: teamInfo.shortName,
+              externalId: teamInfo.externalId,
+              country: teamInfo.country ? { code: teamInfo.country.code } : undefined
+            })}
+            alt={`${teamInfo.name} background logo`}
+            width={400}
+            height={400}
+            className="w-96 h-96 object-contain transform rotate-12"
+          />
         </div>
       </div>
       
@@ -270,6 +281,18 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           currentTeamCode={teamCode} 
           league="chl" 
         />
+
+        {/* Compact Standings */}
+        {standings && game && (
+          <div className="max-w-4xl mx-auto mt-8">
+            <CompactStandings 
+              standings={standings as any} 
+              league="chl" 
+              teamCode1={game.homeTeam.shortName}
+              teamCode2={game.awayTeam.shortName}
+            />
+          </div>
+        )}
 
         {/* Previous and Upcoming Games */}
         <div className="max-w-6xl mx-auto mt-8">
