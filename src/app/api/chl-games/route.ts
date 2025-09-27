@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CHLService } from '../../services/chlService';
+import { generateCacheKey, getCachedData } from '../../utils/cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,29 +8,34 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'upcoming';
     const date = searchParams.get('date');
 
-    let games;
+    // Generate cache key with parameters
+    const cacheKey = generateCacheKey('chl-games', { type, ...(date && { date }) });
 
-    switch (type) {
-      case 'upcoming':
-        games = await CHLService.getUpcomingGames();
-        break;
-      case 'recent':
-        games = await CHLService.getRecentGames();
-        break;
-      case 'date':
-        if (!date) {
-          return NextResponse.json(
-            { error: 'Date parameter is required for date type' },
-            { status: 400 }
-          );
-        }
-        games = await CHLService.getGamesByDate(date);
-        break;
-      default:
-        games = await CHLService.getUpcomingGames();
-    }
+    // Get cached data or fetch fresh data
+    const result = await getCachedData(cacheKey, async () => {
+      let games;
 
-    return NextResponse.json({ games });
+      switch (type) {
+        case 'upcoming':
+          games = await CHLService.getUpcomingGames();
+          break;
+        case 'recent':
+          games = await CHLService.getRecentGames();
+          break;
+        case 'date':
+          if (!date) {
+            throw new Error('Date parameter is required for date type');
+          }
+          games = await CHLService.getGamesByDate(date);
+          break;
+        default:
+          games = await CHLService.getUpcomingGames();
+      }
+
+      return { games };
+    });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error in CHL games API route:', error);
     return NextResponse.json(

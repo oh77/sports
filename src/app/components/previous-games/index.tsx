@@ -21,6 +21,7 @@ export default function PreviousGames({ games, currentTeamCode, league }: Previo
       <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Tidigare Matcher</h2>
       <div className="space-y-3">
         {games.map((prevGame) => {
+          console.log(prevGame);
           const isHomeTeam = getTeamCode(prevGame.homeTeamInfo) === currentTeamCode;
           const opponentInfo = isHomeTeam ? prevGame.awayTeamInfo : prevGame.homeTeamInfo;
           const currentTeamScore = isHomeTeam ? prevGame.homeTeamInfo.score : prevGame.awayTeamInfo.score;
