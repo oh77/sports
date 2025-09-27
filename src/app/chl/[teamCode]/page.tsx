@@ -143,6 +143,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         );
 
         // Debug logging to see what games we have
+        console.log('All games:', allGames.map(g => ({ id: g.id, status: g.status, date: g.startDate })));
         console.log(`Found ${teamGames.length} total games for team ${foundTeam.shortName}`);
         console.log('Game statuses:', teamGames.map(g => ({ id: g.id, status: g.status, date: g.startDate })));
 
