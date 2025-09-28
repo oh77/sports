@@ -44,9 +44,6 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
     return team.shortName;
   };
 
-  const getCHLTeamLogo = (team: CHLStandingsTeam): string | undefined => {
-    return team.logo;
-  };
 
   const getCHLPoints = (team: CHLStandingsTeam): number => {
     return team.points;

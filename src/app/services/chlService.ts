@@ -141,8 +141,6 @@ export class CHLService {
         teamsMap.set(team.externalId, team);
       });
 
-      const now = new Date();
-      
       // Filter for finished games
       const finishedMatches = data.data.filter(match => 
         match.status === 'finished'

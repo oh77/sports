@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { invalidateCache } from '../../../utils/cache';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Clear all cache entries
     invalidateCache();

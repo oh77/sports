@@ -5,7 +5,7 @@ interface CacheEntry<T> {
 }
 
 class MemoryCache {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
 
   set<T>(key: string, data: T, ttlMs: number = 60 * 60 * 1000): void {
     this.cache.set(key, {
@@ -57,6 +57,10 @@ class MemoryCache {
       size: this.cache.size,
       keys: Array.from(this.cache.keys())
     };
+  }
+
+  getEntry(key: string): CacheEntry<unknown> | undefined {
+    return this.cache.get(key);
   }
 }
 
@@ -156,3 +160,7 @@ export function getCacheStats() {
 }
 
 export { cache };
+
+export const getCacheEntry = (key: string) => {
+  return cache.getEntry(key);
+};

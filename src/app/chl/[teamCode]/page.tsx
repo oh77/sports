@@ -36,7 +36,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
       externalId: chlGame.homeTeam.externalId,
       country: chlGame.homeTeam.country ? { code: chlGame.homeTeam.country } : undefined
     });
-    
+
     const awayTeamLogo = getTeamLogoWithFallback({
       shortName: chlGame.awayTeam.shortName,
       externalId: chlGame.awayTeam.externalId,
@@ -98,7 +98,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
     const loadTeamData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch CHL games and teams - use all games to get complete data
         const [upcomingGamesResponse, recentGamesResponse, teamsResponse] = await Promise.all([
           fetch('/api/chl-games?type=all-upcoming'),
@@ -119,15 +119,15 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         const upcomingGamesData = await upcomingGamesResponse.json();
         const recentGamesData = await recentGamesResponse.json();
         const teamsData = await teamsResponse.json();
-        
+
         const allGames = [...(recentGamesData.games || []), ...(upcomingGamesData.games || [])];
         const teams = teamsData.data || [];
-        
+
         // Store all teams for footer
         setAllTeams(teams);
 
         // Find the team by matching the team code with team short names
-        const foundTeam = teams.find((team: CHLTeamInfo) => 
+        const foundTeam = teams.find((team: CHLTeamInfo) =>
           matchTeamCode(teamCode, team.shortName)
         );
 
@@ -139,7 +139,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         setTeamInfo(foundTeam);
 
         // Find games for this team
-        const teamGames = allGames.filter((game: CHLGame) => 
+        const teamGames = allGames.filter((game: CHLGame) =>
           game.homeTeam.shortName === foundTeam.shortName || game.awayTeam.shortName === foundTeam.shortName
         );
 
@@ -194,6 +194,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
     }
   }, [teamCode]);
 
+  // Convert game data for NextGame component
+  const nextGameData: GameInfo | null = game ? convertCHLGameToGameInfo(game) : null;
 
 
 
@@ -223,8 +225,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
             <p className="text-gray-600 mb-6">
               {error || `Inga kommande matcher hittades för lagkod: ${teamCode}`}
             </p>
-            <Link 
-              href="/chl" 
+            <Link
+              href="/chl"
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
               Tillbaka till CHL
@@ -254,7 +256,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           />
         </div>
       </div>
-      
+
       <div className="container mx-auto px-4 relative z-10">
         {/* Header Row */}
         <div className="flex items-center justify-center gap-6 mb-8 py-6">
@@ -276,18 +278,18 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           </h1>
         </div>
 
-        <NextGame 
-          game={game ? convertCHLGameToGameInfo(game) : null} 
-          currentTeamCode={teamCode} 
-          league="chl" 
+        <NextGame
+          game={nextGameData}
+          currentTeamCode={teamCode}
+          league="chl"
         />
 
         {/* Compact Standings */}
         {standings && game && (
           <div className="max-w-4xl mx-auto mt-8">
-            <CompactStandings 
-              standings={standings as any} 
-              league="chl" 
+            <CompactStandings
+              standings={standings}
+              league="chl"
               teamCode1={game.homeTeam.shortName}
               teamCode2={game.awayTeam.shortName}
             />
@@ -297,16 +299,16 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         {/* Previous and Upcoming Games */}
         <div className="max-w-6xl mx-auto mt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <PreviousGames 
-              games={convertCHLGamesToGameInfo(previousGames)} 
-              currentTeamCode={teamCode} 
-              league="chl" 
+            <PreviousGames
+              games={convertCHLGamesToGameInfo(previousGames)}
+              currentTeamCode={teamCode}
+              league="chl"
             />
 
-            <UpcomingGames 
-              games={convertCHLGamesToGameInfo(upcomingGames)} 
-              currentTeamCode={teamCode} 
-              league="chl" 
+            <UpcomingGames
+              games={convertCHLGamesToGameInfo(upcomingGames)}
+              currentTeamCode={teamCode}
+              league="chl"
             />
           </div>
         </div>
@@ -359,7 +361,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
                         className="w-12 h-12 object-contain"
                       />
                     </div>
-                    
+
                     {/* Tooltip */}
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                       {item.tooltip}

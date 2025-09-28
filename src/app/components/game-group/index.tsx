@@ -4,12 +4,12 @@ import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 
 interface GameGroupProps {
   time: string;
-  games: any[];
+  games: unknown[];
   league: 'chl' | 'shl' | 'sdhl';
 }
 
 export function GameGroup({ time, games, league }: GameGroupProps) {
-  const getTeamLogo = (team: any) => {
+  const getTeamLogo = (team: Record<string, unknown>) => {
     if (league === 'chl') {
       // Use the proper CHL logo utility
       return getTeamLogoWithFallback({
@@ -21,14 +21,14 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
     return team.icon || 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg';
   };
 
-  const getTeamCode = (team: any) => {
+  const getTeamCode = (team: Record<string, unknown>) => {
     if (league === 'chl') {
       return team.shortName?.toUpperCase() || team.name;
     }
     return team.names?.code || team.code;
   };
 
-  const getTeamName = (team: any) => {
+  const getTeamName = (team: Record<string, unknown>) => {
     if (league === 'chl') {
       return team.name;
     }
@@ -48,7 +48,7 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
     }
   };
 
-  const getVenueName = (game: any) => {
+  const getVenueName = (game: Record<string, unknown>) => {
     if (league === 'chl') {
       return game.venue;
     }

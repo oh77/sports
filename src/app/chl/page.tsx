@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { CHLGame } from '../types/chl';
-import { getTeamLogoWithFallback } from '../utils/teamLogos';
 import { GameGroup } from '../components/game-group';
 
 export default function CHLPage() {
@@ -97,10 +95,6 @@ export default function CHLPage() {
     }));
   };
 
-  // Generate team code from team short name for URL routing
-  const generateTeamCode = (teamShortName: string): string => {
-    return teamShortName.toUpperCase();
-  };
 
   if (loading) {
     return (
@@ -122,7 +116,7 @@ export default function CHLPage() {
     <div className="min-h-screen relative" style={{ backgroundColor: '#20001c' }}>
       {/* Background CHL Logo */}
       <div className="fixed top-0 right-0 z-0">
-        <img 
+        <Image 
           src="https://www.chl.hockey/static/img/logo.png" 
           alt="CHL Background"
           width={400}
@@ -134,9 +128,11 @@ export default function CHLPage() {
       <div className="relative z-10">
         {/* Header with Logo */}
         <div className="flex flex-col items-center py-8">
-          <img 
+          <Image 
             src="https://www.chl.hockey/static/img/logo.png" 
             alt="CHL Logo" 
+            width={96}
+            height={96}
             className="h-24 w-auto mb-4"
           />
           <h1 className="text-white text-5xl font-bold uppercase tracking-wider mb-2">

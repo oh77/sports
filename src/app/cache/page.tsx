@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 interface CacheEntry {
   key: string;
-  data: any;
+  data: unknown;
   timestamp: number;
   ttl: number;
   isExpired: boolean;

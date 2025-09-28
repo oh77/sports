@@ -20,7 +20,7 @@ export function getTeamLogo(team: CHLTeamInfo | { shortName: string; externalId?
 /**
  * Get a generic team logo based on team short name and country
  */
-function getGenericTeamLogo(shortName: string, countryCode?: string): string {
+function getGenericTeamLogo(shortName: string): string {
   // You can customize this to return different generic logos
   // based on country or team characteristics
   

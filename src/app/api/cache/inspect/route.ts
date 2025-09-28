@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { cache } from '../../../utils/cache';
+import { cache, getCacheEntry } from '../../../utils/cache';
 
 export async function GET() {
   try {
@@ -8,7 +8,7 @@ export async function GET() {
 
     // Get all cache entries with their metadata
     for (const key of stats.keys) {
-      const entry = (cache as any).cache.get(key);
+      const entry = getCacheEntry(key);
       if (entry) {
         const now = Date.now();
         const isExpired = (now - entry.timestamp) > entry.ttl;

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LeagueService } from '../services/leagueService';
-import { GameContainer } from '../components/game-container';
 import { GameInfo } from '../types/game';
 import { GameGroup } from '../components/game-group';
 

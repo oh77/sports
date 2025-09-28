@@ -10,7 +10,7 @@ interface NextGameProps {
   league: 'shl' | 'sdhl' | 'chl';
 }
 
-export default function NextGame({ game, league }: NextGameProps) {
+export default function NextGame({ game, league }: NextGameProps) : React.JSX.Element | null {
 
   const formatTime = (dateTimeStr: string) => {
     try {
@@ -42,7 +42,7 @@ export default function NextGame({ game, league }: NextGameProps) {
     return null;
   }
 
-  const stadiumIconUrl = league === 'sdhl' 
+  const stadiumIconUrl = league === 'sdhl'
     ? 'https://www.sdhl.se/assets/stadium-460843bd.svg'
     : league === 'chl'
     ? 'https://www.shl.se/assets/stadium-460843bd.svg' // Use SHL stadium icon for CHL

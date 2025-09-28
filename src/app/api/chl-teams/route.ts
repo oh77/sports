@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { CHLTeamsApiResponse } from '../../types/chl';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
 
 const CHL_TEAMS_URL = 'https://www.chl.hockey/api/s3?q=teams-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const cacheKey = generateCacheKey('chl-teams');
 

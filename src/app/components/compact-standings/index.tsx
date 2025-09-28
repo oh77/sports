@@ -46,9 +46,6 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
     return team.shortName;
   };
 
-  const getCHLTeamLogo = (team: CHLStandingsTeam): string | undefined => {
-    return team.logo;
-  };
 
   const getCHLPoints = (team: CHLStandingsTeam): number => {
     return team.points;
@@ -303,7 +300,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {compactTeams.map(({ team, rank }, index) => {
+            {compactTeams.map(({ team, rank }) => {
               let teamCode: string;
               let teamName: string;
               let teamLogo: string | undefined;
