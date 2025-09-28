@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { LeagueService } from '../../services/leagueService';
-import { GameInfo } from '../../types/game';
+import { StatnetGameInfo } from '../../types/statnet/game';
 
 interface FirstGameProps {
   league?: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function FirstGame({ league = 'shl' }: FirstGameProps) {
-  const [game, setGame] = useState<GameInfo | null>(null);
+  const [game, setGame] = useState<StatnetGameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,16 +19,16 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
       try {
         setLoading(true);
         const leagueService = new LeagueService(league);
-        
+
         // Try to get stored game first
         let storedGame = leagueService.getFirstGame();
-        
+
         if (!storedGame) {
           // Fetch fresh data if none stored
           await leagueService.fetchGames();
           storedGame = leagueService.getFirstGame();
         }
-        
+
         setGame(storedGame);
       } catch (err) {
         setError('Failed to load game data');
@@ -86,7 +86,7 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
       <h3 className="text-xl font-semibold text-center text-gray-800 mb-4">
         Next {league.toUpperCase()} Game
       </h3>
-      
+
       <div className="text-center mb-4">
         <p className="text-sm text-gray-600 mb-1">Date & Time</p>
         <p className="text-lg font-medium text-gray-800">
@@ -98,8 +98,8 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
         <div className="text-center flex-1">
           <div className="w-16 h-16 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
             {game.homeTeamInfo.icon ? (
-              <Image 
-                src={game.homeTeamInfo.icon} 
+              <Image
+                src={game.homeTeamInfo.icon}
                 alt={game.homeTeamInfo.names.short}
                 width={48}
                 height={48}
@@ -113,16 +113,16 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
             {game.homeTeamInfo.names.short}
           </p>
         </div>
-        
+
         <div className="text-center mx-4">
           <span className="text-2xl font-bold text-gray-600">VS</span>
         </div>
-        
+
         <div className="text-center flex-1">
           <div className="w-16 h-16 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
             {game.awayTeamInfo.icon ? (
-              <Image 
-                src={game.awayTeamInfo.icon} 
+              <Image
+                src={game.awayTeamInfo.icon}
                 alt={game.awayTeamInfo.names.short}
                 width={48}
                 height={48}

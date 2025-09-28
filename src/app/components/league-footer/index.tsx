@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { LeagueService } from '../../services/leagueService';
-import { TeamInfo } from '../../types/game';
+import { StatnetTeamInfo } from '../../types/statnet/game';
 
 interface LeagueFooterProps {
   league: 'shl' | 'sdhl' | 'chl';
@@ -10,7 +10,7 @@ interface LeagueFooterProps {
 }
 
 export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
-  const [teams, setTeams] = useState<TeamInfo[]>([]);
+  const [teams, setTeams] = useState<StatnetTeamInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,13 +20,13 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
         const leagueService = new LeagueService(league);
         // Try to get stored teams first
         let storedTeams = leagueService.getTeamList();
-        
+
         if (storedTeams.length === 0) {
           // Fetch fresh data if none stored
           await leagueService.fetchGames();
           storedTeams = leagueService.getTeamList();
         }
-        
+
         setTeams(storedTeams);
       } catch (err) {
         console.error('Failed to load team list:', err);
@@ -40,7 +40,7 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
 
 
   const getLeagueLogo = () => {
-    return league === 'shl' 
+    return league === 'shl'
       ? "https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
       : "https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg";
   };
@@ -106,8 +106,8 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
             >
               <div className={`w-12 h-12 ${item.isLeague ? 'bg-gray-800' : 'bg-gray-100'} rounded-full flex items-center justify-center overflow-hidden`}>
                 {item.logo ? (
-                  <Image 
-                    src={item.logo} 
+                  <Image
+                    src={item.logo}
                     alt={item.alt}
                     width={48}
                     height={48}
@@ -117,7 +117,7 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
                   <span className="text-gray-400 text-lg">🏒</span>
                 )}
               </div>
-              
+
               {/* Tooltip */}
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                 {item.tooltip}

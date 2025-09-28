@@ -1,4 +1,4 @@
-import { CHLApiResponse, CHLGame, CHLMatch, CHLTeamsApiResponse, CHLTeamInfo } from '../types/chl';
+import { CHLApiResponse, CHLGame, CHLMatch, CHLTeamsApiResponse, CHLTeamInfo } from '../types/chl/game';
 
 const CHL_API_URL = 'https://www.chl.hockey/api/s3/live?q=live-events.json';
 
@@ -67,7 +67,7 @@ export class CHLService {
         this.fetchCHLData(),
         this.fetchCHLTeams()
       ]);
-      
+
       // Create teams map for quick lookup
       const teamsMap = new Map<string, CHLTeamInfo>();
       teamsData.data.forEach(team => {
@@ -75,15 +75,15 @@ export class CHLService {
       });
 
       const now = new Date();
-      
+
       // Filter for upcoming games (not-started status and future dates)
-      const upcomingMatches = data.data.filter(match => 
-        match.status === 'not-started' && 
+      const upcomingMatches = data.data.filter(match =>
+        match.status === 'not-started' &&
         new Date(match.startDate) > now
       );
 
       // Sort by start date
-      upcomingMatches.sort((a, b) => 
+      upcomingMatches.sort((a, b) =>
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
 
@@ -101,7 +101,7 @@ export class CHLService {
         this.fetchCHLData(),
         this.fetchCHLTeams()
       ]);
-      
+
       // Create teams map for quick lookup
       const teamsMap = new Map<string, CHLTeamInfo>();
       teamsData.data.forEach(team => {
@@ -109,7 +109,7 @@ export class CHLService {
       });
 
       const targetDate = new Date(date);
-      
+
       // Filter games for the specific date
       const gamesForDate = data.data.filter(match => {
         const matchDate = new Date(match.startDate);
@@ -117,7 +117,7 @@ export class CHLService {
       });
 
       // Sort by start time
-      gamesForDate.sort((a, b) => 
+      gamesForDate.sort((a, b) =>
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
 
@@ -134,7 +134,7 @@ export class CHLService {
         this.fetchCHLData(),
         this.fetchCHLTeams()
       ]);
-      
+
       // Create teams map for quick lookup
       const teamsMap = new Map<string, CHLTeamInfo>();
       teamsData.data.forEach(team => {
@@ -142,12 +142,12 @@ export class CHLService {
       });
 
       // Filter for finished games
-      const finishedMatches = data.data.filter(match => 
+      const finishedMatches = data.data.filter(match =>
         match.status === 'finished'
       );
 
       // Sort by start date (most recent first)
-      finishedMatches.sort((a, b) => 
+      finishedMatches.sort((a, b) =>
         new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       );
 
@@ -175,7 +175,7 @@ export class CHLService {
         this.fetchCHLData(),
         this.fetchCHLTeams()
       ]);
-      
+
       // Create teams map for quick lookup
       const teamsMap = new Map<string, CHLTeamInfo>();
       teamsData.data.forEach(team => {
@@ -196,7 +196,7 @@ export class CHLService {
         this.fetchCHLData(),
         this.fetchCHLTeams()
       ]);
-      
+
       // Create teams map for quick lookup
       const teamsMap = new Map<string, CHLTeamInfo>();
       teamsData.data.forEach(team => {
@@ -204,15 +204,15 @@ export class CHLService {
       });
 
       const now = new Date();
-      
+
       // Filter for upcoming games (not-started status and future dates)
-      const upcomingMatches = data.data.filter(match => 
-        match.status === 'not-started' && 
+      const upcomingMatches = data.data.filter(match =>
+        match.status === 'not-started' &&
         new Date(match.startDate) > now
       );
 
       // Sort by start date
-      upcomingMatches.sort((a, b) => 
+      upcomingMatches.sort((a, b) =>
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
 
@@ -230,7 +230,7 @@ export class CHLService {
         this.fetchCHLData(),
         this.fetchCHLTeams()
       ]);
-      
+
       // Create teams map for quick lookup
       const teamsMap = new Map<string, CHLTeamInfo>();
       teamsData.data.forEach(team => {
@@ -238,12 +238,12 @@ export class CHLService {
       });
 
       // Filter for finished games
-      const finishedMatches = data.data.filter(match => 
+      const finishedMatches = data.data.filter(match =>
         match.status === 'finished'
       );
 
       // Sort by start date (most recent first)
-      finishedMatches.sort((a, b) => 
+      finishedMatches.sort((a, b) =>
         new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       );
 
@@ -257,7 +257,7 @@ export class CHLService {
 
   static getNextGameDay(games: CHLGame[]): string | null {
     if (games.length === 0) return null;
-    
+
     const nextGame = games[0];
     const gameDate = new Date(nextGame.startDate);
     return gameDate.toLocaleDateString('en-US', {

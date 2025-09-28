@@ -3,16 +3,16 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { GameInfo, TeamInfo } from '../../types/game';
+import { StatnetGameInfo, StatnetTeamInfo } from '../../types/statnet/game';
 
 interface PreviousGamesProps {
-  games: GameInfo[];
+  games: StatnetGameInfo[];
   currentTeamCode: string;
   league: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function PreviousGames({ games, currentTeamCode, league }: PreviousGamesProps) {
-  const getTeamCode = (teamInfo: TeamInfo): string => {
+  const getTeamCode = (teamInfo: StatnetTeamInfo): string => {
     return teamInfo.names?.code || teamInfo.code;
   };
 
@@ -55,8 +55,8 @@ export default function PreviousGames({ games, currentTeamCode, league }: Previo
                   <div className="text-sm font-bold text-gray-800">
                     {currentTeamScore} - {opponentScore}
                   </div>
-                  {((prevGame.state && (prevGame.state.includes('Shootout') || prevGame.state.includes('Overtime'))) || 
-                    ('shootout' in prevGame && prevGame.shootout) || 
+                  {((prevGame.state && (prevGame.state.includes('Shootout') || prevGame.state.includes('Overtime'))) ||
+                    ('shootout' in prevGame && prevGame.shootout) ||
                     ('overtime' in prevGame && prevGame.overtime)) && (
                     <div className="text-xs text-orange-600 font-medium">
                       {((prevGame.state && prevGame.state.includes('Shootout')) || ('shootout' in prevGame && prevGame.shootout)) ? 'SO' : 'OT'}

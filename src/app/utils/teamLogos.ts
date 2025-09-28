@@ -1,4 +1,4 @@
-import { CHLTeamInfo } from '../types/chl';
+import { CHLTeamInfo } from '../types/chl/game';
 
 /**
  * Get team logo URL based on team information
@@ -7,12 +7,12 @@ import { CHLTeamInfo } from '../types/chl';
 export function getTeamLogo(team: CHLTeamInfo | { shortName: string; externalId?: string; country?: { code: string } }): string {
   const externalId = 'externalId' in team ? team.externalId : undefined;
   const shortName = team.shortName;
-  
+
   // Use CHL's Cloudinary CDN for team logos
   if (externalId && externalId !== 'n/a' && externalId !== '') {
     return `https://res.cloudinary.com/chl-production/image/upload/c_fit,dpr_1.0,f_webp,g_center,h_50,q_auto,w_50/v1/chl-prod/assets/teams/${externalId}`;
   }
-  
+
   // Fallback to generic logo if no externalId
   return getGenericTeamLogo(shortName);
 }
@@ -23,7 +23,7 @@ export function getTeamLogo(team: CHLTeamInfo | { shortName: string; externalId?
 function getGenericTeamLogo(shortName: string): string {
   // You can customize this to return different generic logos
   // based on country or team characteristics
-  
+
   // For now, return a simple hockey puck icon as placeholder
   return `data:image/svg+xml;base64,${btoa(`
     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">

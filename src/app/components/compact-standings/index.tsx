@@ -2,12 +2,12 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { StandingsData, TeamStats } from '../../types/standings';
-import { CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl-standings';
+import { StatnetStandingsData, StatnetTeamStats } from '../../types/statnet/standings';
+import { CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl/standings';
 import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 
 interface CompactStandingsProps {
-  standings: StandingsData | CHLStandingsDataTransformed;
+  standings: StatnetStandingsData | CHLStandingsDataTransformed;
   league: 'shl' | 'sdhl' | 'chl';
   teamCode1: string;
   teamCode2: string;
@@ -15,15 +15,15 @@ interface CompactStandingsProps {
 
 export function CompactStandings({ standings, league, teamCode1, teamCode2 }: CompactStandingsProps) {
   // Helper functions for SHL/SDHL data
-  const getTeamCode = (team: TeamStats): string => {
+  const getTeamCode = (team: StatnetTeamStats): string => {
     return team.info.teamNames.code;
   };
 
-  const getTeamName = (team: TeamStats): string => {
+  const getTeamName = (team: StatnetTeamStats): string => {
     return team.info.teamNames.short;
   };
 
-  const getTeamLogo = (team: TeamStats): string => {
+  const getTeamLogo = (team: StatnetTeamStats): string => {
     return team.info.logo;
   };
 
@@ -32,7 +32,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
     return rank.toString();
   };
 
-  const getPoints = (team: TeamStats): number => {
+  const getPoints = (team: StatnetTeamStats): number => {
     // Calculate points: 3 for win, 1 for tie, 0 for loss
     return (team.W * 3) + (team.T * 1);
   };
@@ -52,7 +52,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
   };
 
   // Universal helper functions
-  const isCHLData = (data: StandingsData | CHLStandingsDataTransformed): data is CHLStandingsDataTransformed => {
+  const isCHLData = (data: StatnetStandingsData | CHLStandingsDataTransformed): data is CHLStandingsDataTransformed => {
     return 'teams' in data && Array.isArray(data.teams) && data.teams.length > 0 && 'rank' in data.teams[0];
   };
 
@@ -70,21 +70,21 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
     if (!teams.length) return [];
 
     const selectedTeams = new Set<string>();
-    const result: Array<{ team: TeamStats | CHLStandingsTeam; index: number; rank: number }> = [];
+    const result: Array<{ team: StatnetTeamStats | CHLStandingsTeam; index: number; rank: number }> = [];
 
     // Find the two target teams
     const team1Index = teams.findIndex(team => {
       if (isCHLData(standings)) {
         return getCHLTeamCode(team as CHLStandingsTeam) === teamCode1;
       } else {
-        return getTeamCode(team as TeamStats) === teamCode1;
+        return getTeamCode(team as StatnetTeamStats) === teamCode1;
       }
     });
     const team2Index = teams.findIndex(team => {
       if (isCHLData(standings)) {
         return getCHLTeamCode(team as CHLStandingsTeam) === teamCode2;
       } else {
-        return getTeamCode(team as TeamStats) === teamCode2;
+        return getTeamCode(team as StatnetTeamStats) === teamCode2;
       }
     });
 
@@ -101,11 +101,11 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
         teamCode = getCHLTeamCode(chlTeam);
         rank = chlTeam.rank;
       } else {
-        const shlTeam = team as TeamStats;
+        const shlTeam = team as StatnetTeamStats;
         teamCode = getTeamCode(shlTeam);
         rank = shlTeam.Rank || teamIndex + 1;
       }
-      
+
       // Add the team itself
       if (!selectedTeams.has(teamCode)) {
         selectedTeams.add(teamCode);
@@ -127,7 +127,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
           teamAboveCode = getCHLTeamCode(chlTeamAbove);
           teamAboveRank = chlTeamAbove.rank;
         } else {
-          const shlTeamAbove = teamAbove as TeamStats;
+          const shlTeamAbove = teamAbove as StatnetTeamStats;
           teamAboveCode = getTeamCode(shlTeamAbove);
           teamAboveRank = shlTeamAbove.Rank || teamIndex;
         }
@@ -153,7 +153,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
           teamBelowCode = getCHLTeamCode(chlTeamBelow);
           teamBelowRank = chlTeamBelow.rank;
         } else {
-          const shlTeamBelow = teamBelow as TeamStats;
+          const shlTeamBelow = teamBelow as StatnetTeamStats;
           teamBelowCode = getTeamCode(shlTeamBelow);
           teamBelowRank = shlTeamBelow.Rank || teamIndex + 2;
         }
@@ -175,21 +175,21 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
       if (a.rank !== b.rank) {
         return a.rank - b.rank;
       }
-      
+
       // If ranks are equal, sort by goal difference (descending)
       let aGoalDiff: number;
       let bGoalDiff: number;
-      
+
       if (isCHLData(standings)) {
         aGoalDiff = (a.team as CHLStandingsTeam).goalDifference;
         bGoalDiff = (b.team as CHLStandingsTeam).goalDifference;
       } else {
-        const aTeam = a.team as TeamStats;
-        const bTeam = b.team as TeamStats;
+        const aTeam = a.team as StatnetTeamStats;
+        const bTeam = b.team as StatnetTeamStats;
         aGoalDiff = aTeam.G - aTeam.GA;
         bGoalDiff = bTeam.G - bTeam.GA;
       }
-      
+
       return bGoalDiff - aGoalDiff; // Descending order
     });
   };
@@ -202,63 +202,63 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
     } else {
       allTeams = standings.stats || [];
     }
-    
+
     // Sort all teams the same way as FullStandings
     const sortedTeams = allTeams.sort((a, b) => {
       // First sort by rank
       let aRank: number;
       let bRank: number;
-      
+
       if (isCHLData(standings)) {
         aRank = (a as CHLStandingsTeam).rank;
         bRank = (b as CHLStandingsTeam).rank;
       } else {
-        aRank = (a as TeamStats).Rank || 0;
-        bRank = (b as TeamStats).Rank || 0;
+        aRank = (a as StatnetTeamStats).Rank || 0;
+        bRank = (b as StatnetTeamStats).Rank || 0;
       }
-      
+
       if (aRank !== bRank) {
         return aRank - bRank;
       }
-      
+
       // If ranks are equal, sort by goal difference (descending)
       let aGoalDiff: number;
       let bGoalDiff: number;
-      
+
       if (isCHLData(standings)) {
         aGoalDiff = (a as CHLStandingsTeam).goalDifference;
         bGoalDiff = (b as CHLStandingsTeam).goalDifference;
       } else {
-        const aTeam = a as TeamStats;
-        const bTeam = b as TeamStats;
+        const aTeam = a as StatnetTeamStats;
+        const bTeam = b as StatnetTeamStats;
         aGoalDiff = aTeam.G - aTeam.GA;
         bGoalDiff = bTeam.G - bTeam.GA;
       }
-      
+
       return bGoalDiff - aGoalDiff; // Descending order
     });
-    
+
     // Find the position of the team
     const position = sortedTeams.findIndex(team => {
       if (isCHLData(standings)) {
         return (team as CHLStandingsTeam).shortName === teamCode;
       } else {
-        return (team as TeamStats).info.teamNames.code === teamCode;
+        return (team as StatnetTeamStats).info.teamNames.code === teamCode;
       }
     });
-    
+
     return position + 1; // Return 1-based position
   };
 
   const compactTeams = getCompactTeams();
-  
+
   // Get total number of teams for colorization
   const totalTeams = isCHLData(standings) ? standings.teams.length : (standings.stats?.length || 0);
 
   // Helper function for rank column border based on full standings position
   const getRankBorderClass = (teamCode: string, totalTeams: number): string => {
     const fullPosition = getFullStandingsPosition(teamCode);
-    
+
     if (league === 'shl') {
       // SHL: playoff (top 6), playoff qualification (next 4), relegation (last 2)
       if (fullPosition <= 6) return 'border-r-4 border-yellow-400'; // Playoff spots
@@ -320,7 +320,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
                 goalDifference = chlTeam.goalDifference;
                 gamesPlayed = chlTeam.gamesPlayed;
               } else {
-                const shlTeam = team as TeamStats;
+                const shlTeam = team as StatnetTeamStats;
                 teamCode = getTeamCode(shlTeam);
                 teamName = getTeamName(shlTeam);
                 teamLogo = getTeamLogo(shlTeam);
@@ -330,8 +330,8 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
               }
 
               return (
-                <tr 
-                  key={teamCode} 
+                <tr
+                  key={teamCode}
                   className="hover:bg-gray-50 transition-colors"
                 >
                   {/* Rank */}
@@ -341,14 +341,14 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
 
                   {/* Team */}
                   <td className="px-3 py-3 whitespace-nowrap">
-                    <Link 
+                    <Link
                       href={`/${league}/${encodeURIComponent(teamCode)}`}
                       className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
                     >
                       <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                         {teamLogo ? (
-                          <Image 
-                            src={teamLogo} 
+                          <Image
+                            src={teamLogo}
                             alt={teamName}
                             width={24}
                             height={24}

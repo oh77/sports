@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CHLGame, CHLTeamInfo } from '../../types/chl';
+import { CHLGame, CHLTeamInfo } from '../../types/chl/game';
 import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
 import { CompactStandings } from '../../components/compact-standings';
-import { GameInfo } from '../../types/game';
+import { StatnetGameInfo } from '../../types/statnet/game';
 
 
 export default function TeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
@@ -30,7 +30,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   };
 
   // Convert CHL game to GameInfo format for components
-  const convertCHLGameToGameInfo = (chlGame: CHLGame): GameInfo => {
+  const convertCHLGameToGameInfo = (chlGame: CHLGame): StatnetGameInfo => {
     const homeTeamLogo = getTeamLogoWithFallback({
       shortName: chlGame.homeTeam.shortName,
       externalId: chlGame.homeTeam.externalId,
@@ -90,7 +90,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   };
 
   // Convert arrays of CHL games to GameInfo arrays
-  const convertCHLGamesToGameInfo = (chlGames: CHLGame[]): GameInfo[] => {
+  const convertCHLGamesToGameInfo = (chlGames: CHLGame[]): StatnetGameInfo[] => {
     return chlGames.map(convertCHLGameToGameInfo);
   };
 
@@ -195,7 +195,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   }, [teamCode]);
 
   // Convert game data for NextGame component
-  const nextGameData: GameInfo | null = game ? convertCHLGameToGameInfo(game) : null;
+  const nextGameData: StatnetGameInfo | null = game ? convertCHLGameToGameInfo(game) : null;
 
 
 

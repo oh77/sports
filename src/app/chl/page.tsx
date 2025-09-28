@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { CHLGame } from '../types/chl';
+import { CHLGame } from '../types/chl/game';
 import { GameGroup } from '../components/game-group';
 
 export default function CHLPage() {
@@ -20,24 +20,24 @@ export default function CHLPage() {
           throw new Error('Failed to fetch upcoming games');
         }
         const upcomingData = await upcomingResponse.json();
-        
+
         if (upcomingData.games && upcomingData.games.length > 0) {
           // Get the date of the first upcoming game
           const firstUpcomingGame = upcomingData.games[0];
           const nextGameDate = new Date(firstUpcomingGame.startDate);
           const nextGameDateString = nextGameDate.toISOString().split('T')[0];
-          
+
           // Check if the next game date is today
           const today = new Date().toISOString().split('T')[0];
           const targetDate = nextGameDateString === today ? today : nextGameDateString;
-          
+
           // Fetch games for the target date
           const dateResponse = await fetch(`/api/chl-games?type=date&date=${targetDate}`);
           if (!dateResponse.ok) {
             throw new Error('Failed to fetch games for date');
           }
           const dateData = await dateResponse.json();
-          
+
           if (dateData.games && dateData.games.length > 0) {
             setTodaysGames(dateData.games);
             setGameDate(nextGameDate.toLocaleDateString('sv-SE', {
@@ -116,8 +116,8 @@ export default function CHLPage() {
     <div className="min-h-screen relative" style={{ backgroundColor: '#20001c' }}>
       {/* Background CHL Logo */}
       <div className="fixed top-0 right-0 z-0">
-        <Image 
-          src="https://www.chl.hockey/static/img/logo.png" 
+        <Image
+          src="https://www.chl.hockey/static/img/logo.png"
           alt="CHL Background"
           width={400}
           height={400}
@@ -128,9 +128,9 @@ export default function CHLPage() {
       <div className="relative z-10">
         {/* Header with Logo */}
         <div className="flex flex-col items-center py-8">
-          <Image 
-            src="https://www.chl.hockey/static/img/logo.png" 
-            alt="CHL Logo" 
+          <Image
+            src="https://www.chl.hockey/static/img/logo.png"
+            alt="CHL Logo"
             width={96}
             height={96}
             className="h-24 w-auto mb-4"

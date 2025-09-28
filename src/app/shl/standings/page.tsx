@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FullStandings } from '../../components/full-standings';
-import { StandingsData } from '../../types/standings';
+import { StatnetStandingsData } from '../../types/statnet/standings';
 
 export default function SHLStandingsPage() {
-  const [standings, setStandings] = useState<StandingsData | null>(null);
+  const [standings, setStandings] = useState<StatnetStandingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,11 +16,11 @@ export default function SHLStandingsPage() {
       try {
         setLoading(true);
         const response = await fetch('/api/shl-standings');
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
 
         setStandings(data);
@@ -40,7 +40,7 @@ export default function SHLStandingsPage() {
       <main className="min-h-screen bg-gray-100 py-12 relative">
         {/* Background SHL Logo */}
         <div className="fixed top-0 right-0 z-0">
-          <Image 
+          <Image
             src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
             alt="SHL Background"
             width={400}
@@ -48,7 +48,7 @@ export default function SHLStandingsPage() {
             className="opacity-10 transform rotate-12"
           />
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           {/* Header Row */}
           <div className="max-w-6xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
@@ -58,7 +58,7 @@ export default function SHLStandingsPage() {
               <div className="h-6 bg-gray-300 rounded w-32 animate-pulse"></div>
             </div>
           </div>
-          
+
           <div className="animate-pulse">
             <div className="h-96 bg-gray-300 rounded"></div>
           </div>
@@ -72,7 +72,7 @@ export default function SHLStandingsPage() {
       <main className="min-h-screen bg-gray-100 py-12 relative">
         {/* Background SHL Logo */}
         <div className="fixed top-0 right-0 z-0">
-          <Image 
+          <Image
             src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
             alt="SHL Background"
             width={400}
@@ -80,11 +80,11 @@ export default function SHLStandingsPage() {
             className="opacity-10 transform rotate-12"
           />
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           {/* Header Row */}
           <div className="max-w-6xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-            <Image 
+            <Image
               src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
               alt="SHL Logo"
               width={80}
@@ -100,7 +100,7 @@ export default function SHLStandingsPage() {
               </p>
             </div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <h2 className="text-3xl font-bold text-white mb-4">
@@ -109,8 +109,8 @@ export default function SHLStandingsPage() {
             <p className="text-gray-200 mb-6">
               {error || 'Kunde inte ladda ligatabell just nu'}
             </p>
-            <Link 
-              href="/shl" 
+            <Link
+              href="/shl"
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
               Tillbaka till SHL
@@ -125,7 +125,7 @@ export default function SHLStandingsPage() {
     <main className="min-h-screen bg-gray-100 py-12 relative">
       {/* Background SHL Logo */}
       <div className="fixed top-0 right-0 z-0">
-        <Image 
+        <Image
           src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
           alt="SHL Background"
           width={400}
@@ -133,11 +133,11 @@ export default function SHLStandingsPage() {
           className="opacity-10 transform rotate-12"
         />
       </div>
-      
+
       <div className="container mx-auto px-4 relative z-10">
         {/* Header Row */}
         <div className="max-w-6xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-          <Image 
+          <Image
             src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
             alt="SHL Logo"
             width={80}
@@ -157,8 +157,8 @@ export default function SHLStandingsPage() {
         <FullStandings standings={standings} league="shl" />
 
         <div className="text-center mt-8">
-          <Link 
-            href="/shl" 
+          <Link
+            href="/shl"
             className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
           >
             Tillbaka till SHL

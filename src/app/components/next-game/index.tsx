@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { GameInfo } from '../../types/game';
+import { StatnetGameInfo } from '../../types/statnet/game';
 
 interface NextGameProps {
-  game: GameInfo | null;
+  game: StatnetGameInfo | null;
   currentTeamCode: string;
   league: 'shl' | 'sdhl' | 'chl';
 }

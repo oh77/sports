@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { CHLStandingsApiResponse, CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl-standings';
+import { CHLStandingsApiResponse, CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl/standings';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
 
 const CHL_STANDINGS_URL = 'https://www.chl.hockey/api/s3/live?q=standings-groups-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json';
@@ -10,13 +10,13 @@ export async function GET() {
 
     const transformedData = await getCachedData(cacheKey, async (): Promise<CHLStandingsDataTransformed> => {
       const response = await fetch(CHL_STANDINGS_URL);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data: CHLStandingsApiResponse = await response.json();
-      
+
       if (!data.data || data.data.length === 0) {
         throw new Error('No standings data available');
       }

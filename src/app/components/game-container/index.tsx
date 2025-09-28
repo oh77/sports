@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { GameInfo, TeamInfo } from '../../types/game';
+import { StatnetGameInfo, StatnetTeamInfo } from '../../types/statnet/game';
 
 interface GameContainerProps {
-  game: GameInfo;
+  game: StatnetGameInfo;
   league: 'shl' | 'sdhl' | 'chl';
 }
 
@@ -21,12 +21,12 @@ export function GameContainer({ game, league }: GameContainerProps) {
   };
 
   const getStadiumIcon = () => {
-    return league === 'shl' 
+    return league === 'shl'
       ? "https://www.shl.se/assets/stadium-460843bd.svg"
       : "https://www.sdhl.se/assets/stadium-460843bd.svg";
   };
 
-  const getTeamCode = (team: TeamInfo) => {
+  const getTeamCode = (team: StatnetTeamInfo) => {
     return team.names?.code || team.code;
   };
 
@@ -42,8 +42,8 @@ export function GameContainer({ game, league }: GameContainerProps) {
         <div className="text-center flex-1">
           <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
             {game.homeTeamInfo.icon ? (
-              <Image 
-                src={game.homeTeamInfo.icon} 
+              <Image
+                src={game.homeTeamInfo.icon}
                 alt={game.homeTeamInfo.names.short}
                 width={league === 'shl' ? 48 : 64}
                 height={league === 'shl' ? 48 : 64}
@@ -53,16 +53,16 @@ export function GameContainer({ game, league }: GameContainerProps) {
               <span className="text-gray-400 text-xl">🏒</span>
             )}
           </div>
-          <Link 
+          <Link
             href={`/${league}/${encodeURIComponent(getTeamCode(game.homeTeamInfo))}`}
             className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
           >
             {game.homeTeamInfo.names.short}
           </Link>
         </div>
-        
+
         <div className="text-center mx-6">
-          <Image 
+          <Image
             src={getStadiumIcon()}
             alt="Arena"
             width={40}
@@ -73,12 +73,12 @@ export function GameContainer({ game, league }: GameContainerProps) {
             {game.venueInfo.name}
           </p>
         </div>
-        
+
         <div className="text-center flex-1">
           <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
             {game.awayTeamInfo.icon ? (
-              <Image 
-                src={game.awayTeamInfo.icon} 
+              <Image
+                src={game.awayTeamInfo.icon}
                 alt={game.awayTeamInfo.names.short}
                 width={league === 'shl' ? 48 : 64}
                 height={league === 'shl' ? 48 : 64}
@@ -88,7 +88,7 @@ export function GameContainer({ game, league }: GameContainerProps) {
               <span className="text-gray-400 text-xl">🏒</span>
             )}
           </div>
-          <Link 
+          <Link
             href={`/${league}/${encodeURIComponent(getTeamCode(game.awayTeamInfo))}`}
             className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
           >
@@ -100,4 +100,4 @@ export function GameContainer({ game, league }: GameContainerProps) {
   );
 }
 
-export type { GameInfo } from '../../types/game';
+export type { StatnetGameInfo } from '../../types/statnet/game';

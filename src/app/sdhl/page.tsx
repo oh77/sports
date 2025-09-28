@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LeagueService } from '../services/leagueService';
-import { GameInfo } from '../types/game';
+import { StatnetGameInfo } from '../types/statnet/game';
 import { GameGroup } from '../components/game-group';
 
 export default function SDHLPage() {
-  const [games, setGames] = useState<GameInfo[]>([]);
+  const [games, setGames] = useState<StatnetGameInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gameDate, setGameDate] = useState<string>('');
@@ -18,37 +18,37 @@ export default function SDHLPage() {
       try {
         setLoading(true);
         const leagueService = new LeagueService('sdhl');
-        
+
         // Try to get stored games first
         let storedGames = leagueService.getStoredGames();
-        
+
         if (storedGames.length === 0) {
           // Fetch fresh data if none stored
           storedGames = await leagueService.fetchGames();
         }
-        
+
         if (storedGames.length > 0) {
           const now = new Date();
           const today = new Date();
           const todayString = today.toDateString();
-          
+
           // Find the next available game date
           const futureGames = storedGames.filter(game => new Date(game.startDateTime) >= now);
-          
+
           if (futureGames.length > 0) {
             // Get the first future game date
             const firstGameDate = new Date(futureGames[0].startDateTime);
             const firstGameDateString = firstGameDate.toDateString();
-            
+
             // Check if the next game date is today
             const targetDateString = firstGameDateString === todayString ? todayString : firstGameDateString;
-            
+
             // Get all games for the target date
             const targetGames = storedGames.filter(game => {
               const gameDate = new Date(game.startDateTime);
               return gameDate.toDateString() === targetDateString;
             });
-            
+
             if (targetGames.length > 0) {
               setGames(targetGames);
               setGameDate(firstGameDate.toLocaleDateString('sv-SE', {
@@ -87,7 +87,7 @@ export default function SDHLPage() {
   };
 
   // Group games by time
-  const groupGamesByTime = (games: GameInfo[]) => {
+  const groupGamesByTime = (games: StatnetGameInfo[]) => {
     const grouped = games.reduce((acc, game) => {
       const time = formatGameTime(game.startDateTime);
       if (!acc[time]) {
@@ -95,7 +95,7 @@ export default function SDHLPage() {
       }
       acc[time].push(game);
       return acc;
-    }, {} as Record<string, GameInfo[]>);
+    }, {} as Record<string, StatnetGameInfo[]>);
 
     // Sort times
     const sortedTimes = Object.keys(grouped).sort((a, b) => {
@@ -116,7 +116,7 @@ export default function SDHLPage() {
       <main className="min-h-screen bg-gray-100 py-12 relative">
         {/* Sticky Background SDHL Logo */}
         <div className="fixed top-0 right-0 z-0">
-          <Image 
+          <Image
             src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
             alt="SDHL Background"
             width={400}
@@ -124,7 +124,7 @@ export default function SDHLPage() {
             className="opacity-10 transform rotate-12"
           />
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           {/* Header Row */}
           <div className="max-w-4xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
@@ -134,7 +134,7 @@ export default function SDHLPage() {
               <div className="h-6 bg-gray-300 rounded w-32 animate-pulse"></div>
             </div>
           </div>
-          
+
           <div className="animate-pulse">
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -152,7 +152,7 @@ export default function SDHLPage() {
       <main className="min-h-screen bg-gray-100 py-12 relative">
         {/* Sticky Background SDHL Logo */}
         <div className="fixed top-0 right-0 z-0">
-          <Image 
+          <Image
             src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
             alt="SDHL Background"
             width={400}
@@ -160,11 +160,11 @@ export default function SDHLPage() {
             className="opacity-10 transform rotate-12"
           />
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           {/* Header Row */}
           <div className="max-w-4xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-            <Image 
+            <Image
               src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
               alt="SDHL Logo"
               width={80}
@@ -180,7 +180,7 @@ export default function SDHLPage() {
               </p>
             </div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <h2 className="text-3xl font-bold text-white mb-4">
@@ -189,8 +189,8 @@ export default function SDHLPage() {
             <p className="text-gray-600 mb-6">
               {error || 'Inga kommande matcher tillgängliga just nu'}
             </p>
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="bg-blue-500 hover:bg-blue-600 text-gray-800 px-6 py-3 rounded-lg transition-colors"
             >
               Tillbaka till Hem
@@ -205,7 +205,7 @@ export default function SDHLPage() {
     <main className="min-h-screen bg-gray-100 py-12 relative">
       {/* Sticky Background SDHL Logo */}
       <div className="fixed top-0 right-0 z-0">
-        <Image 
+        <Image
           src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
           alt="SDHL Background"
           width={400}
@@ -213,11 +213,11 @@ export default function SDHLPage() {
           className="opacity-10 transform rotate-12"
         />
       </div>
-      
+
       <div className="container mx-auto px-4 relative z-10">
         {/* Header Row */}
         <div className="max-w-4xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-          <Image 
+          <Image
             src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
             alt="SDHL Logo"
             width={80}
@@ -246,14 +246,14 @@ export default function SDHLPage() {
         </div>
 
         <div className="text-center mt-8 space-x-4">
-          <Link 
-            href="/sdhl/standings" 
+          <Link
+            href="/sdhl/standings"
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
           >
             Visa Ligatabell
           </Link>
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="bg-gray-500 hover:bg-gray-600 text-gray-800 px-6 py-3 rounded-lg transition-colors"
           >
             Tillbaka till Hem

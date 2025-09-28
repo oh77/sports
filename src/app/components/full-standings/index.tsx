@@ -2,26 +2,26 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { StandingsData, TeamStats } from '../../types/standings';
-import { CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl-standings';
+import { StatnetStandingsData, StatnetTeamStats } from '../../types/statnet/standings';
+import { CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl/standings';
 import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 
 interface FullStandingsProps {
-  standings: StandingsData | CHLStandingsDataTransformed;
+  standings: StatnetStandingsData | CHLStandingsDataTransformed;
   league: 'shl' | 'sdhl' | 'chl';
 }
 
 export function FullStandings({ standings, league }: FullStandingsProps) {
   // Helper functions for SHL/SDHL data
-  const getTeamCode = (team: TeamStats): string => {
+  const getTeamCode = (team: StatnetTeamStats): string => {
     return team.info.teamNames.code;
   };
 
-  const getTeamName = (team: TeamStats): string => {
+  const getTeamName = (team: StatnetTeamStats): string => {
     return team.info.teamNames.short;
   };
 
-  const getTeamLogo = (team: TeamStats): string => {
+  const getTeamLogo = (team: StatnetTeamStats): string => {
     return team.info.logo;
   };
 
@@ -30,7 +30,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
     return rank.toString();
   };
 
-  const getPoints = (team: TeamStats): number => {
+  const getPoints = (team: StatnetTeamStats): number => {
     // Calculate points: 3 for win, 1 for tie, 0 for loss
     return (team.W * 3) + (team.T * 1);
   };
@@ -50,7 +50,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
   };
 
   // Universal helper functions
-  const isCHLData = (data: StandingsData | CHLStandingsDataTransformed): data is CHLStandingsDataTransformed => {
+  const isCHLData = (data: StatnetStandingsData | CHLStandingsDataTransformed): data is CHLStandingsDataTransformed => {
     return 'teams' in data && Array.isArray(data.teams) && data.teams.length > 0 && 'rank' in data.teams[0];
   };
 
@@ -61,39 +61,39 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
     } else {
       teams = standings.stats || [];
     }
-    
+
     // Sort by rank first, then by goal difference descending
     return teams.sort((a, b) => {
       // First sort by rank
       let aRank: number;
       let bRank: number;
-      
+
       if (isCHLData(standings)) {
         aRank = (a as CHLStandingsTeam).rank;
         bRank = (b as CHLStandingsTeam).rank;
       } else {
-        aRank = (a as TeamStats).Rank || 0;
-        bRank = (b as TeamStats).Rank || 0;
+        aRank = (a as StatnetTeamStats).Rank || 0;
+        bRank = (b as StatnetTeamStats).Rank || 0;
       }
-      
+
       if (aRank !== bRank) {
         return aRank - bRank;
       }
-      
+
       // If ranks are equal, sort by goal difference (descending)
       let aGoalDiff: number;
       let bGoalDiff: number;
-      
+
       if (isCHLData(standings)) {
         aGoalDiff = (a as CHLStandingsTeam).goalDifference;
         bGoalDiff = (b as CHLStandingsTeam).goalDifference;
       } else {
-        const aTeam = a as TeamStats;
-        const bTeam = b as TeamStats;
+        const aTeam = a as StatnetTeamStats;
+        const bTeam = b as StatnetTeamStats;
         aGoalDiff = aTeam.G - aTeam.GA;
         bGoalDiff = bTeam.G - bTeam.GA;
       }
-      
+
       return bGoalDiff - aGoalDiff; // Descending order
     });
   };
@@ -175,7 +175,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                   goalsAgainst = chlTeam.goalsAgainst;
                   fullTeamName = chlTeam.name;
                 } else {
-                  const shlTeam = team as TeamStats;
+                  const shlTeam = team as StatnetTeamStats;
                   teamCode = getTeamCode(shlTeam);
                   teamName = getTeamName(shlTeam);
                   teamLogo = getTeamLogo(shlTeam);
@@ -192,8 +192,8 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 }
 
                 return (
-                  <tr 
-                    key={teamCode} 
+                  <tr
+                    key={teamCode}
                     className="hover:bg-gray-50 transition-colors"
                   >
                     {/* Rank */}
@@ -203,14 +203,14 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
 
                     {/* Team */}
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <Link 
+                      <Link
                         href={`/${league}/${encodeURIComponent(teamCode)}`}
                         className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
                       >
                         <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                           {teamLogo ? (
-                            <Image 
-                              src={teamLogo} 
+                            <Image
+                              src={teamLogo}
                               alt={teamName}
                               width={32}
                               height={32}
@@ -289,8 +289,8 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-yellow-200 rounded"></div>
               <span>
-                {league === 'shl' ? 'Topp 6 (Slutspel)' : 
-                 league === 'sdhl' ? 'Topp 8 (Slutspel)' : 
+                {league === 'shl' ? 'Topp 6 (Slutspel)' :
+                 league === 'sdhl' ? 'Topp 8 (Slutspel)' :
                  'Topp 16 (Playoffs)'}
               </span>
             </div>

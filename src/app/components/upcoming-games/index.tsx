@@ -3,16 +3,16 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { GameInfo, TeamInfo } from '../../types/game';
+import { StatnetGameInfo, StatnetTeamInfo } from '../../types/statnet/game';
 
 interface UpcomingGamesProps {
-  games: GameInfo[];
+  games: StatnetGameInfo[];
   currentTeamCode: string;
   league: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function UpcomingGames({ games, currentTeamCode, league }: UpcomingGamesProps) {
-  const getTeamCode = (teamInfo: TeamInfo): string => {
+  const getTeamCode = (teamInfo: StatnetTeamInfo): string => {
     return teamInfo.names?.code || teamInfo.code;
   };
 
