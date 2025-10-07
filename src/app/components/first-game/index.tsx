@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { LeagueService } from '../../services/leagueService';
-import { StatnetGameInfo } from '../../types/statnet/game';
+import { GameInfo } from '../../types/domain/game';
 
 interface FirstGameProps {
   league?: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function FirstGame({ league = 'shl' }: FirstGameProps) {
-  const [game, setGame] = useState<StatnetGameInfo | null>(null);
+  const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,10 +97,10 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="text-center flex-1">
           <div className="w-16 h-16 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
-            {game.homeTeamInfo.icon ? (
+            {game.homeTeamInfo.teamInfo.logo ? (
               <Image
-                src={game.homeTeamInfo.icon}
-                alt={game.homeTeamInfo.names.short}
+                src={game.homeTeamInfo.teamInfo.logo}
+                alt={game.homeTeamInfo.teamInfo.short}
                 width={48}
                 height={48}
                 className="w-12 h-12 object-contain"
@@ -110,7 +110,7 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
             )}
           </div>
           <p className="text-sm font-medium text-gray-800">
-            {game.homeTeamInfo.names.short}
+            {game.homeTeamInfo.teamInfo.short}
           </p>
         </div>
 
@@ -120,10 +120,10 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
 
         <div className="text-center flex-1">
           <div className="w-16 h-16 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
-            {game.awayTeamInfo.icon ? (
+            {game.awayTeamInfo.teamInfo.logo ? (
               <Image
-                src={game.awayTeamInfo.icon}
-                alt={game.awayTeamInfo.names.short}
+                src={game.awayTeamInfo.teamInfo.logo}
+                alt={game.awayTeamInfo.teamInfo.short}
                 width={48}
                 height={48}
                 className="w-12 h-12 object-contain"
@@ -133,7 +133,7 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
             )}
           </div>
           <p className="text-sm font-medium text-gray-800">
-            {game.awayTeamInfo.names.short}
+            {game.awayTeamInfo.teamInfo.short}
           </p>
         </div>
       </div>

@@ -3,17 +3,17 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { StatnetGameInfo, StatnetTeamInfo } from '../../types/statnet/game';
+import { GameInfo, GameTeamInfo } from '../../types/domain/game';
 
 interface UpcomingGamesProps {
-  games: StatnetGameInfo[];
+  games: GameInfo[];
   currentTeamCode: string;
   league: 'shl' | 'sdhl' | 'chl';
 }
 
 export default function UpcomingGames({ games, currentTeamCode, league }: UpcomingGamesProps) {
-  const getTeamCode = (teamInfo: StatnetTeamInfo): string => {
-    return teamInfo.names?.code || teamInfo.code;
+  const getTeamCode = (teamInfo: GameTeamInfo): string => {
+    return teamInfo.teamInfo.code;
   };
 
   const formatTime = (dateTimeStr: string) => {
@@ -55,10 +55,10 @@ export default function UpcomingGames({ games, currentTeamCode, league }: Upcomi
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    {opponentInfo.icon ? (
+                    {opponentInfo.teamInfo.logo ? (
                       <Image
-                        src={opponentInfo.icon}
-                        alt={opponentInfo.names.short}
+                        src={opponentInfo.teamInfo.logo}
+                        alt={opponentInfo.teamInfo.short}
                         width={24}
                         height={24}
                         className="w-6 h-6 object-contain"
@@ -71,7 +71,7 @@ export default function UpcomingGames({ games, currentTeamCode, league }: Upcomi
                     href={`/${league}/${encodeURIComponent(getTeamCode(opponentInfo))}`}
                     className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
                   >
-                    {opponentInfo.names.short} ({isHomeTeam ? 'H' : 'A'})
+                    {opponentInfo.teamInfo.short} ({isHomeTeam ? 'H' : 'A'})
                   </Link>
                 </div>
 

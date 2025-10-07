@@ -9,15 +9,15 @@ import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
 import { CompactStandings } from '../../components/compact-standings';
-import { StatnetGameInfo, StatnetTeamInfo } from '../../types/statnet/game';
+import { GameInfo, GameTeamInfo } from '../../types/domain/game';
 
 export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
   const resolvedParams = React.use(params);
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
-  const [teamInfo, setTeamInfo] = useState<StatnetTeamInfo | null>(null);
-  const [nextGame, setNextGame] = useState<StatnetGameInfo | null>(null);
-  const [previousGames, setPreviousGames] = useState<StatnetGameInfo[]>([]);
-  const [upcomingGames, setUpcomingGames] = useState<StatnetGameInfo[]>([]);
+  const [teamInfo, setTeamInfo] = useState<GameTeamInfo | null>(null);
+  const [nextGame, setNextGame] = useState<GameInfo | null>(null);
+  const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
+  const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [standings, setStandings] = useState<{
@@ -70,8 +70,8 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
 
         // Find team info from any game
         const teamGame = games.find(game =>
-          game.homeTeamInfo.names.code === teamCode ||
-          game.awayTeamInfo.names.code === teamCode
+          game.homeTeamInfo.teamInfo.code === teamCode ||
+          game.awayTeamInfo.teamInfo.code === teamCode
         );
 
         if (!teamGame) {
@@ -80,7 +80,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         }
 
         // Set team info
-        const isHomeTeam = teamGame.homeTeamInfo.names.code === teamCode;
+        const isHomeTeam = teamGame.homeTeamInfo.teamInfo.code === teamCode;
         const team = isHomeTeam ? teamGame.homeTeamInfo : teamGame.awayTeamInfo;
         setTeamInfo(team);
 
@@ -170,11 +170,11 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
   return (
     <main className="min-h-screen bg-gray-100 py-12 relative">
       {/* Background Team Logo */}
-      {teamInfo.icon && (
+      {teamInfo.teamInfo.logo && (
         <div className="absolute inset-0 flex items-center justify-center z-0 px-8">
           <Image
-            src={teamInfo.icon}
-            alt={`${teamInfo.names.short} Background`}
+            src={teamInfo.teamInfo.logo}
+            alt={`${teamInfo.teamInfo.short} Background`}
             width={1200}
             height={1200}
             className="opacity-10 w-full h-full object-contain"
@@ -186,10 +186,10 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         {/* Header */}
         <div className="max-w-4xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
-            {teamInfo.icon ? (
+            {teamInfo.teamInfo.logo ? (
               <Image
-                src={teamInfo.icon}
-                alt={teamInfo.names.short}
+                src={teamInfo.teamInfo.logo}
+                alt={teamInfo.teamInfo.short}
                 width={80}
                 height={80}
                 className="w-20 h-20 object-contain"
@@ -199,7 +199,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
             )}
           </div>
           <h1 className="text-5xl font-bold text-white uppercase tracking-wider">
-            {teamInfo.names.full}
+            {teamInfo.teamInfo.full}
           </h1>
         </div>
 
@@ -215,8 +215,8 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
             <CompactStandings
               standings={standings}
               league="sdhl"
-              teamCode1={nextGame.homeTeamInfo.names?.code || nextGame.homeTeamInfo.code}
-              teamCode2={nextGame.awayTeamInfo.names?.code || nextGame.awayTeamInfo.code}
+              teamCode1={nextGame.homeTeamInfo.teamInfo.code}
+              teamCode2={nextGame.awayTeamInfo.teamInfo.code}
             />
           </div>
         )}

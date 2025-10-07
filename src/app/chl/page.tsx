@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { GameInfo } from '../types/domain/game';
 import { CHLGame } from '../types/chl/game';
+import { translateCHLGameToDomain } from '../utils/translators/chlToDomain';
 import { GameGroup } from '../components/game-group';
 
 export default function CHLPage() {
-  const [todaysGames, setTodaysGames] = useState<CHLGame[]>([]);
+  const [todaysGames, setTodaysGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gameDate, setGameDate] = useState<string>('');
@@ -22,9 +24,13 @@ export default function CHLPage() {
         const upcomingData = await upcomingResponse.json();
 
         if (upcomingData.games && upcomingData.games.length > 0) {
+          // Translate CHL games to domain models
+          const chlGames: CHLGame[] = upcomingData.games;
+          const domainGames = chlGames.map(translateCHLGameToDomain);
+          
           // Get the date of the first upcoming game
-          const firstUpcomingGame = upcomingData.games[0];
-          const nextGameDate = new Date(firstUpcomingGame.startDate);
+          const firstUpcomingGame = domainGames[0];
+          const nextGameDate = new Date(firstUpcomingGame.startDateTime);
           const nextGameDateString = nextGameDate.toISOString().split('T')[0];
 
           // Check if the next game date is today
@@ -39,7 +45,10 @@ export default function CHLPage() {
           const dateData = await dateResponse.json();
 
           if (dateData.games && dateData.games.length > 0) {
-            setTodaysGames(dateData.games);
+            // Translate CHL games to domain models
+            const dateChlGames: CHLGame[] = dateData.games;
+            const dateDomainGames = dateChlGames.map(translateCHLGameToDomain);
+            setTodaysGames(dateDomainGames);
             setGameDate(nextGameDate.toLocaleDateString('sv-SE', {
               weekday: 'long',
               year: 'numeric',
@@ -72,15 +81,15 @@ export default function CHLPage() {
   };
 
   // Group games by time
-  const groupGamesByTime = (games: CHLGame[]) => {
+  const groupGamesByTime = (games: GameInfo[]) => {
     const grouped = games.reduce((acc, game) => {
-      const time = formatGameTime(game.startDate);
+      const time = formatGameTime(game.startDateTime);
       if (!acc[time]) {
         acc[time] = [];
       }
       acc[time].push(game);
       return acc;
-    }, {} as Record<string, CHLGame[]>);
+    }, {} as Record<string, GameInfo[]>);
 
     // Sort times
     const sortedTimes = Object.keys(grouped).sort((a, b) => {

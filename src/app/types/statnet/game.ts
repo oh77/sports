@@ -1,15 +1,9 @@
 import {VenueInfo} from "@/app/types/domain/game";
 
-export interface StatnetTeamInfo {
+export interface StatnetGameTeamInfo {
   code: string;
   names: {
     code?: string;
-    short: string;
-    long: string;
-    full: string;
-  };
-  teamNames: {
-    code: string;
     short: string;
     long: string;
     full: string;
@@ -23,14 +17,14 @@ export interface StatnetGameInfo {
   uuid: string;
   startDateTime: string;
   state: string;
-  homeTeamInfo: StatnetTeamInfo;
-  awayTeamInfo: StatnetTeamInfo;
+  homeTeamInfo: StatnetGameTeamInfo;
+  awayTeamInfo: StatnetGameTeamInfo;
   venueInfo: VenueInfo;
   overtime?: boolean;
   shootout?: boolean;
 }
 
-export interface LeagueResponse {
+export interface StatnetLeagueResponse {
   gameInfo: StatnetGameInfo[];
-  teamList?: StatnetTeamInfo[];
+  teamList?: StatnetGameTeamInfo[];
 }

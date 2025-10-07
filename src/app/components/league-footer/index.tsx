@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { LeagueService } from '../../services/leagueService';
-import { StatnetTeamInfo } from '../../types/statnet/game';
+import { TeamInfo } from '../../types/domain/team';
 
 interface LeagueFooterProps {
   league: 'shl' | 'sdhl' | 'chl';
@@ -10,7 +10,7 @@ interface LeagueFooterProps {
 }
 
 export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
-  const [teams, setTeams] = useState<StatnetTeamInfo[]>([]);
+  const [teams, setTeams] = useState<TeamInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,13 +83,13 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
             },
             // Team logos
             ...teams.map((team, index) => {
-              const teamCode = team.teamNames.code || team.code;
+              const teamCode = team.code;
               return {
                 key: `team-${teamCode}-${index}`,
                 href: `/${league}/${encodeURIComponent(teamCode)}`,
                 logo: team.logo,
-                alt: team.teamNames.full,
-                tooltip: team.teamNames.full,
+                alt: team.full,
+                tooltip: team.full,
                 isCurrentTeam: currentTeamCode === teamCode,
                 isLeague: false
               };

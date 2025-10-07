@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { StatnetGameInfo } from '../../types/statnet/game';
+import { GameInfo } from '../../types/domain/game';
 
 interface NextGameProps {
-  game: StatnetGameInfo | null;
+  game: GameInfo | null;
   currentTeamCode: string;
   league: 'shl' | 'sdhl' | 'chl';
 }
@@ -63,10 +63,10 @@ export default function NextGame({ game, league }: NextGameProps) : React.JSX.El
         <div className="flex items-center justify-between">
           <div className="text-center flex-1">
             <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-              {game.homeTeamInfo.icon ? (
+              {game.homeTeamInfo.teamInfo.logo ? (
                 <Image
-                  src={game.homeTeamInfo.icon}
-                  alt={game.homeTeamInfo.names.short}
+                  src={game.homeTeamInfo.teamInfo.logo}
+                  alt={game.homeTeamInfo.teamInfo.short}
                   width={64}
                   height={64}
                   className="w-16 h-16 object-contain"
@@ -76,7 +76,7 @@ export default function NextGame({ game, league }: NextGameProps) : React.JSX.El
               )}
             </div>
             <p className="text-lg font-medium text-gray-800">
-              {game.homeTeamInfo.names.short}
+              {game.homeTeamInfo.teamInfo.short}
             </p>
           </div>
 
@@ -95,10 +95,10 @@ export default function NextGame({ game, league }: NextGameProps) : React.JSX.El
 
           <div className="text-center flex-1">
             <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-              {game.awayTeamInfo.icon ? (
+              {game.awayTeamInfo.teamInfo.logo ? (
                 <Image
-                  src={game.awayTeamInfo.icon}
-                  alt={game.awayTeamInfo.names.short}
+                  src={game.awayTeamInfo.teamInfo.logo}
+                  alt={game.awayTeamInfo.teamInfo.short}
                   width={64}
                   height={64}
                   className="w-16 h-16 object-contain"
@@ -108,7 +108,7 @@ export default function NextGame({ game, league }: NextGameProps) : React.JSX.El
               )}
             </div>
             <p className="text-lg font-medium text-gray-800">
-              {game.awayTeamInfo.names.short}
+              {game.awayTeamInfo.teamInfo.short}
             </p>
           </div>
         </div>

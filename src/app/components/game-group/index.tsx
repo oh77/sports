@@ -1,38 +1,34 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getTeamLogoWithFallback } from '../../utils/teamLogos';
+import { GameInfo } from '../../types/domain/game';
+import { League } from '@/app/types/domain/league';
 
 interface GameGroupProps {
   time: string;
-  games: unknown[];
-  league: 'chl' | 'shl' | 'sdhl';
+  games: GameInfo[];
+  league: League;
 }
 
 export function GameGroup({ time, games, league }: GameGroupProps) {
-  const getTeamLogo = (team: Record<string, unknown>) => {
+  const getTeamLogo = (teamInfo: { code: string; short: string; long: string; full: string; logo: string }) => {
     if (league === 'chl') {
       // Use the proper CHL logo utility
       return getTeamLogoWithFallback({
-        shortName: team.shortName,
-        externalId: team.externalId,
-        country: team.country ? { code: team.country } : undefined
+        shortName: teamInfo.short,
+        externalId: teamInfo.code,
+        country: undefined
       });
     }
-    return team.icon || 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg';
+    return teamInfo.logo || 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg';
   };
 
-  const getTeamCode = (team: Record<string, unknown>) => {
-    if (league === 'chl') {
-      return team.shortName?.toUpperCase() || team.name;
-    }
-    return team.names?.code || team.code;
+  const getTeamCode = (teamInfo: { code: string; short: string; long: string; full: string; logo: string }) => {
+    return teamInfo.code;
   };
 
-  const getTeamName = (team: Record<string, unknown>) => {
-    if (league === 'chl') {
-      return team.name;
-    }
-    return team.names?.short || team.name;
+  const getTeamName = (teamInfo: { code: string; short: string; long: string; full: string; logo: string }) => {
+    return teamInfo.short;
   };
 
   const getStadiumIcon = () => {
@@ -48,11 +44,8 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
     }
   };
 
-  const getVenueName = (game: Record<string, unknown>) => {
-    if (league === 'chl') {
-      return game.venue;
-    }
-    return game.venueInfo?.name || 'Unknown venue';
+  const getVenueName = (game: GameInfo) => {
+    return game.venueInfo.name || 'Unknown venue';
   };
 
   return (
@@ -66,7 +59,7 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
       <div className="space-y-4">
         {games.map((game, index) => (
           <div 
-            key={league === 'chl' ? game.id : game.uuid || index}
+            key={game.uuid || index}
             className="rounded-lg shadow-lg p-6"
             style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
           >
@@ -75,18 +68,18 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
               <div className="text-center flex-1">
                 <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                   <Image
-                    src={getTeamLogo(league === 'chl' ? game.homeTeam : game.homeTeamInfo)}
-                    alt={`${getTeamName(league === 'chl' ? game.homeTeam : game.homeTeamInfo)} logo`}
+                    src={getTeamLogo(game.homeTeamInfo.teamInfo)}
+                    alt={`${getTeamName(game.homeTeamInfo.teamInfo)} logo`}
                     width={48}
                     height={48}
                     className="w-12 h-12 object-contain"
                   />
                 </div>
                 <Link 
-                  href={`/${league}/${encodeURIComponent(getTeamCode(league === 'chl' ? game.homeTeam : game.homeTeamInfo))}`}
+                  href={`/${league}/${encodeURIComponent(getTeamCode(game.homeTeamInfo.teamInfo))}`}
                   className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                 >
-                  {getTeamName(league === 'chl' ? game.homeTeam : game.homeTeamInfo)}
+                  {getTeamName(game.homeTeamInfo.teamInfo)}
                 </Link>
               </div>
               
@@ -108,18 +101,18 @@ export function GameGroup({ time, games, league }: GameGroupProps) {
               <div className="text-center flex-1">
                 <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                   <Image
-                    src={getTeamLogo(league === 'chl' ? game.awayTeam : game.awayTeamInfo)}
-                    alt={`${getTeamName(league === 'chl' ? game.awayTeam : game.awayTeamInfo)} logo`}
+                    src={getTeamLogo(game.awayTeamInfo.teamInfo)}
+                    alt={`${getTeamName(game.awayTeamInfo.teamInfo)} logo`}
                     width={48}
                     height={48}
                     className="w-12 h-12 object-contain"
                   />
                 </div>
                 <Link 
-                  href={`/${league}/${encodeURIComponent(getTeamCode(league === 'chl' ? game.awayTeam : game.awayTeamInfo))}`}
+                  href={`/${league}/${encodeURIComponent(getTeamCode(game.awayTeamInfo.teamInfo))}`}
                   className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                 >
-                  {getTeamName(league === 'chl' ? game.awayTeam : game.awayTeamInfo)}
+                  {getTeamName(game.awayTeamInfo.teamInfo)}
                 </Link>
               </div>
             </div>

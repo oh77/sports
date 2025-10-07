@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LeagueService } from '../services/leagueService';
-import { StatnetGameInfo } from '../types/statnet/game';
+import { GameInfo } from '../types/domain/game';
 import { GameGroup } from '../components/game-group';
 
 export default function SDHLPage() {
-  const [games, setGames] = useState<StatnetGameInfo[]>([]);
+  const [games, setGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gameDate, setGameDate] = useState<string>('');
@@ -87,7 +87,7 @@ export default function SDHLPage() {
   };
 
   // Group games by time
-  const groupGamesByTime = (games: StatnetGameInfo[]) => {
+  const groupGamesByTime = (games: GameInfo[]) => {
     const grouped = games.reduce((acc, game) => {
       const time = formatGameTime(game.startDateTime);
       if (!acc[time]) {
@@ -95,7 +95,7 @@ export default function SDHLPage() {
       }
       acc[time].push(game);
       return acc;
-    }, {} as Record<string, StatnetGameInfo[]>);
+    }, {} as Record<string, GameInfo[]>);
 
     // Sort times
     const sortedTimes = Object.keys(grouped).sort((a, b) => {

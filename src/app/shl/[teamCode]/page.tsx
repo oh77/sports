@@ -9,18 +9,18 @@ import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
 import { CompactStandings } from '../../components/compact-standings';
-import { StatnetGameInfo, StatnetTeamInfo } from '../../types/statnet/game';
-
+import { GameInfo } from '../../types/domain/game';
+import { TeamInfo } from '../../types/domain/team';
 
 export default function TeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
   const resolvedParams = React.use(params);
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
-  const [game, setGame] = useState<StatnetGameInfo | null>(null);
+  const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [teamInfo, setTeamInfo] = useState<StatnetTeamInfo | null>(null);
-  const [previousGames, setPreviousGames] = useState<StatnetGameInfo[]>([]);
-  const [upcomingGames, setUpcomingGames] = useState<StatnetGameInfo[]>([]);
+  const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
+  const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
+  const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [standings, setStandings] = useState<{
     dataColumns: Array<{
       name: string;
@@ -73,8 +73,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         if (storedGame) {
           setGame(storedGame);
           // Determine which team info to show (home or away)
-          const isHomeTeam = (storedGame.homeTeamInfo.names?.code || storedGame.homeTeamInfo.code) === teamCode;
-          setTeamInfo(isHomeTeam ? storedGame.homeTeamInfo : storedGame.awayTeamInfo);
+          const isHomeTeam = storedGame.homeTeamInfo.teamInfo.code === teamCode;
+          setTeamInfo(isHomeTeam ? storedGame.homeTeamInfo.teamInfo : storedGame.awayTeamInfo.teamInfo);
 
           // Load previous and upcoming games
           const prevGames = leagueService.getPreviousGamesForTeam(teamCode, 3);
@@ -153,11 +153,11 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   return (
     <main className="min-h-screen bg-gray-100 py-12 relative">
       {/* Background Team Logo */}
-      {teamInfo.icon && (
+      {teamInfo.logo && (
         <div className="absolute inset-0 flex items-center justify-center z-0 px-8">
           <Image
-            src={teamInfo.icon}
-            alt={`${teamInfo.names.short} Background`}
+            src={teamInfo.logo}
+            alt={`${teamInfo.short} Background`}
             width={1200}
             height={1200}
             className="opacity-10 w-full h-full object-contain"
@@ -168,10 +168,10 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
       <div className="container mx-auto px-4 relative z-10">
         {/* Header Row */}
         <div className="flex items-center justify-center gap-6 mb-8 py-6">
-          {teamInfo.icon ? (
+          {teamInfo.logo ? (
             <Image
-              src={teamInfo.icon}
-              alt={teamInfo.names.short}
+              src={teamInfo.logo}
+              alt={teamInfo.short}
               width={80}
               height={80}
               className="w-20 h-20 object-contain"
@@ -182,7 +182,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
             </div>
           )}
           <h1 className="text-5xl font-bold text-gray-800 uppercase tracking-wider">
-            {teamInfo.names.full}
+            {teamInfo.full}
           </h1>
         </div>
 
@@ -191,7 +191,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           <div className="rounded-lg shadow-lg p-6 text-gray-800" style={{ backgroundColor: 'rgba(128, 128, 128, 0.8)' }}>
             <div className="text-center">
               <p className="text-2xl font-semibold">
-                {opponentInfo.names.short} ({isHomeGame ? 'H' : 'A'})
+                {opponentInfo.short} ({isHomeGame ? 'H' : 'A'})
               </p>
             </div>
           </div>
@@ -204,16 +204,17 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         />
 
         {/* Compact Standings */}
-        {standings && game && (
+        {/* TODO: Fix standings data structure to use domain types */}
+        {/* {standings && game && (
           <div className="max-w-4xl mx-auto mb-8">
             <CompactStandings
               standings={standings}
               league="shl"
-              teamCode1={game.homeTeamInfo.names?.code || game.homeTeamInfo.code}
-              teamCode2={game.awayTeamInfo.names?.code || game.awayTeamInfo.code}
+              teamCode1={game.homeTeamInfo.teamInfo.code}
+              teamCode2={game.awayTeamInfo.teamInfo.code}
             />
           </div>
-        )}
+        )} */}
 
         {/* Previous and Upcoming Games */}
         <div className="max-w-6xl mx-auto mt-8">

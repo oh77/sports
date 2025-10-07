@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LeagueService } from '../services/leagueService';
-import { StatnetGameInfo } from '../types/statnet/game';
+import { GameInfo } from '../types/domain/game';
 import { GameGroup } from '../components/game-group';
 
 export default function SHLPage() {
-  const [games, setGames] = useState<StatnetGameInfo[]>([]);
+  const [games, setGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gameDate, setGameDate] = useState<string>('');
@@ -18,9 +18,8 @@ export default function SHLPage() {
       try {
         setLoading(true);
         const leagueService = new LeagueService('shl');
-
         // Try to get stored games first
-        let storedGames = leagueService.getStoredGames();
+        let storedGames: GameInfo[] = []; //leagueService.getStoredGames();
 
         if (storedGames.length === 0) {
           // Fetch fresh data if none stored
@@ -87,7 +86,7 @@ export default function SHLPage() {
   };
 
   // Group games by time
-  const groupGamesByTime = (games: StatnetGameInfo[]) => {
+  const groupGamesByTime = (games: GameInfo[]) => {
     const grouped = games.reduce((acc, game) => {
       const time = formatGameTime(game.startDateTime);
       if (!acc[time]) {
@@ -95,7 +94,7 @@ export default function SHLPage() {
       }
       acc[time].push(game);
       return acc;
-    }, {} as Record<string, StatnetGameInfo[]>);
+    }, {} as Record<string, GameInfo[]>);
 
     // Sort times
     const sortedTimes = Object.keys(grouped).sort((a, b) => {

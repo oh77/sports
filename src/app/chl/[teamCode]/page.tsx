@@ -4,94 +4,30 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CHLGame, CHLTeamInfo } from '../../types/chl/game';
+import { GameInfo } from '../../types/domain/game';
+import { translateCHLGameToDomain } from '../../utils/translators/chlToDomain';
 import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
 import { CompactStandings } from '../../components/compact-standings';
-import { StatnetGameInfo } from '../../types/statnet/game';
 
 
 export default function TeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
   const resolvedParams = React.use(params);
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
-  const [game, setGame] = useState<CHLGame | null>(null);
+  const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teamInfo, setTeamInfo] = useState<CHLTeamInfo | null>(null);
-  const [previousGames, setPreviousGames] = useState<CHLGame[]>([]);
-  const [upcomingGames, setUpcomingGames] = useState<CHLGame[]>([]);
+  const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
+  const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [standings, setStandings] = useState<unknown>(null);
   const [allTeams, setAllTeams] = useState<CHLTeamInfo[]>([]);
 
   // Helper function to match team code with short name
   const matchTeamCode = (teamCode: string, teamShortName: string): boolean => {
     return teamShortName.toUpperCase() === teamCode.toUpperCase();
-  };
-
-  // Convert CHL game to GameInfo format for components
-  const convertCHLGameToGameInfo = (chlGame: CHLGame): StatnetGameInfo => {
-    const homeTeamLogo = getTeamLogoWithFallback({
-      shortName: chlGame.homeTeam.shortName,
-      externalId: chlGame.homeTeam.externalId,
-      country: chlGame.homeTeam.country ? { code: chlGame.homeTeam.country } : undefined
-    });
-
-    const awayTeamLogo = getTeamLogoWithFallback({
-      shortName: chlGame.awayTeam.shortName,
-      externalId: chlGame.awayTeam.externalId,
-      country: chlGame.awayTeam.country ? { code: chlGame.awayTeam.country } : undefined
-    });
-
-    return {
-      uuid: chlGame.id,
-      startDateTime: chlGame.startDate,
-      state: chlGame.state,
-      homeTeamInfo: {
-        code: chlGame.homeTeam.shortName,
-        names: {
-          short: chlGame.homeTeam.shortName,
-          long: chlGame.homeTeam.name,
-          full: chlGame.homeTeam.name,
-          code: chlGame.homeTeam.shortName
-        },
-        teamNames: {
-          short: chlGame.homeTeam.shortName,
-          long: chlGame.homeTeam.name,
-          full: chlGame.homeTeam.name,
-          code: chlGame.homeTeam.shortName
-        },
-        icon: homeTeamLogo,
-        logo: homeTeamLogo,
-        score: chlGame.scores?.home || 0
-      },
-      awayTeamInfo: {
-        code: chlGame.awayTeam.shortName,
-        names: {
-          short: chlGame.awayTeam.shortName,
-          long: chlGame.awayTeam.name,
-          full: chlGame.awayTeam.name,
-          code: chlGame.awayTeam.shortName
-        },
-        teamNames: {
-          short: chlGame.awayTeam.shortName,
-          long: chlGame.awayTeam.name,
-          full: chlGame.awayTeam.name,
-          code: chlGame.awayTeam.shortName
-        },
-        icon: awayTeamLogo,
-        logo: awayTeamLogo,
-        score: chlGame.scores?.away || 0
-      },
-      venueInfo: {
-        name: chlGame.venue
-      }
-    };
-  };
-
-  // Convert arrays of CHL games to GameInfo arrays
-  const convertCHLGamesToGameInfo = (chlGames: CHLGame[]): StatnetGameInfo[] => {
-    return chlGames.map(convertCHLGameToGameInfo);
   };
 
   useEffect(() => {
@@ -120,7 +56,13 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         const recentGamesData = await recentGamesResponse.json();
         const teamsData = await teamsResponse.json();
 
-        const allGames = [...(recentGamesData.games || []), ...(upcomingGamesData.games || [])];
+        // Translate CHL games to domain models
+        const upcomingChlGames: CHLGame[] = upcomingGamesData.games || [];
+        const recentChlGames: CHLGame[] = recentGamesData.games || [];
+        const allGames = [
+          ...recentChlGames.map(translateCHLGameToDomain),
+          ...upcomingChlGames.map(translateCHLGameToDomain)
+        ];
         const teams = teamsData.data || [];
 
         // Store all teams for footer
@@ -138,33 +80,33 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
 
         setTeamInfo(foundTeam);
 
-        // Find games for this team
-        const teamGames = allGames.filter((game: CHLGame) =>
-          game.homeTeam.shortName === foundTeam.shortName || game.awayTeam.shortName === foundTeam.shortName
+        // Find games for this team (now using domain GameInfo models)
+        const teamGames = allGames.filter((game: GameInfo) =>
+          game.homeTeamInfo.teamInfo.code === foundTeam.shortName || game.awayTeamInfo.teamInfo.code === foundTeam.shortName
         );
 
         // Debug logging to see what games we have
-        console.log('All games:', allGames.map(g => ({ id: g.id, status: g.status, date: g.startDate })));
+        console.log('All games:', allGames.map(g => ({ uuid: g.uuid, state: g.state, date: g.startDateTime })));
         console.log(`Found ${teamGames.length} total games for team ${foundTeam.shortName}`);
-        console.log('Game statuses:', teamGames.map(g => ({ id: g.id, status: g.status, date: g.startDate })));
+        console.log('Game statuses:', teamGames.map(g => ({ uuid: g.uuid, state: g.state, date: g.startDateTime })));
 
         // Find next game - get the chronologically next game for this team
         const now = new Date();
         const nextGame = teamGames
-          .filter((game: CHLGame) => game.status === 'not-started' && new Date(game.startDate) > now)
-          .sort((a: CHLGame, b: CHLGame) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())[0];
+          .filter((game: GameInfo) => game.state === 'not-started' && new Date(game.startDateTime) > now)
+          .sort((a: GameInfo, b: GameInfo) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())[0];
 
         setGame(nextGame || null);
 
         // Get previous and upcoming games
         const previous = teamGames
-          .filter((game: CHLGame) => game.status === 'finished')
-          .sort((a: CHLGame, b: CHLGame) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+          .filter((game: GameInfo) => game.state === 'finished')
+          .sort((a: GameInfo, b: GameInfo) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime())
           .slice(0, 5); // Show up to 5 previous games
 
         const upcoming = teamGames
-          .filter((game: CHLGame) => game.status === 'not-started' && game.id !== nextGame?.id)
-          .sort((a: CHLGame, b: CHLGame) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+          .filter((game: GameInfo) => game.state === 'not-started' && game.uuid !== nextGame?.uuid)
+          .sort((a: GameInfo, b: GameInfo) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
           .slice(0, 5); // Show up to 5 upcoming games (excluding the next game)
 
         setPreviousGames(previous);
@@ -193,10 +135,6 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
       loadTeamData();
     }
   }, [teamCode]);
-
-  // Convert game data for NextGame component
-  const nextGameData: StatnetGameInfo | null = game ? convertCHLGameToGameInfo(game) : null;
-
 
 
   if (loading) {
@@ -279,7 +217,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         </div>
 
         <NextGame
-          game={nextGameData}
+          game={game}
           currentTeamCode={teamCode}
           league="chl"
         />
@@ -290,8 +228,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
             <CompactStandings
               standings={standings}
               league="chl"
-              teamCode1={game.homeTeam.shortName}
-              teamCode2={game.awayTeam.shortName}
+              teamCode1={game.homeTeamInfo.teamInfo.code}
+              teamCode2={game.awayTeamInfo.teamInfo.code}
             />
           </div>
         )}
@@ -300,13 +238,13 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         <div className="max-w-6xl mx-auto mt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <PreviousGames
-              games={convertCHLGamesToGameInfo(previousGames)}
+              games={previousGames}
               currentTeamCode={teamCode}
               league="chl"
             />
 
             <UpcomingGames
-              games={convertCHLGamesToGameInfo(upcomingGames)}
+              games={upcomingGames}
               currentTeamCode={teamCode}
               league="chl"
             />
