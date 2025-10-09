@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { GameInfo } from '../types/domain/game';
 import { CHLGame } from '../types/chl/game';
 import { translateCHLGameToDomain } from '../utils/translators/chlToDomain';

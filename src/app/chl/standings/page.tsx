@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { FullStandings } from '../../components/full-standings';
 import { StandingsData } from '../../types/domain/standings';
 import { StandingsHeader } from '../../components/standings-header';
