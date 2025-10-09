@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { StandingsData, TeamStats } from '../../types/domain/standings';
-import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 
 interface CompactStandingsProps {
   standings: StandingsData;

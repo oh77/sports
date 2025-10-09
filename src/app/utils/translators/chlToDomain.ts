@@ -4,6 +4,16 @@ import { GameInfo, LeagueResponse } from '../../types/domain/game';
 import { TeamInfo } from '../../types/domain/team';
 import { TeamStats, StandingsData } from '../../types/domain/standings';
 
+/**
+ * Construct CHL team logo URL from externalId
+ */
+function getCHLLogoUrl(externalId?: string): string {
+  if (externalId && externalId !== 'n/a' && externalId !== '') {
+    return `https://res.cloudinary.com/chl-production/image/upload/c_fit,dpr_2.0,f_webp,g_center,h_100,q_auto/v1/chl-prod/assets/teams/${externalId}`;
+  }
+  return '';
+}
+
 export function translateCHLTeamToDomain(chlTeam: CHLTeamInfo): TeamInfo {
   return {
     code: chlTeam.shortName,
@@ -11,7 +21,7 @@ export function translateCHLTeamToDomain(chlTeam: CHLTeamInfo): TeamInfo {
     short: chlTeam.shortName,
     long: chlTeam.name,
     full: chlTeam.name,
-    logo: '' // CHL doesn't provide logo URLs in the API response
+    logo: getCHLLogoUrl(chlTeam.externalId)
   };
 }
 
@@ -27,7 +37,7 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
         short: chlGame.homeTeam.shortName,
         long: chlGame.homeTeam.name,
         full: chlGame.homeTeam.name,
-        logo: ''
+        logo: getCHLLogoUrl(chlGame.homeTeam.externalId)
       },
       score: chlGame.scores?.home || 0
     },
@@ -38,7 +48,7 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
         short: chlGame.awayTeam.shortName,
         long: chlGame.awayTeam.name,
         full: chlGame.awayTeam.name,
-        logo: ''
+        logo: getCHLLogoUrl(chlGame.awayTeam.externalId)
       },
       score: chlGame.scores?.away || 0
     },
@@ -79,7 +89,7 @@ export function translateCHLStandingsTeamToDomain(chlTeam: CHLStandingsTeam): Te
       short: chlTeam.shortName,
       long: chlTeam.name,
       full: chlTeam.name,
-      logo: chlTeam.logo || ''
+      logo: getCHLLogoUrl(chlTeam.externalId)
     }
   };
 }

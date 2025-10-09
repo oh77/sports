@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { StandingsData, TeamStats } from '../../types/domain/standings';
-import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 
 interface FullStandingsProps {
   standings: StandingsData;
@@ -101,12 +100,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
               {getTeams().length ? getTeams().map((team, index) => {
                 const teamCode = getTeamCode(team);
                 const teamName = getTeamName(team);
-                const teamLogo = league === 'chl' 
-                  ? getTeamLogoWithFallback({
-                      shortName: team.info.code,
-                      externalId: team.info.externalId
-                    })
-                  : getTeamLogo(team);
+                const teamLogo = getTeamLogo(team);
                 const points = getPoints(team);
                 const goalDifference = team.G - team.GA;
                 const actualRank = team.Rank || index + 1;

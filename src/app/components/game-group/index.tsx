@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 import { GameInfo } from '../../types/domain/game';
 import { League } from '@/app/types/domain/league';
 
@@ -12,14 +11,6 @@ interface GameGroupProps {
 
 export function GameGroup({ time, games, league }: GameGroupProps) {
   const getTeamLogo = (teamInfo: { code: string; short: string; long: string; full: string; logo: string }) => {
-    if (league === 'chl') {
-      // Use the proper CHL logo utility
-      return getTeamLogoWithFallback({
-        shortName: teamInfo.short,
-        externalId: teamInfo.code,
-        country: undefined
-      });
-    }
     return teamInfo.logo || 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg';
   };
 
