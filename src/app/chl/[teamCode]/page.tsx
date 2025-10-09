@@ -197,8 +197,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header Row */}
-        <div className="flex items-center justify-center gap-6 mb-8 py-6">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full flex items-center justify-center">
             <Image
               src={getTeamLogoWithFallback({
                 shortName: teamInfo.shortName,
@@ -211,7 +211,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
               className="w-16 h-16 object-contain"
             />
           </div>
-          <h1 className="text-5xl font-bold text-gray-800 uppercase tracking-wider">
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-800 uppercase tracking-wider text-center md:text-left">
             {teamInfo.name}
           </h1>
         </div>

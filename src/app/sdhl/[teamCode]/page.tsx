@@ -128,9 +128,9 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
 
         <div className="container mx-auto px-4 relative z-10">
           {/* Header */}
-          <div className="max-w-4xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-            <div className="w-20 h-20 bg-gray-300 rounded animate-pulse"></div>
-            <div className="h-12 bg-gray-300 rounded w-48 animate-pulse"></div>
+          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded animate-pulse"></div>
+            <div className="h-8 md:h-12 bg-gray-300 rounded w-48 animate-pulse"></div>
           </div>
 
           <div className="animate-pulse space-y-4">
@@ -184,21 +184,21 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
-        <div className="max-w-4xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full flex items-center justify-center">
             {teamInfo.teamInfo.logo ? (
               <Image
                 src={teamInfo.teamInfo.logo}
                 alt={teamInfo.teamInfo.short}
                 width={80}
                 height={80}
-                className="w-20 h-20 object-contain"
+                className="w-16 h-16 md:w-20 md:h-20 object-contain"
               />
             ) : (
-              <span className="text-gray-400 text-2xl">🏒</span>
+              <span className="text-gray-400 text-xl md:text-2xl">🏒</span>
             )}
           </div>
-          <h1 className="text-5xl font-bold text-white uppercase tracking-wider">
+          <h1 className="text-3xl md:text-5xl font-bold text-white uppercase tracking-wider text-center md:text-left">
             {teamInfo.teamInfo.full}
           </h1>
         </div>

@@ -45,10 +45,10 @@ export default function CHLStandingsPage() {
 
         <div className="container mx-auto px-4 relative z-10">
           {/* Header Row */}
-          <div className="max-w-6xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-            <div className="w-20 h-20 bg-gray-300 rounded animate-pulse"></div>
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded animate-pulse"></div>
             <div className="text-center">
-              <div className="h-12 bg-gray-300 rounded mb-2 w-48 animate-pulse"></div>
+              <div className="h-8 md:h-12 bg-gray-300 rounded mb-2 w-48 animate-pulse"></div>
               <div className="h-6 bg-gray-300 rounded w-32 animate-pulse"></div>
             </div>
           </div>
@@ -71,19 +71,19 @@ export default function CHLStandingsPage() {
 
         <div className="container mx-auto px-4 relative z-10">
           {/* Header Row */}
-          <div className="max-w-6xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
             <Image
               src="https://www.chl.hockey/static/img/logo.png"
               alt="CHL Logo"
               width={80}
               height={80}
-              className="w-20 h-20 object-contain"
+              className="w-16 h-16 md:w-20 md:h-20 object-contain"
             />
             <div className="text-center">
-              <h1 className="text-5xl font-bold text-white uppercase tracking-wider">
+              <h1 className="text-3xl md:text-5xl font-bold text-white uppercase tracking-wider">
                 STANDINGS
               </h1>
-              <p className="text-2xl text-gray-200 mt-2">
+              <p className="text-xl md:text-2xl text-gray-200 mt-2">
                 CHL Standings
               </p>
             </div>
@@ -118,19 +118,19 @@ export default function CHLStandingsPage() {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header Row */}
-        <div className="max-w-6xl mx-auto flex items-center justify-center gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
           <Image
             src="https://www.chl.hockey/static/img/logo.png"
             alt="CHL Logo"
             width={80}
             height={80}
-            className="w-20 h-20 object-contain"
+            className="w-16 h-16 md:w-20 md:h-20 object-contain"
           />
           <div className="text-center">
-            <h1 className="text-5xl font-bold text-white uppercase tracking-wider">
+            <h1 className="text-3xl md:text-5xl font-bold text-white uppercase tracking-wider">
               STANDINGS
             </h1>
-            <p className="text-2xl text-gray-200 mt-2">
+            <p className="text-xl md:text-2xl text-gray-200 mt-2">
               CHL {standings.season}
             </p>
           </div>

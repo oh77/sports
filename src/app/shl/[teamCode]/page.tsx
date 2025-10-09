@@ -163,21 +163,21 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header Row */}
-        <div className="flex items-center justify-center gap-6 mb-8 py-6">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6">
           {teamInfo.logo ? (
             <Image
               src={teamInfo.logo}
               alt={teamInfo.short}
               width={80}
               height={80}
-              className="w-20 h-20 object-contain"
+              className="w-16 h-16 md:w-20 md:h-20 object-contain"
             />
           ) : (
-            <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-500 text-3xl">🏒</span>
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded-full flex items-center justify-center">
+              <span className="text-gray-500 text-2xl md:text-3xl">🏒</span>
             </div>
           )}
-          <h1 className="text-5xl font-bold text-gray-800 uppercase tracking-wider">
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-800 uppercase tracking-wider text-center md:text-left">
             {teamInfo.full}
           </h1>
         </div>
