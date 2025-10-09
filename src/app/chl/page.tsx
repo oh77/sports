@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { GameInfo } from '../types/domain/game';
 import { CHLGame } from '../types/chl/game';
 import { translateCHLGameToDomain } from '../utils/translators/chlToDomain';
 import { GameGroup } from '../components/game-group';
+import { LeagueHeader } from '../components/league-header';
 
 export default function CHLPage() {
   const [todaysGames, setTodaysGames] = useState<GameInfo[]>([]);
@@ -134,25 +136,14 @@ export default function CHLPage() {
         />
       </div>
 
-      <div className="relative z-10">
-        {/* Header with Logo */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 py-8">
-          <Image
-            src="https://www.chl.hockey/static/img/logo.png"
-            alt="CHL Logo"
-            width={96}
-            height={96}
-            className="w-16 h-16 md:w-20 md:h-20 object-contain"
-          />
-          <div className="text-center">
-            <h1 className="text-white text-3xl md:text-5xl font-bold uppercase tracking-wider mb-2">
-              MATCHDAG
-            </h1>
-            <p className="text-white text-xl md:text-2xl">
-              {gameDate || 'Inga Matcher Tillgängliga'}
-            </p>
-          </div>
-        </div>
+      <div className="relative z-10 container mx-auto px-4">
+        <LeagueHeader
+          league="chl"
+          gameDate={gameDate || 'Inga Matcher Tillgängliga'}
+          logoUrl="https://www.chl.hockey/static/img/logo.png"
+          backgroundColor="#20001c"
+          standingsPath="/chl/standings"
+        />
 
         {/* Games List */}
         {todaysGames.length > 0 && (
@@ -176,6 +167,7 @@ export default function CHLPage() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

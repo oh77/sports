@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { LeagueService } from '../services/leagueService';
 import { GameInfo } from '../types/domain/game';
 import { GameGroup } from '../components/game-group';
+import { LeagueHeader } from '../components/league-header';
 
 export default function SHLPage() {
   const [games, setGames] = useState<GameInfo[]>([]);
@@ -157,24 +158,12 @@ export default function SHLPage() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          {/* Header Row */}
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-            <Image
-              src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-              alt="SHL Logo"
-              width={80}
-              height={80}
-              className="w-16 h-16 md:w-20 md:h-20 object-contain"
-            />
-            <div className="text-center">
-              <h1 className="text-3xl md:text-5xl font-bold text-white uppercase tracking-wider">
-                MATCHDAG
-              </h1>
-              <p className="text-xl md:text-2xl text-gray-200 mt-2">
-                {gameDate || 'Inga Matcher Tillgängliga'}
-              </p>
-            </div>
-          </div>
+          <LeagueHeader
+            league="shl"
+            gameDate={gameDate || 'Inga Matcher Tillgängliga'}
+            logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
+            standingsPath="/shl/standings"
+          />
 
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
@@ -209,25 +198,13 @@ export default function SHLPage() {
         />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Header Row */}
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-          <Image
-            src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-            alt="SHL Logo"
-            width={80}
-            height={80}
-            className="w-16 h-16 md:w-20 md:h-20 object-contain"
+        <div className="container mx-auto px-4 relative z-10">
+          <LeagueHeader
+            league="shl"
+            gameDate={gameDate}
+            logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
+            standingsPath="/shl/standings"
           />
-          <div className="text-center">
-            <h1 className="text-3xl md:text-5xl font-bold text-white uppercase tracking-wider">
-              MATCHDAG
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-200 mt-2">
-              {gameDate}
-            </p>
-          </div>
-        </div>
 
         <div className="max-w-4xl mx-auto">
           {groupGamesByTime(games).map((group) => (
@@ -240,20 +217,6 @@ export default function SHLPage() {
           ))}
         </div>
 
-        <div className="text-center mt-8 space-x-4">
-          <Link
-            href="/shl/standings"
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
-          >
-            Visa Ligatabell
-          </Link>
-          <Link
-            href="/"
-            className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
-          >
-            Tillbaka till Hem
-          </Link>
-        </div>
       </div>
     </main>
   );
