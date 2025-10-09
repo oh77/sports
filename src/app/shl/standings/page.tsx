@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FullStandings } from '../../components/full-standings';
-import { StatnetStandingsData } from '../../types/statnet/standings';
+import { StandingsData } from '../../types/domain/standings';
 
 export default function SHLStandingsPage() {
-  const [standings, setStandings] = useState<StatnetStandingsData | null>(null);
+  const [standings, setStandings] = useState<StandingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

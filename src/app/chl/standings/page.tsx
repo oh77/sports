@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FullStandings } from '../../components/full-standings';
-import { CHLStandingsDataTransformed } from '../../types/chl/standings';
+import { StandingsData } from '../../types/domain/standings';
 
 export default function CHLStandingsPage() {
-  const [standings, setStandings] = useState<CHLStandingsDataTransformed | null>(null);
+  const [standings, setStandings] = useState<StandingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -131,7 +131,7 @@ export default function CHLStandingsPage() {
               STANDINGS
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 mt-2">
-              CHL {standings.season}
+              CHL
             </p>
           </div>
         </div>

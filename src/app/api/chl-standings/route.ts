@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { CHLStandingsApiResponse, CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl/standings';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
+import { translateCHLStandingsToDomain } from '../../utils/translators/chlToDomain';
+import { StandingsData } from '../../types/domain/standings';
 
 const CHL_STANDINGS_URL = 'https://www.chl.hockey/api/s3/live?q=standings-groups-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json';
 
@@ -8,7 +10,7 @@ export async function GET() {
   try {
     const cacheKey = generateCacheKey('chl-standings');
 
-    const transformedData = await getCachedData(cacheKey, async (): Promise<CHLStandingsDataTransformed> => {
+    const domainData = await getCachedData(cacheKey, async (): Promise<StandingsData> => {
       const response = await fetch(CHL_STANDINGS_URL);
 
       if (!response.ok) {
@@ -40,14 +42,17 @@ export async function GET() {
         logo: undefined // CHL API doesn't provide logos in standings data
       }));
 
-      return {
+      const chlStandings: CHLStandingsDataTransformed = {
         teams: transformedTeams,
         season: standingsData.stage.group.name,
         lastUpdated: new Date().toISOString()
       };
+      
+      // Translate to domain model
+      return translateCHLStandingsToDomain(chlStandings);
     });
 
-    return NextResponse.json(transformedData);
+    return NextResponse.json(domainData);
   } catch (error) {
     console.error('Error fetching CHL standings:', error);
     return NextResponse.json(

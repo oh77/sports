@@ -11,6 +11,7 @@ import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
 import { CompactStandings } from '../../components/compact-standings';
+import { StandingsData } from '../../types/domain/standings';
 
 
 export default function TeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
@@ -22,7 +23,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   const [teamInfo, setTeamInfo] = useState<CHLTeamInfo | null>(null);
   const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
-  const [standings, setStandings] = useState<unknown>(null);
+  const [standings, setStandings] = useState<StandingsData | null>(null);
   const [allTeams, setAllTeams] = useState<CHLTeamInfo[]>([]);
 
   // Helper function to match team code with short name

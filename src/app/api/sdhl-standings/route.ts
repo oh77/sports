@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
+import { translateStatnetTeamStatsToDomain } from '../../utils/translators/statnetToDomain';
+import { StatnetTeamStats } from '../../types/statnet/standings';
+import { StandingsData } from '../../types/domain/standings';
 
 export async function GET() {
   try {
@@ -20,8 +23,16 @@ export async function GET() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data[0];
+      const rawData = await response.json();
+      const statnetData = rawData[0];
+      
+      // Translate to domain model
+      const domainData: StandingsData = {
+        dataColumns: statnetData.dataColumns,
+        stats: statnetData.stats.map((stat: StatnetTeamStats) => translateStatnetTeamStatsToDomain(stat))
+      };
+      
+      return domainData;
     });
     
     return NextResponse.json(data);

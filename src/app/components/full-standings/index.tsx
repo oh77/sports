@@ -2,26 +2,25 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { StatnetStandingsData, StatnetTeamStats } from '../../types/statnet/standings';
-import { CHLStandingsDataTransformed, CHLStandingsTeam } from '../../types/chl/standings';
+import { StandingsData, TeamStats } from '../../types/domain/standings';
 import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 
 interface FullStandingsProps {
-  standings: StatnetStandingsData | CHLStandingsDataTransformed;
+  standings: StandingsData;
   league: 'shl' | 'sdhl' | 'chl';
 }
 
 export function FullStandings({ standings, league }: FullStandingsProps) {
-  // Helper functions for SHL/SDHL data
-  const getTeamCode = (team: StatnetTeamStats): string => {
-    return team.info.teamNames.code;
+  // Helper functions for domain data
+  const getTeamCode = (team: TeamStats): string => {
+    return team.info.code;
   };
 
-  const getTeamName = (team: StatnetTeamStats): string => {
-    return team.info.teamNames.short;
+  const getTeamName = (team: TeamStats): string => {
+    return team.info.short;
   };
 
-  const getTeamLogo = (team: StatnetTeamStats): string => {
+  const getTeamLogo = (team: TeamStats): string => {
     return team.info.logo;
   };
 
@@ -30,69 +29,27 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
     return rank.toString();
   };
 
-  const getPoints = (team: StatnetTeamStats): number => {
+  const getPoints = (team: TeamStats): number => {
     // Calculate points: 3 for win, 1 for tie, 0 for loss
     return (team.W * 3) + (team.T * 1);
   };
 
-  // Helper functions for CHL data
-  const getCHLTeamCode = (team: CHLStandingsTeam): string => {
-    return team.shortName;
-  };
-
-  const getCHLTeamName = (team: CHLStandingsTeam): string => {
-    return team.shortName;
-  };
-
-
-  const getCHLPoints = (team: CHLStandingsTeam): number => {
-    return team.points;
-  };
-
-  // Universal helper functions
-  const isCHLData = (data: StatnetStandingsData | CHLStandingsDataTransformed): data is CHLStandingsDataTransformed => {
-    return 'teams' in data && Array.isArray(data.teams) && data.teams.length > 0 && 'rank' in data.teams[0];
-  };
-
   const getTeams = () => {
-    let teams;
-    if (isCHLData(standings)) {
-      teams = standings.teams;
-    } else {
-      teams = standings.stats || [];
-    }
+    const teams = standings.stats || [];
 
     // Sort by rank first, then by goal difference descending
     return teams.sort((a, b) => {
       // First sort by rank
-      let aRank: number;
-      let bRank: number;
-
-      if (isCHLData(standings)) {
-        aRank = (a as CHLStandingsTeam).rank;
-        bRank = (b as CHLStandingsTeam).rank;
-      } else {
-        aRank = (a as StatnetTeamStats).Rank || 0;
-        bRank = (b as StatnetTeamStats).Rank || 0;
-      }
+      const aRank = a.Rank || 0;
+      const bRank = b.Rank || 0;
 
       if (aRank !== bRank) {
         return aRank - bRank;
       }
 
       // If ranks are equal, sort by goal difference (descending)
-      let aGoalDiff: number;
-      let bGoalDiff: number;
-
-      if (isCHLData(standings)) {
-        aGoalDiff = (a as CHLStandingsTeam).goalDifference;
-        bGoalDiff = (b as CHLStandingsTeam).goalDifference;
-      } else {
-        const aTeam = a as StatnetTeamStats;
-        const bTeam = b as StatnetTeamStats;
-        aGoalDiff = aTeam.G - aTeam.GA;
-        bGoalDiff = bTeam.G - bTeam.GA;
-      }
+      const aGoalDiff = a.G - a.GA;
+      const bGoalDiff = b.G - b.GA;
 
       return bGoalDiff - aGoalDiff; // Descending order
     });
@@ -142,54 +99,24 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {getTeams().length ? getTeams().map((team, index) => {
-                let teamCode: string;
-                let teamName: string;
-                let teamLogo: string | undefined;
-                let points: number;
-                let goalDifference: number;
-                let actualRank: number;
-                let gamesPlayed: number;
-                let wins: number;
-                let ties: number;
-                let losses: number;
-                let goalsFor: number;
-                let goalsAgainst: number;
-                let fullTeamName: string;
-
-                if (isCHLData(standings)) {
-                  const chlTeam = team as CHLStandingsTeam;
-                  teamCode = getCHLTeamCode(chlTeam);
-                  teamName = getCHLTeamName(chlTeam);
-                  teamLogo = getTeamLogoWithFallback({
-                    shortName: chlTeam.shortName,
-                    externalId: chlTeam.externalId
-                  });
-                  points = getCHLPoints(chlTeam);
-                  goalDifference = chlTeam.goalDifference;
-                  actualRank = chlTeam.rank;
-                  gamesPlayed = chlTeam.gamesPlayed;
-                  wins = chlTeam.wins;
-                  ties = chlTeam.ties;
-                  losses = chlTeam.losses;
-                  goalsFor = chlTeam.goalsFor;
-                  goalsAgainst = chlTeam.goalsAgainst;
-                  fullTeamName = chlTeam.name;
-                } else {
-                  const shlTeam = team as StatnetTeamStats;
-                  teamCode = getTeamCode(shlTeam);
-                  teamName = getTeamName(shlTeam);
-                  teamLogo = getTeamLogo(shlTeam);
-                  points = getPoints(shlTeam);
-                  goalDifference = shlTeam.G - shlTeam.GA;
-                  actualRank = shlTeam.Rank || index + 1;
-                  gamesPlayed = shlTeam.GP;
-                  wins = shlTeam.W;
-                  ties = shlTeam.T;
-                  losses = shlTeam.L;
-                  goalsFor = shlTeam.G;
-                  goalsAgainst = shlTeam.GA;
-                  fullTeamName = shlTeam.info.teamNames.full;
-                }
+                const teamCode = getTeamCode(team);
+                const teamName = getTeamName(team);
+                const teamLogo = league === 'chl' 
+                  ? getTeamLogoWithFallback({
+                      shortName: team.info.code,
+                      externalId: team.info.externalId
+                    })
+                  : getTeamLogo(team);
+                const points = getPoints(team);
+                const goalDifference = team.G - team.GA;
+                const actualRank = team.Rank || index + 1;
+                const gamesPlayed = team.GP;
+                const wins = team.W;
+                const ties = team.T;
+                const losses = team.L;
+                const goalsFor = team.G;
+                const goalsAgainst = team.GA;
+                const fullTeamName = team.info.full;
 
                 return (
                   <tr

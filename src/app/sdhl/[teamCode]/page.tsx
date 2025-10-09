@@ -10,6 +10,7 @@ import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
 import { CompactStandings } from '../../components/compact-standings';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
+import { StandingsData } from '../../types/domain/standings';
 
 export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
   const resolvedParams = React.use(params);
@@ -20,39 +21,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [standings, setStandings] = useState<{
-    dataColumns: Array<{
-      name: string;
-      type: string;
-      highlighted: boolean;
-      group: string;
-    }>;
-    stats: Array<{
-      Rank: number | null;
-      Team: number;
-      GP: number;
-      W: number;
-      T: number;
-      L: number;
-      G: number;
-      GPG: string;
-      GA: number;
-      GAPG: string;
-      OTW: number;
-      OTL: number;
-      SOW: number;
-      SOL: number;
-      info: {
-        teamNames: {
-          code: string;
-          short: string;
-          long: string;
-          full: string;
-        };
-        logo: string;
-      };
-    }>;
-  } | null>(null);
+  const [standings, setStandings] = useState<StandingsData | null>(null);
 
   useEffect(() => {
     const loadTeamData = async () => {

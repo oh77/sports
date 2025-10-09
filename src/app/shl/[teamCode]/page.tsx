@@ -11,6 +11,7 @@ import { LeagueFooter } from '../../components/league-footer';
 import { CompactStandings } from '../../components/compact-standings';
 import { GameInfo } from '../../types/domain/game';
 import { TeamInfo } from '../../types/domain/team';
+import { StandingsData } from '../../types/domain/standings';
 
 export default function TeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
   const resolvedParams = React.use(params);
@@ -21,39 +22,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
   const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
-  const [standings, setStandings] = useState<{
-    dataColumns: Array<{
-      name: string;
-      type: string;
-      highlighted: boolean;
-      group: string;
-    }>;
-    stats: Array<{
-      Rank: number | null;
-      Team: number;
-      GP: number;
-      W: number;
-      T: number;
-      L: number;
-      G: number;
-      GPG: string;
-      GA: number;
-      GAPG: string;
-      OTW: number;
-      OTL: number;
-      SOW: number;
-      SOL: number;
-      info: {
-        teamNames: {
-          code: string;
-          short: string;
-          long: string;
-          full: string;
-        };
-        logo: string;
-      };
-    }>;
-  } | null>(null);
+  const [standings, setStandings] = useState<StandingsData | null>(null);
 
   useEffect(() => {
     const loadTeamGame = async () => {
@@ -200,8 +169,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         />
 
         {/* Compact Standings */}
-        {/* TODO: Fix standings data structure to use domain types */}
-        {/* {standings && game && (
+        {standings && game && (
           <div className="max-w-4xl mx-auto mb-8">
             <CompactStandings
               standings={standings}
@@ -210,7 +178,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
               teamCode2={game.awayTeamInfo.teamInfo.code}
             />
           </div>
-        )} */}
+        )}
 
         {/* Previous and Upcoming Games */}
         <div className="max-w-6xl mx-auto mt-8">

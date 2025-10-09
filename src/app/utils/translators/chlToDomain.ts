@@ -1,10 +1,13 @@
-import { CHLGame, CHLTeamInfo, CHLStandingsTeam, CHLStandingsDataTransformed } from '../../types/chl/game';
-import { TeamInfo, GameInfo, LeagueResponse } from '../../types/domain/game';
+import { CHLGame, CHLTeamInfo } from '../../types/chl/game';
+import { CHLStandingsTeam, CHLStandingsDataTransformed } from '../../types/chl/standings';
+import { GameInfo, LeagueResponse } from '../../types/domain/game';
+import { TeamInfo } from '../../types/domain/team';
 import { TeamStats, StandingsData } from '../../types/domain/standings';
 
 export function translateCHLTeamToDomain(chlTeam: CHLTeamInfo): TeamInfo {
   return {
     code: chlTeam.shortName,
+    externalId: chlTeam.externalId,
     short: chlTeam.shortName,
     long: chlTeam.name,
     full: chlTeam.name,
