@@ -1,11 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { LeagueService } from '../../services/leagueService';
 import { TeamInfo } from '../../types/domain/team';
+import { LeagueService } from '../../services/leagueService';
+import { League } from '@/app/types/domain/league';
 
 interface LeagueFooterProps {
-  league: 'shl' | 'sdhl' | 'chl';
+  league: League;
   currentTeamCode?: string;
 }
 
@@ -17,17 +18,12 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
     const loadTeams = async () => {
       try {
         setLoading(true);
+        
+        // Use LeagueService to handle API call and transformation
         const leagueService = new LeagueService(league);
-        // Try to get stored teams first
-        let storedTeams = leagueService.getTeamList();
-
-        if (storedTeams.length === 0) {
-          // Fetch fresh data if none stored
-          await leagueService.fetchGames();
-          storedTeams = leagueService.getTeamList();
-        }
-
-        setTeams(storedTeams);
+        const teamList = await leagueService.fetchTeams();
+        
+        setTeams(teamList);
       } catch (err) {
         console.error('Failed to load team list:', err);
       } finally {
@@ -82,18 +78,15 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
               isLeague: true
             },
             // Team logos
-            ...teams.map((team, index) => {
-              const teamCode = team.code;
-              return {
-                key: `team-${teamCode}-${index}`,
-                href: `/${league}/${encodeURIComponent(teamCode)}`,
-                logo: team.logo,
-                alt: team.full,
-                tooltip: team.full,
-                isCurrentTeam: currentTeamCode === teamCode,
-                isLeague: false
-              };
-            })
+            ...teams.map((team, index) => ({
+              key: `team-${team.code}-${index}`,
+              href: `/${league}/${encodeURIComponent(team.code)}`,
+              logo: team.logo,
+              alt: team.full,
+              tooltip: team.full,
+              isCurrentTeam: currentTeamCode === team.code,
+              isLeague: false
+            }))
           ].map((item) => (
             <Link
               key={item.key}

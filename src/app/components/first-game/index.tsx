@@ -20,16 +20,11 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
         setLoading(true);
         const leagueService = new LeagueService(league);
 
-        // Try to get stored game first
-        let storedGame = leagueService.getFirstGame();
+        // Fetch games from API (cached server-side)
+        await leagueService.fetchGames();
+        const firstGame = leagueService.getFirstGame();
 
-        if (!storedGame) {
-          // Fetch fresh data if none stored
-          await leagueService.fetchGames();
-          storedGame = leagueService.getFirstGame();
-        }
-
-        setGame(storedGame);
+        setGame(firstGame);
       } catch (err) {
         setError('Failed to load game data');
         console.error(err);

@@ -18,21 +18,17 @@ export default function SHLPage() {
       try {
         setLoading(true);
         const leagueService = new LeagueService('shl');
-        // Try to get stored games first
-        let storedGames: GameInfo[] = []; //leagueService.getStoredGames();
+        
+        // Fetch games from API (cached server-side)
+        const games = await leagueService.fetchGames();
 
-        if (storedGames.length === 0) {
-          // Fetch fresh data if none stored
-          storedGames = await leagueService.fetchGames();
-        }
-
-        if (storedGames.length > 0) {
+        if (games.length > 0) {
           const now = new Date();
           const today = new Date();
           const todayString = today.toDateString();
 
           // Find the next available game date
-          const futureGames = storedGames.filter(game => new Date(game.startDateTime) >= now);
+          const futureGames = games.filter(game => new Date(game.startDateTime) >= now);
 
           if (futureGames.length > 0) {
             // Get the first future game date
@@ -43,7 +39,7 @@ export default function SHLPage() {
             const targetDateString = firstGameDateString === todayString ? todayString : firstGameDateString;
 
             // Get all games for the target date
-            const targetGames = storedGames.filter(game => {
+            const targetGames = games.filter(game => {
               const gameDate = new Date(game.startDateTime);
               return gameDate.toDateString() === targetDateString;
             });

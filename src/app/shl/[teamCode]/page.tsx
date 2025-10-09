@@ -61,20 +61,16 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         setLoading(true);
         const leagueService = new LeagueService('shl');
 
-        // Try to get stored game first
-        let storedGame = leagueService.getNextGameForTeam(teamCode);
+        // Fetch games from API (cached server-side)
+        await leagueService.fetchGames();
+        
+        const nextGame = leagueService.getNextGameForTeam(teamCode);
 
-        if (!storedGame) {
-          // Fetch fresh data if none stored
-          await leagueService.fetchGames();
-          storedGame = leagueService.getNextGameForTeam(teamCode);
-        }
-
-        if (storedGame) {
-          setGame(storedGame);
+        if (nextGame) {
+          setGame(nextGame);
           // Determine which team info to show (home or away)
-          const isHomeTeam = storedGame.homeTeamInfo.teamInfo.code === teamCode;
-          setTeamInfo(isHomeTeam ? storedGame.homeTeamInfo.teamInfo : storedGame.awayTeamInfo.teamInfo);
+          const isHomeTeam = nextGame.homeTeamInfo.teamInfo.code === teamCode;
+          setTeamInfo(isHomeTeam ? nextGame.homeTeamInfo.teamInfo : nextGame.awayTeamInfo.teamInfo);
 
           // Load previous and upcoming games
           const prevGames = leagueService.getPreviousGamesForTeam(teamCode, 3);

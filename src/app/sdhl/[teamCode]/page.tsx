@@ -60,7 +60,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         setLoading(true);
         const leagueService = new LeagueService('sdhl');
 
-        // Fetch games if not already stored
+        // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
 
         if (games.length === 0) {

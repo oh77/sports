@@ -4,7 +4,7 @@ import { TeamStats, StandingsData } from '../../types/domain/standings';
 
 export function translateCHLTeamToDomain(chlTeam: CHLTeamInfo): TeamInfo {
   return {
-    code: chlTeam.externalId,
+    code: chlTeam.shortName,
     short: chlTeam.shortName,
     long: chlTeam.name,
     full: chlTeam.name,
@@ -19,7 +19,8 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
     state: chlGame.status,
     homeTeamInfo: {
       teamInfo: {
-        code: chlGame.homeTeam.externalId,
+        code: chlGame.homeTeam.shortName,
+        externalId: chlGame.homeTeam.externalId,
         short: chlGame.homeTeam.shortName,
         long: chlGame.homeTeam.name,
         full: chlGame.homeTeam.name,
@@ -29,7 +30,8 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
     },
     awayTeamInfo: {
       teamInfo: {
-        code: chlGame.awayTeam.externalId,
+        code: chlGame.awayTeam.shortName,
+        externalId: chlGame.awayTeam.externalId,
         short: chlGame.awayTeam.shortName,
         long: chlGame.awayTeam.name,
         full: chlGame.awayTeam.name,
@@ -69,7 +71,8 @@ export function translateCHLStandingsTeamToDomain(chlTeam: CHLStandingsTeam): Te
     SOW: 0, // CHL doesn't provide shootout wins separately
     SOL: 0, // CHL doesn't provide shootout losses separately
     info: {
-      code: chlTeam.externalId,
+      code: chlTeam.shortName,
+      externalId: chlTeam.externalId,
       short: chlTeam.shortName,
       long: chlTeam.name,
       full: chlTeam.name,

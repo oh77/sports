@@ -7,6 +7,7 @@ import {TeamInfo} from "@/app/types/domain/team";
 export function translateStatnetGameTeamToDomain(statnetTeam: StatnetGameTeamInfo): TeamInfo {
   return {
       code: statnetTeam.names?.code || statnetTeam.code,
+      externalId: statnetTeam.names?.code || statnetTeam.code,
       short: statnetTeam.names?.short || '',
       long: statnetTeam.names?.long || '',
       full: statnetTeam.names?.full || '',
@@ -18,6 +19,7 @@ export const translateStatnetStandingsTeamToDomain = (statnetTeamInfo: StatnetTe
 {
   return {
     code: statnetTeamInfo.teamNames.code,
+    externalId: statnetTeamInfo.teamNames.code,
     short: statnetTeamInfo.teamNames.short,
     long: statnetTeamInfo.teamNames.long,
     full: statnetTeamInfo.teamNames.full,
