@@ -225,7 +225,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
 
         {/* Compact Standings */}
         {standings && game && (
-          <div className="max-w-4xl mx-auto mt-8">
+          <div className="max-w-6xl mx-auto mt-8">
             <CompactStandings
               standings={standings}
               league="chl"

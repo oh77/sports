@@ -36,10 +36,10 @@ export default function CHLStandingsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
+      <main className="min-h-screen py-12 relative" style={{ backgroundColor: '#20001c' }}>
         {/* Background CHL Logo */}
         <div className="fixed top-0 right-0 z-0">
-          <div className="w-96 h-96 bg-gray-300 rounded-full opacity-10 transform rotate-12"></div>
+          <div className="w-96 h-96 bg-white rounded-full opacity-10 transform rotate-12"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -47,11 +47,12 @@ export default function CHLStandingsPage() {
             league="chl"
             leagueName="CHL"
             logoUrl="https://www.chl.hockey/static/img/logo.png"
+            backgroundColor="#20001c"
             backPath="/chl"
           />
 
           <div className="animate-pulse">
-            <div className="h-96 bg-gray-300 rounded"></div>
+            <div className="h-96 bg-gray-700 rounded"></div>
           </div>
         </div>
       </main>
@@ -60,10 +61,10 @@ export default function CHLStandingsPage() {
 
   if (error || !standings) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
+      <main className="min-h-screen py-12 relative" style={{ backgroundColor: '#20001c' }}>
         {/* Background CHL Logo */}
         <div className="fixed top-0 right-0 z-0">
-          <div className="w-96 h-96 bg-gray-300 rounded-full opacity-10 transform rotate-12"></div>
+          <div className="w-96 h-96 bg-white rounded-full opacity-10 transform rotate-12"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -71,6 +72,7 @@ export default function CHLStandingsPage() {
             league="chl"
             leagueName="CHL"
             logoUrl="https://www.chl.hockey/static/img/logo.png"
+            backgroundColor="#20001c"
             backPath="/chl"
           />
 
@@ -89,10 +91,10 @@ export default function CHLStandingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 py-12 relative">
+    <main className="min-h-screen py-12 relative" style={{ backgroundColor: '#20001c' }}>
       {/* Background CHL Logo */}
       <div className="fixed top-0 right-0 z-0">
-        <div className="w-96 h-96 bg-gray-300 rounded-full opacity-10 transform rotate-12"></div>
+        <div className="w-96 h-96 bg-white rounded-full opacity-10 transform rotate-12"></div>
       </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -100,6 +102,7 @@ export default function CHLStandingsPage() {
             league="chl"
             leagueName="CHL"
             logoUrl="https://www.chl.hockey/static/img/logo.png"
+            backgroundColor="#20001c"
             backPath="/chl"
           />
 

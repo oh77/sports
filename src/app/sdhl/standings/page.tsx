@@ -114,24 +114,12 @@ export default function SDHLStandingsPage() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Header Row */}
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
-          <Image
-            src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
-            alt="SDHL Logo"
-            width={80}
-            height={80}
-            className="w-16 h-16 md:w-20 md:h-20 object-contain"
-          />
-          <div className="text-center">
-            <h1 className="text-3xl md:text-5xl font-bold text-white uppercase tracking-wider">
-              LIGATABELL
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-200 mt-2">
-              SDHL Ligatabell
-            </p>
-          </div>
-        </div>
+        <StandingsHeader
+          league="sdhl"
+          leagueName="SDHL Ligatabell"
+          logoUrl="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
+          backPath="/sdhl"
+        />
 
         <FullStandings standings={standings} league="sdhl" />
       </div>

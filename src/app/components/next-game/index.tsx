@@ -10,7 +10,7 @@ interface NextGameProps {
   league: 'shl' | 'sdhl' | 'chl';
 }
 
-export default function NextGame({ game, league }: NextGameProps) : React.JSX.Element | null {
+export default function NextGame({ game, currentTeamCode, league }: NextGameProps) : React.JSX.Element | null {
 
   const formatTime = (dateTimeStr: string) => {
     try {
@@ -42,6 +42,11 @@ export default function NextGame({ game, league }: NextGameProps) : React.JSX.El
     return null;
   }
 
+  // Determine opponent
+  const isHomeTeam = game.homeTeamInfo.teamInfo.code === currentTeamCode;
+  const opponentInfo = isHomeTeam ? game.awayTeamInfo : game.homeTeamInfo;
+  const homeOrAway = isHomeTeam ? 'H' : 'B';
+
   const stadiumIconUrl = league === 'sdhl'
     ? 'https://www.sdhl.se/assets/stadium-460843bd.svg'
     : league === 'chl'
@@ -49,38 +54,60 @@ export default function NextGame({ game, league }: NextGameProps) : React.JSX.El
     : 'https://www.shl.se/assets/stadium-460843bd.svg';
 
   return (
-    <div className="max-w-2xl mx-auto mb-8">
-      <div className="rounded-lg shadow-lg p-8" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}>
-        <div className="text-center mb-6">
-          <p className="text-xl font-medium text-gray-800">
-            {formatTime(game.startDateTime)}
-          </p>
-          <p className="text-sm text-gray-600 mt-1">
-            {formatDate(game.startDateTime)}
-          </p>
+    <div className="max-w-6xl mx-auto mb-8">
+      <div className="rounded-lg shadow-lg overflow-hidden relative py-8" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', minHeight: '250px' }}>
+        {/* Home Team Logo - Left side, 35% hidden on left, full height */}
+        <div className="absolute left-0 top-4 bottom-4 w-64 -ml-[90px]">
+          {game.homeTeamInfo.teamInfo.logo ? (
+            <Image
+              src={game.homeTeamInfo.teamInfo.logo}
+              alt={game.homeTeamInfo.teamInfo.short}
+              width={256}
+              height={256}
+              className="w-full h-full object-contain opacity-80"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-gray-400 text-8xl">🏒</span>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="text-center flex-1">
-            <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-              {game.homeTeamInfo.teamInfo.logo ? (
-                <Image
-                  src={game.homeTeamInfo.teamInfo.logo}
-                  alt={game.homeTeamInfo.teamInfo.short}
-                  width={64}
-                  height={64}
-                  className="w-16 h-16 object-contain"
-                />
-              ) : (
-                <span className="text-gray-400 text-xl">🏒</span>
-              )}
+        {/* Away Team Logo - Right side, 35% hidden on right, full height */}
+        <div className="absolute right-0 top-4 bottom-4 w-64 -mr-[90px]">
+          {game.awayTeamInfo.teamInfo.logo ? (
+            <Image
+              src={game.awayTeamInfo.teamInfo.logo}
+              alt={game.awayTeamInfo.teamInfo.short}
+              width={256}
+              height={256}
+              className="w-full h-full object-contain opacity-80"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-gray-400 text-8xl">🏒</span>
             </div>
-            <p className="text-lg font-medium text-gray-800">
-              {game.homeTeamInfo.teamInfo.short}
+          )}
+        </div>
+
+        {/* Content - centered with higher z-index */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full">
+          <div className="text-center mb-8">
+            <p className="text-xl font-medium text-gray-800">
+              {formatTime(game.startDateTime)}
+            </p>
+            <p className="text-sm text-gray-600 mt-1">
+              {formatDate(game.startDateTime)}
             </p>
           </div>
 
-          <div className="text-center mx-6">
+          <div className="text-center mb-8">
+            <p className="text-2xl font-bold text-gray-800">
+              {opponentInfo.teamInfo.full} ({homeOrAway})
+            </p>
+          </div>
+
+          <div className="text-center">
             <Image
               src={stadiumIconUrl}
               alt="Arena"
@@ -90,25 +117,6 @@ export default function NextGame({ game, league }: NextGameProps) : React.JSX.El
             />
             <p className="text-sm text-gray-500 mt-1">
               {game.venueInfo.name}
-            </p>
-          </div>
-
-          <div className="text-center flex-1">
-            <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-              {game.awayTeamInfo.teamInfo.logo ? (
-                <Image
-                  src={game.awayTeamInfo.teamInfo.logo}
-                  alt={game.awayTeamInfo.teamInfo.short}
-                  width={64}
-                  height={64}
-                  className="w-16 h-16 object-contain"
-                />
-              ) : (
-                <span className="text-gray-400 text-xl">🏒</span>
-              )}
-            </div>
-            <p className="text-lg font-medium text-gray-800">
-              {game.awayTeamInfo.teamInfo.short}
             </p>
           </div>
         </div>

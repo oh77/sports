@@ -74,10 +74,6 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        {/* Table Header */}
-        <div className="bg-gray-800 text-white px-6 py-4">
-          <h2 className="text-2xl font-bold text-center">Ligatabell</h2>
-        </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
@@ -210,21 +206,20 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-yellow-200 rounded"></div>
               <span>
-                {league === 'shl' ? 'Topp 6 (Slutspel)' :
-                 league === 'sdhl' ? 'Topp 8 (Slutspel)' :
-                 'Topp 16 (Playoffs)'}
+                {league === 'chl' ? 'Playoff' :
+                 'Slutspel'}
               </span>
             </div>
             {league === 'shl' && (
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-blue-200 rounded"></div>
-                <span>Kvalspel (7-10)</span>
+                <span>Kval</span>
               </div>
             )}
             {league !== 'chl' && (
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-red-200 rounded"></div>
-                <span>Nedflyttning/Kval (sista 2)</span>
+                <span>Kval</span>
               </div>
             )}
           </div>

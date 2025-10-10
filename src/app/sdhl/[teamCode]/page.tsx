@@ -180,7 +180,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
 
         {/* Compact Standings */}
         {standings && nextGame && (
-          <div className="max-w-4xl mx-auto mb-8">
+          <div className="max-w-6xl mx-auto mb-8">
             <CompactStandings
               standings={standings}
               league="sdhl"
