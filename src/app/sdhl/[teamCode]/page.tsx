@@ -9,6 +9,7 @@ import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
 import { CompactStandings } from '../../components/compact-standings';
+import { HeadToHead } from '../../components/head-to-head';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
 import { StandingsData } from '../../types/domain/standings';
 
@@ -22,6 +23,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [standings, setStandings] = useState<StandingsData | null>(null);
+  const [allGames, setAllGames] = useState<GameInfo[]>([]);
 
   useEffect(() => {
     const loadTeamData = async () => {
@@ -31,6 +33,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
 
         // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
+        setAllGames(games);
 
         if (games.length === 0) {
           setError('Ingen matchdata tillgänglig');
@@ -177,6 +180,15 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
           currentTeamCode={teamCode}
           league="sdhl"
         />
+
+        {/* Head to Head */}
+        {nextGame && (
+          <HeadToHead
+            games={allGames}
+            teamCode1={nextGame.homeTeamInfo.teamInfo.code}
+            teamCode2={nextGame.awayTeamInfo.teamInfo.code}
+          />
+        )}
 
         {/* Compact Standings */}
         {standings && nextGame && (

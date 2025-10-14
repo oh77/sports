@@ -1,5 +1,7 @@
 import {VenueInfo} from "@/app/types/domain/game";
 
+export type StatnetGameState = 'post-game' | 'pre-game';
+
 export interface StatnetGameTeamInfo {
   code: string;
   names: {
@@ -16,7 +18,7 @@ export interface StatnetGameTeamInfo {
 export interface StatnetGameInfo {
   uuid: string;
   startDateTime: string;
-  state: string;
+  state: StatnetGameState;
   homeTeamInfo: StatnetGameTeamInfo;
   awayTeamInfo: StatnetGameTeamInfo;
   venueInfo: VenueInfo;

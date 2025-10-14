@@ -1,5 +1,7 @@
 import {TeamInfo} from "@/app/types/domain/team";
 
+export type GameState = 'finished' | 'not-started' | 'live';
+
 export interface GameTeamInfo {
     teamInfo: TeamInfo;
     score: number;
@@ -12,7 +14,7 @@ export interface VenueInfo {
 export interface GameInfo {
     uuid: string;
     startDateTime: string;
-    state: string;
+    state: GameState;
     homeTeamInfo: GameTeamInfo;
     awayTeamInfo: GameTeamInfo;
     venueInfo: VenueInfo;

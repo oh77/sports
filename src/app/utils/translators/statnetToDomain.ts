@@ -31,7 +31,7 @@ export function translateStatnetGameToDomain(statnetGame: StatnetGameInfo): Game
   return {
     uuid: statnetGame.uuid,
     startDateTime: statnetGame.startDateTime,
-    state: statnetGame.state,
+    state: statnetGame.state === 'post-game' ? 'finished' : 'not-started',
     homeTeamInfo: {
       teamInfo: translateStatnetGameTeamToDomain(statnetGame.homeTeamInfo),
       score: statnetGame.homeTeamInfo.score

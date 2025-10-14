@@ -26,10 +26,13 @@ export function translateCHLTeamToDomain(chlTeam: CHLTeamInfo): TeamInfo {
 }
 
 export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
+  // Map CHL status to domain GameState
+  const state = chlGame.status === 'finished' ? 'finished' : 'not-started';
+  
   return {
     uuid: chlGame.id,
     startDateTime: chlGame.startDate,
-    state: chlGame.status,
+    state,
     homeTeamInfo: {
       teamInfo: {
         code: chlGame.homeTeam.shortName,

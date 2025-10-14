@@ -9,6 +9,7 @@ import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
 import { CompactStandings } from '../../components/compact-standings';
+import { HeadToHead } from '../../components/head-to-head';
 import { GameInfo } from '../../types/domain/game';
 import { TeamInfo } from '../../types/domain/team';
 import { StandingsData } from '../../types/domain/standings';
@@ -23,6 +24,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [standings, setStandings] = useState<StandingsData | null>(null);
+  const [allGames, setAllGames] = useState<GameInfo[]>([]);
 
   useEffect(() => {
     const loadTeamGame = async () => {
@@ -31,7 +33,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         const leagueService = new LeagueService('shl');
 
         // Fetch games from API (cached server-side)
-        await leagueService.fetchGames();
+        const games = await leagueService.fetchGames();
+        setAllGames(games);
         
         const nextGame = leagueService.getNextGameForTeam(teamCode);
 
@@ -167,6 +170,15 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           currentTeamCode={teamCode}
           league="shl"
         />
+
+        {/* Head to Head */}
+        {game && (
+          <HeadToHead
+            games={allGames}
+            teamCode1={game.homeTeamInfo.teamInfo.code}
+            teamCode2={game.awayTeamInfo.teamInfo.code}
+          />
+        )}
 
         {/* Compact Standings */}
         {standings && game && (
