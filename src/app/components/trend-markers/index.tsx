@@ -1,4 +1,7 @@
+'use client';
+
 import { GameInfo } from '../../types/domain/game';
+import { useState, useEffect } from 'react';
 
 interface TrendMarkersProps {
   games: GameInfo[];
@@ -17,7 +20,20 @@ interface TeamGameResult {
 }
 
 export function TrendMarkers({ games, homeTeamCode, awayTeamCode }: TrendMarkersProps) {
-  const getTeamResults = (teamCode: string): TeamGameResult[] => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const getTeamResults = (teamCode: string, limit: number): TeamGameResult[] => {
     return games
       .filter(game => game.state === 'finished')
       .filter(game => 
@@ -25,7 +41,7 @@ export function TrendMarkers({ games, homeTeamCode, awayTeamCode }: TrendMarkers
         game.awayTeamInfo.teamInfo.code === teamCode
       )
       .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime())
-      .slice(0, 10)
+      .slice(0, limit)
       .reverse()
       .map(game => {
         const isHomeTeam = game.homeTeamInfo.teamInfo.code === teamCode;
@@ -53,8 +69,11 @@ export function TrendMarkers({ games, homeTeamCode, awayTeamCode }: TrendMarkers
       });
   };
 
-  const homeResults = getTeamResults(homeTeamCode);
-  const awayResults = getTeamResults(awayTeamCode);
+  // Mobile: 7 games, Desktop: 10 games
+  const limit = isMobile ? 7 : 10;
+  
+  const homeResults = getTeamResults(homeTeamCode, limit);
+  const awayResults = getTeamResults(awayTeamCode, limit);
 
   // Hide if no games played
   if (homeResults.length === 0 && awayResults.length === 0) {
@@ -94,7 +113,7 @@ export function TrendMarkers({ games, homeTeamCode, awayTeamCode }: TrendMarkers
 
   return (
     <div className="mt-4 pt-4">
-      <div className="flex justify-between items-center px-4">
+      <div className="flex justify-between items-center px-2 md:px-4">
         <div>
           {renderTrend(homeResults, 'left')}
         </div>

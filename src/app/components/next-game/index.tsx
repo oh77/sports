@@ -60,8 +60,8 @@ export default function NextGame({ game, currentTeamCode, league, allGames = [] 
       <div className="rounded-lg shadow-lg overflow-hidden relative" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}>
         {/* Container for content with logos (excludes trend markers) */}
         <div className="relative py-8" style={{ minHeight: '250px' }}>
-          {/* Home Team Logo - Left side, 35% hidden on left, full height */}
-          <div className="absolute left-0 top-4 bottom-4 w-64 -ml-[90px]">
+          {/* Home Team Logo - Left side, mobile: 70% hidden, desktop: 35% hidden */}
+          <div className="absolute left-0 top-4 bottom-4 w-64 -ml-[179px] md:-ml-[90px]">
             {game.homeTeamInfo.teamInfo.logo ? (
               <Image
                 src={game.homeTeamInfo.teamInfo.logo}
@@ -77,8 +77,8 @@ export default function NextGame({ game, currentTeamCode, league, allGames = [] 
             )}
           </div>
 
-          {/* Away Team Logo - Right side, 35% hidden on right, full height */}
-          <div className="absolute right-0 top-4 bottom-4 w-64 -mr-[90px]">
+          {/* Away Team Logo - Right side, mobile: 70% hidden, desktop: 35% hidden */}
+          <div className="absolute right-0 top-4 bottom-4 w-64 -mr-[179px] md:-mr-[90px]">
             {game.awayTeamInfo.teamInfo.logo ? (
               <Image
                 src={game.awayTeamInfo.teamInfo.logo}
@@ -127,7 +127,7 @@ export default function NextGame({ game, currentTeamCode, league, allGames = [] 
         </div>
 
         {/* Trend Markers - outside logo container */}
-        <div className="relative z-10 px-8 pb-4">
+        <div className="relative z-10 px-4 md:px-8 pb-4">
           <TrendMarkers
             games={allGames}
             homeTeamCode={game.homeTeamInfo.teamInfo.code}
