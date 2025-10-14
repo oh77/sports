@@ -179,6 +179,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
           game={nextGame}
           currentTeamCode={teamCode}
           league="sdhl"
+          allGames={allGames}
         />
 
         {/* Head to Head */}

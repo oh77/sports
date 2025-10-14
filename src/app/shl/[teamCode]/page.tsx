@@ -169,6 +169,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           game={game}
           currentTeamCode={teamCode}
           league="shl"
+          allGames={allGames}
         />
 
         {/* Head to Head */}
