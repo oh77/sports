@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hockey Matcher",
-  description: "SHL och SDHL matchinformation",
+  title: "Gameday",
+  description: "CHL, SHL och SDHL matchinformation",
 };
 
 export default function RootLayout({
