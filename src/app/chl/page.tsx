@@ -7,6 +7,7 @@ import { CHLGame } from '../types/chl/game';
 import { translateCHLGameToDomain } from '../utils/translators/chlToDomain';
 import { GameGroup } from '../components/game-group';
 import { LeagueHeader } from '../components/league-header';
+import { LeagueFooter } from '../components/league-footer';
 
 export default function CHLPage() {
   const [todaysGames, setTodaysGames] = useState<GameInfo[]>([]);
@@ -167,6 +168,7 @@ export default function CHLPage() {
           </div>
         )}
 
+        <LeagueFooter league="chl" />
       </div>
     </div>
   );

@@ -36,13 +36,21 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
 
 
   const getLeagueLogo = () => {
-    return league === 'shl'
-      ? "https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-      : "https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg";
+    if (league === 'shl') {
+      return "https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg";
+    } else if (league === 'sdhl') {
+      return "https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg";
+    } else if (league === 'chl') {
+      return "https://www.chl.hockey/static/img/logo.png";
+    }
+    return "";
   };
 
   const getLeagueName = () => {
-    return league === 'shl' ? 'SHL' : 'SDHL';
+    if (league === 'shl') return 'SHL';
+    if (league === 'sdhl') return 'SDHL';
+    if (league === 'chl') return 'CHL';
+    return '';
   };
 
   if (loading) {

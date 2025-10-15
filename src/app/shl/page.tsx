@@ -7,6 +7,7 @@ import { LeagueService } from '../services/leagueService';
 import { GameInfo } from '../types/domain/game';
 import { GameGroup } from '../components/game-group';
 import { LeagueHeader } from '../components/league-header';
+import { LeagueFooter } from '../components/league-footer';
 
 export default function SHLPage() {
   const [games, setGames] = useState<GameInfo[]>([]);
@@ -217,6 +218,7 @@ export default function SHLPage() {
           ))}
         </div>
 
+        <LeagueFooter league="shl" />
       </div>
     </main>
   );

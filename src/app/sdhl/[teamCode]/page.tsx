@@ -192,13 +192,13 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         )}
 
         {/* Compact Standings */}
-        {standings && nextGame && (
+        {standings && (
           <div className="max-w-6xl mx-auto mb-8">
             <CompactStandings
               standings={standings}
               league="sdhl"
-              teamCode1={nextGame.homeTeamInfo.teamInfo.code}
-              teamCode2={nextGame.awayTeamInfo.teamInfo.code}
+              teamCode1={teamCode}
+              teamCode2={nextGame ? (nextGame.homeTeamInfo.teamInfo.code === teamCode ? nextGame.awayTeamInfo.teamInfo.code : nextGame.homeTeamInfo.teamInfo.code) : teamCode}
             />
           </div>
         )}
