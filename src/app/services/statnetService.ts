@@ -3,8 +3,7 @@ import { TeamInfo } from '../types/domain/team';
 import { League } from '../types/domain/league';
 import { StatnetLeagueResponse } from '../types/statnet/game';
 import { translateStatnetGameToDomain, translateStatnetGameTeamToDomain } from '../utils/translators/statnetToDomain';
-import { CHLTeamsApiResponse } from '../types/chl/game';
-import { translateCHLTeamToDomain } from '../utils/translators/chlToDomain';
+import { LeagueResponse } from '../types/domain/game';
 
 export class StatnetService {
   private readonly API_URL: string;
@@ -25,10 +24,19 @@ export class StatnetService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // API returns Statnet model
-      const statnetData: StatnetLeagueResponse = await response.json();
-      // Transform to domain model
-      this.games = (statnetData.gameInfo || []).map(translateStatnetGameToDomain);
+      const data = await response.json();
+
+      // Handle different API responses based on league
+      if (this.league === 'chl') {
+        // CHL API now returns domain models directly
+        const chlData = data as LeagueResponse;
+        this.games = chlData.gameInfo || [];
+      } else {
+        // SHL/SDHL API returns Statnet model
+        const statnetData: StatnetLeagueResponse = data;
+        // Transform to domain model
+        this.games = (statnetData.gameInfo || []).map(translateStatnetGameToDomain);
+      }
 
       return this.games;
     } catch (error) {
@@ -48,13 +56,9 @@ export class StatnetService {
 
       // Handle different API responses based on league
       if (this.league === 'chl') {
-        // CHL API returns CHLTeamsApiResponse
-        const chlData = data as CHLTeamsApiResponse;
-        const chlTeams = chlData.data || [];
-
-        return chlTeams
-          .map(translateCHLTeamToDomain)
-          .filter((team: TeamInfo) => team && team.code);
+        // CHL API now returns domain models directly
+        const chlTeams = data as TeamInfo[];
+        return chlTeams.filter((team: TeamInfo) => team && team.code);
       } else {
         // SHL/SDHL API returns Statnet models
         const statnetTeams = data.teams || [];

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CHLService } from '../../services/chlService';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
+import { translateCHLGamesToDomainResponse } from '../../utils/translators/chlToDomain';
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,7 +42,8 @@ export async function GET(request: NextRequest) {
           games = await CHLService.getUpcomingGames();
       }
 
-      return { games };
+      // Translate CHL games to domain models
+      return translateCHLGamesToDomainResponse(games);
     });
 
     return NextResponse.json(result);

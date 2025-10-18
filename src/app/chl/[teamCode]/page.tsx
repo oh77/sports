@@ -3,10 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CHLGame, CHLTeamInfo } from '../../types/chl/game';
-import { GameInfo } from '../../types/domain/game';
-import { translateCHLGameToDomain } from '../../utils/translators/chlToDomain';
-import { getTeamLogoWithFallback } from '../../utils/teamLogos';
+import { GameInfo, LeagueResponse } from '../../types/domain/game';
+import { TeamInfo } from '../../types/domain/team';
 import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
@@ -20,11 +18,11 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [teamInfo, setTeamInfo] = useState<CHLTeamInfo | null>(null);
+  const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
   const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [standings, setStandings] = useState<StandingsData | null>(null);
-  const [allTeams, setAllTeams] = useState<CHLTeamInfo[]>([]);
+  const [allTeams, setAllTeams] = useState<TeamInfo[]>([]);
 
   // Helper function to match team code with short name
   const matchTeamCode = (teamCode: string, teamShortName: string): boolean => {
@@ -53,25 +51,23 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           throw new Error(`Failed to fetch teams: ${teamsResponse.status}`);
         }
 
-        const upcomingGamesData = await upcomingGamesResponse.json();
-        const recentGamesData = await recentGamesResponse.json();
-        const teamsData = await teamsResponse.json();
+        const upcomingGamesData: LeagueResponse = await upcomingGamesResponse.json();
+        const recentGamesData: LeagueResponse = await recentGamesResponse.json();
+        const teamsData: TeamInfo[] = await teamsResponse.json();
 
-        // Translate CHL games to domain models
-        const upcomingChlGames: CHLGame[] = upcomingGamesData.games || [];
-        const recentChlGames: CHLGame[] = recentGamesData.games || [];
+        // Combine all games from both responses
         const allGames = [
-          ...recentChlGames.map(translateCHLGameToDomain),
-          ...upcomingChlGames.map(translateCHLGameToDomain)
+          ...(recentGamesData.gameInfo || []),
+          ...(upcomingGamesData.gameInfo || [])
         ];
-        const teams = teamsData.data || [];
+        const teams = teamsData;
 
         // Store all teams for footer
         setAllTeams(teams);
 
         // Find the team by matching the team code with team short names
-        const foundTeam = teams.find((team: CHLTeamInfo) =>
-          matchTeamCode(teamCode, team.shortName)
+        const foundTeam = teams.find((team: TeamInfo) =>
+          matchTeamCode(teamCode, team.short)
         );
 
         if (!foundTeam) {
@@ -83,7 +79,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
 
         // Find games for this team (now using domain GameInfo models)
         const teamGames = allGames.filter((game: GameInfo) =>
-          game.homeTeamInfo.teamInfo.code === foundTeam.shortName || game.awayTeamInfo.teamInfo.code === foundTeam.shortName
+          game.homeTeamInfo.teamInfo.code === foundTeam.short || game.awayTeamInfo.teamInfo.code === foundTeam.short
         );
 
         // Find next game - get the chronologically next game for this team
@@ -178,12 +174,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
       <div className="absolute inset-0 flex items-center justify-center z-0 px-8">
         <div className="opacity-10 w-full h-full flex items-center justify-center">
           <Image
-            src={getTeamLogoWithFallback({
-              shortName: teamInfo.shortName,
-              externalId: teamInfo.externalId,
-              country: teamInfo.country ? { code: teamInfo.country.code } : undefined
-            })}
-            alt={`${teamInfo.name} background logo`}
+            src={teamInfo.logo || '/placeholder-team.png'}
+            alt={`${teamInfo.full} background logo`}
             width={400}
             height={400}
             className="w-96 h-96 object-contain transform rotate-12"
@@ -196,19 +188,15 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6">
           <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full flex items-center justify-center">
             <Image
-              src={getTeamLogoWithFallback({
-                shortName: teamInfo.shortName,
-                externalId: teamInfo.externalId,
-                country: teamInfo.country ? { code: teamInfo.country.code } : undefined
-              })}
-              alt={`${teamInfo.name} logo`}
+              src={teamInfo.logo || '/placeholder-team.png'}
+              alt={`${teamInfo.full} logo`}
               width={64}
               height={64}
               className="w-16 h-16 object-contain"
             />
           </div>
           <h1 className="text-3xl md:text-5xl font-bold text-gray-800 uppercase tracking-wider text-center md:text-left">
-            {teamInfo.name}
+            {teamInfo.full}
           </h1>
         </div>
 
@@ -264,16 +252,12 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
                   },
                   // Team logos
                   ...allTeams.map((team) => ({
-                    key: `team-${team.shortName}`,
-                    href: `/chl/${team.shortName.toUpperCase()}`,
-                    logo: getTeamLogoWithFallback({
-                      shortName: team.shortName,
-                      externalId: team.externalId,
-                      country: team.country ? { code: team.country.code } : undefined
-                    }),
-                    alt: `${team.name} logo`,
-                    tooltip: team.name,
-                    isCurrentTeam: team.shortName.toUpperCase() === teamCode.toUpperCase(),
+                    key: `team-${team.short}`,
+                    href: `/chl/${team.short.toUpperCase()}`,
+                    logo: team.logo || '/placeholder-team.png',
+                    alt: `${team.full} logo`,
+                    tooltip: team.full,
+                    isCurrentTeam: team.short.toUpperCase() === teamCode.toUpperCase(),
                     isLeague: false
                   }))
                 ].map((item) => (

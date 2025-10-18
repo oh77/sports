@@ -1,8 +1,6 @@
 import { CHLGame, CHLTeamInfo } from '../../types/chl/game';
-import { CHLStandingsTeam, CHLStandingsDataTransformed } from '../../types/chl/standings';
 import { GameInfo, LeagueResponse } from '../../types/domain/game';
 import { TeamInfo } from '../../types/domain/team';
-import { TeamStats, StandingsData } from '../../types/domain/standings';
 
 /**
  * Construct CHL team logo URL from externalId
@@ -28,7 +26,7 @@ export function translateCHLTeamToDomain(chlTeam: CHLTeamInfo): TeamInfo {
 export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
   // Map CHL status to domain GameState
   const state = chlGame.status === 'finished' ? 'finished' : 'not-started';
-  
+
   return {
     uuid: chlGame.id,
     startDateTime: chlGame.startDate,
@@ -67,50 +65,5 @@ export function translateCHLGamesToDomainResponse(chlGames: CHLGame[]): LeagueRe
   return {
     gameInfo: chlGames.map(translateCHLGameToDomain),
     teamList: [] // CHL games don't include team list in the same way
-  };
-}
-
-export function translateCHLStandingsTeamToDomain(chlTeam: CHLStandingsTeam): TeamStats {
-  return {
-    Rank: chlTeam.rank,
-    Team: 0, // CHL doesn't have a Team number field
-    GP: chlTeam.gamesPlayed,
-    W: chlTeam.wins,
-    T: chlTeam.ties,
-    L: chlTeam.losses,
-    G: chlTeam.goalsFor,
-    GPG: chlTeam.gamesPlayed > 0 ? (chlTeam.goalsFor / chlTeam.gamesPlayed).toFixed(2) : '0.00',
-    GA: chlTeam.goalsAgainst,
-    GAPG: chlTeam.gamesPlayed > 0 ? (chlTeam.goalsAgainst / chlTeam.gamesPlayed).toFixed(2) : '0.00',
-    OTW: 0, // CHL doesn't provide overtime wins separately
-    OTL: 0, // CHL doesn't provide overtime losses separately
-    SOW: 0, // CHL doesn't provide shootout wins separately
-    SOL: 0, // CHL doesn't provide shootout losses separately
-    info: {
-      code: chlTeam.shortName,
-      externalId: chlTeam.externalId,
-      short: chlTeam.shortName,
-      long: chlTeam.name,
-      full: chlTeam.name,
-      logo: getCHLLogoUrl(chlTeam.externalId)
-    }
-  };
-}
-
-export function translateCHLStandingsToDomain(chlStandings: CHLStandingsDataTransformed): StandingsData {
-  return {
-    dataColumns: [
-      { name: 'Rank', type: 'number', highlighted: true, group: 'position' },
-      { name: 'Team', type: 'string', highlighted: true, group: 'team' },
-      { name: 'GP', type: 'number', highlighted: false, group: 'games' },
-      { name: 'W', type: 'number', highlighted: false, group: 'games' },
-      { name: 'T', type: 'number', highlighted: false, group: 'games' },
-      { name: 'L', type: 'number', highlighted: false, group: 'games' },
-      { name: 'G', type: 'number', highlighted: false, group: 'goals' },
-      { name: 'GPG', type: 'string', highlighted: false, group: 'goals' },
-      { name: 'GA', type: 'number', highlighted: false, group: 'goals' },
-      { name: 'GAPG', type: 'string', highlighted: false, group: 'goals' }
-    ],
-    stats: chlStandings.teams.map(translateCHLStandingsTeamToDomain)
   };
 }

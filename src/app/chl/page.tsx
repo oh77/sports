@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { GameInfo } from '../types/domain/game';
-import { CHLGame } from '../types/chl/game';
-import { translateCHLGameToDomain } from '../utils/translators/chlToDomain';
+import { GameInfo, LeagueResponse } from '../types/domain/game';
 import { GameGroup } from '../components/game-group';
 import { LeagueHeader } from '../components/league-header';
 import { LeagueFooter } from '../components/league-footer';
@@ -25,13 +23,9 @@ export default function CHLPage() {
         }
         const upcomingData = await upcomingResponse.json();
 
-        if (upcomingData.games && upcomingData.games.length > 0) {
-          // Translate CHL games to domain models
-          const chlGames: CHLGame[] = upcomingData.games;
-          const domainGames = chlGames.map(translateCHLGameToDomain);
-          
+        if (upcomingData.gameInfo && upcomingData.gameInfo.length > 0) {
           // Get the date of the first upcoming game
-          const firstUpcomingGame = domainGames[0];
+          const firstUpcomingGame = upcomingData.gameInfo[0];
           const nextGameDate = new Date(firstUpcomingGame.startDateTime);
           const nextGameDateString = nextGameDate.toISOString().split('T')[0];
 
@@ -44,13 +38,10 @@ export default function CHLPage() {
           if (!dateResponse.ok) {
             throw new Error('Failed to fetch games for date');
           }
-          const dateData = await dateResponse.json();
+          const dateData: LeagueResponse = await dateResponse.json();
 
-          if (dateData.games && dateData.games.length > 0) {
-            // Translate CHL games to domain models
-            const dateChlGames: CHLGame[] = dateData.games;
-            const dateDomainGames = dateChlGames.map(translateCHLGameToDomain);
-            setTodaysGames(dateDomainGames);
+          if (dateData.gameInfo && dateData.gameInfo.length > 0) {
+            setTodaysGames(dateData.gameInfo);
             setGameDate(nextGameDate.toLocaleDateString('sv-SE', {
               weekday: 'long',
               year: 'numeric',
