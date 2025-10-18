@@ -15,15 +15,15 @@ export interface StatnetTeamStats {
   Team: number;
   GP: number;
   W: number;
-  T: number;
+    OTW: number;
+    OTL: number;
   L: number;
   G: number;
   GPG: string;
   GA: number;
   GAPG: string;
-  OTW: number;
-  OTL: number;
   SOW: number;
   SOL: number;
+    Points: number;
   info: StatnetTeamInfo;
 }

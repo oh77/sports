@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FullStandings } from '../../components/full-standings';
+import { FullStandings } from '../../components/standings/full-standings';
 import { StandingsData } from '../../types/domain/standings';
-import { StandingsHeader } from '../../components/standings-header';
+import { StandingsHeader } from '../../components/standings/standings-header';
 
 export default function CHLStandingsPage() {
   const [standings, setStandings] = useState<StandingsData | null>(null);

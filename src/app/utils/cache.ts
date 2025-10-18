@@ -17,7 +17,7 @@ class MemoryCache {
 
   get<T>(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
       return null;
     }
@@ -84,9 +84,9 @@ export function generateCacheKey(section: string, params?: Record<string, string
   const month = (now.getMonth() + 1).toString().padStart(2, '0');
   const day = now.getDate().toString().padStart(2, '0');
   const hour = now.getHours().toString().padStart(2, '0');
-  
+
   const timeKey = `${year}${month}${day}${hour}`;
-  
+
   if (params && Object.keys(params).length > 0) {
     const paramString = Object.entries(params)
       .sort(([a], [b]) => a.localeCompare(b))
@@ -94,7 +94,7 @@ export function generateCacheKey(section: string, params?: Record<string, string
       .join('-');
     return `${section}-${timeKey}-${paramString}`;
   }
-  
+
   return `${section}-${timeKey}`;
 }
 
@@ -111,22 +111,22 @@ export async function getCachedData<T>(
   ttlMs: number = 60 * 60 * 1000 // 60 minutes default
 ): Promise<T> {
   // Try to get from cache first
-  const cached = cache.get<T>(cacheKey);
+  const cached = null;//cache.get<T>(cacheKey);
   if (cached !== null) {
     console.log(`Cache hit for key: ${cacheKey}`);
     return cached;
   }
 
   console.log(`Cache miss for key: ${cacheKey}, fetching fresh data`);
-  
+
   try {
     // Fetch fresh data
     const data = await fetcher();
-    
+
     // Only cache successful responses
     cache.set(cacheKey, data, ttlMs);
     console.log(`Cached fresh data for key: ${cacheKey}`);
-    
+
     return data;
   } catch (error) {
     console.error(`Error fetching data for key ${cacheKey}:`, error);

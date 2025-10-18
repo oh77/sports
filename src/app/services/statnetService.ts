@@ -6,7 +6,7 @@ import { translateStatnetGameToDomain, translateStatnetGameTeamToDomain } from '
 import { CHLTeamsApiResponse } from '../types/chl/game';
 import { translateCHLTeamToDomain } from '../utils/translators/chlToDomain';
 
-export class LeagueService {
+export class StatnetService {
   private readonly API_URL: string;
   private readonly TEAMS_API_URL: string;
   private readonly league: League;
@@ -27,7 +27,6 @@ export class LeagueService {
 
       // API returns Statnet model
       const statnetData: StatnetLeagueResponse = await response.json();
-      
       // Transform to domain model
       this.games = (statnetData.gameInfo || []).map(translateStatnetGameToDomain);
 
@@ -46,20 +45,20 @@ export class LeagueService {
       }
 
       const data = await response.json();
-      
+
       // Handle different API responses based on league
       if (this.league === 'chl') {
         // CHL API returns CHLTeamsApiResponse
         const chlData = data as CHLTeamsApiResponse;
         const chlTeams = chlData.data || [];
-        
+
         return chlTeams
           .map(translateCHLTeamToDomain)
           .filter((team: TeamInfo) => team && team.code);
       } else {
         // SHL/SDHL API returns Statnet models
         const statnetTeams = data.teams || [];
-        
+
         return statnetTeams
           .map(translateStatnetGameTeamToDomain)
           .filter((team: TeamInfo) => team && team.code);

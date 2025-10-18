@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { TeamInfo } from '../../types/domain/team';
-import { LeagueService } from '../../services/leagueService';
+import { StatnetService } from '../../services/statnetService';
 import { League } from '@/app/types/domain/league';
 
 interface LeagueFooterProps {
@@ -18,11 +18,11 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
     const loadTeams = async () => {
       try {
         setLoading(true);
-        
+
         // Use LeagueService to handle API call and transformation
-        const leagueService = new LeagueService(league);
+        const leagueService = new StatnetService(league);
         const teamList = await leagueService.fetchTeams();
-        
+
         setTeams(teamList);
       } catch (err) {
         console.error('Failed to load team list:', err);

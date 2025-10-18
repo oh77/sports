@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { LeagueService } from '../services/leagueService';
+import { StatnetService } from '../services/statnetService';
 import { GameInfo } from '../types/domain/game';
 import { GameGroup } from '../components/game-group';
 import { LeagueHeader } from '../components/league-header';
@@ -19,8 +19,8 @@ export default function SHLPage() {
     const loadNextGameDay = async () => {
       try {
         setLoading(true);
-        const leagueService = new LeagueService('shl');
-        
+        const leagueService = new StatnetService('shl');
+
         // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
 

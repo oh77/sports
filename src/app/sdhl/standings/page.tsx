@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { FullStandings } from '../../components/full-standings';
+import { FullStandings } from '../../components/standings/full-standings';
 import { StandingsData } from '../../types/domain/standings';
-import { StandingsHeader } from '../../components/standings-header';
+import { StandingsHeader } from '../../components/standings/standings-header';
 
 export default function SDHLStandingsPage() {
   const [standings, setStandings] = useState<StandingsData | null>(null);

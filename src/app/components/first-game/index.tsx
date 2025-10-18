@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { LeagueService } from '../../services/leagueService';
+import { StatnetService } from '../../services/statnetService';
 import { GameInfo } from '../../types/domain/game';
 
 interface FirstGameProps {
@@ -18,7 +18,7 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
     const loadGame = async () => {
       try {
         setLoading(true);
-        const leagueService = new LeagueService(league);
+        const leagueService = new StatnetService(league);
 
         // Fetch games from API (cached server-side)
         await leagueService.fetchGames();

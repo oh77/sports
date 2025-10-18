@@ -2,38 +2,24 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { StandingsData, TeamStats } from '../../types/domain/standings';
+import { StandingsData, TeamStats } from '../../../types/domain/standings';
+import { League } from '@/app/types/domain/league';
+import {
+    getRankBorderClass,
+    getRankDisplay,
+    getTeamCode,
+    getTeamName,
+    getTeamLogo
+} from "@/app/components/standings/standingsUtils";
 
 interface CompactStandingsProps {
   standings: StandingsData;
-  league: 'shl' | 'sdhl' | 'chl';
-  teamCode1: string;
-  teamCode2: string;
+  league: League;
+  teamCode: string;
+  opponentTeamCode?: string;
 }
 
-export function CompactStandings({ standings, league, teamCode1, teamCode2 }: CompactStandingsProps) {
-  // Helper functions for domain data
-  const getTeamCode = (team: TeamStats): string => {
-    return team.info.code;
-  };
-
-  const getTeamName = (team: TeamStats): string => {
-    return team.info.short;
-  };
-
-  const getTeamLogo = (team: TeamStats): string => {
-    return team.info.logo;
-  };
-
-  const getRankDisplay = (rank: number | null): string => {
-    if (rank === null) return '-';
-    return rank.toString();
-  };
-
-  const getPoints = (team: TeamStats): number => {
-    // Calculate points: 3 for win, 1 for tie, 0 for loss
-    return (team.W * 3) + (team.T * 1);
-  };
+export function CompactStandings({ standings, league, teamCode, opponentTeamCode }: CompactStandingsProps) {
 
   const getTeams = () => {
     return standings.stats || [];
@@ -48,16 +34,20 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
     const selectedTeams = new Set<string>();
     const result: Array<{ team: TeamStats; index: number; rank: number }> = [];
 
-    // Find the two target teams
-    const team1Index = teams.findIndex(team => {
-      return getTeamCode(team) === teamCode1;
-    });
-    const team2Index = teams.findIndex(team => {
-      return getTeamCode(team) === teamCode2;
-    });
+    const getTeamIndex = (teamCode: string) => {
+        return teams.findIndex(team => getTeamCode(team) === teamCode);
+    }
+
+    const getTeamIndices = () => {
+        if (opponentTeamCode) {
+            return [getTeamIndex(teamCode), getTeamIndex(opponentTeamCode)];
+        }
+
+        return [getTeamIndex(teamCode)];
+      };
 
     // Add teams and their neighbors
-    [team1Index, team2Index].forEach(teamIndex => {
+  getTeamIndices().forEach(teamIndex => {
       if (teamIndex === -1) return; // Team not found
 
       const team = teams[teamIndex];
@@ -156,26 +146,6 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
   // Get total number of teams for colorization
   const totalTeams = standings.stats?.length || 0;
 
-  // Helper function for rank column border based on full standings position
-  const getRankBorderClass = (teamCode: string, totalTeams: number): string => {
-    const fullPosition = getFullStandingsPosition(teamCode);
-
-    if (league === 'shl') {
-      // SHL: playoff (top 6), playoff qualification (next 4), relegation (last 2)
-      if (fullPosition <= 6) return 'border-r-4 border-yellow-400'; // Playoff spots
-      if (fullPosition <= 10) return 'border-r-4 border-blue-400'; // Playoff qualification
-      if (fullPosition >= totalTeams - 1) return 'border-r-4 border-red-400'; // Relegation zone
-    } else if (league === 'sdhl') {
-      // SDHL: playoff (top 8), no playoff qualification, relegation (last 2)
-      if (fullPosition <= 8) return 'border-r-4 border-yellow-400'; // Playoff spots
-      if (fullPosition >= totalTeams - 1) return 'border-r-4 border-red-400'; // Relegation zone
-    } else if (league === 'chl') {
-      // CHL: playoff (top 16), no playoff qualification, no relegation
-      if (fullPosition <= 16) return 'border-r-4 border-yellow-400'; // Playoff spots
-    }
-    return '';
-  };
-
   if (!compactTeams.length) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -205,9 +175,10 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
               const teamCode = getTeamCode(team);
               const teamName = getTeamName(team);
               const teamLogo = getTeamLogo(team);
-              const points = getPoints(team);
+              const points = team.Points;
               const goalDifference = team.G - team.GA;
               const gamesPlayed = team.GP;
+              const fullPosition = getFullStandingsPosition(teamCode);
 
               return (
                 <tr
@@ -215,7 +186,7 @@ export function CompactStandings({ standings, league, teamCode1, teamCode2 }: Co
                   className="hover:bg-gray-50 transition-colors"
                 >
                   {/* Rank */}
-                  <td className={`px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(teamCode, totalTeams)}`}>
+                  <td className={`px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(league, fullPosition, totalTeams)}`}>
                     {getRankDisplay(rank)}
                   </td>
 

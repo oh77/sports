@@ -2,36 +2,21 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { StandingsData, TeamStats } from '../../types/domain/standings';
+import { StandingsData } from '../../../types/domain/standings';
+import {League} from "@/app/types/domain/league";
+import {
+    getRankBorderClass, getRankDisplay,
+    getTeamCode,
+    getTeamLogo,
+    getTeamName
+} from "@/app/components/standings/standingsUtils";
 
 interface FullStandingsProps {
   standings: StandingsData;
-  league: 'shl' | 'sdhl' | 'chl';
+  league: League;
 }
 
 export function FullStandings({ standings, league }: FullStandingsProps) {
-  // Helper functions for domain data
-  const getTeamCode = (team: TeamStats): string => {
-    return team.info.code;
-  };
-
-  const getTeamName = (team: TeamStats): string => {
-    return team.info.short;
-  };
-
-  const getTeamLogo = (team: TeamStats): string => {
-    return team.info.logo;
-  };
-
-  const getRankDisplay = (rank: number | null): string => {
-    if (rank === null) return '-';
-    return rank.toString();
-  };
-
-  const getPoints = (team: TeamStats): number => {
-    // Calculate points: 3 for win, 1 for tie, 0 for loss
-    return (team.W * 3) + (team.T * 1);
-  };
 
   const getTeams = () => {
     const teams = standings.stats || [];
@@ -54,23 +39,6 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
     });
   };
 
-  const getRankBorderClass = (tablePosition: number, totalTeams: number): string => {
-    if (league === 'shl') {
-      // SHL: playoff (top 6), playoff qualification (next 4), relegation (last 2)
-      if (tablePosition <= 6) return 'border-r-4 border-yellow-400'; // Playoff spots
-      if (tablePosition <= 10) return 'border-r-4 border-blue-400'; // Playoff qualification
-      if (tablePosition >= totalTeams - 1) return 'border-r-4 border-red-400'; // Relegation zone
-    } else if (league === 'sdhl') {
-      // SDHL: playoff (top 8), no playoff qualification, relegation (last 2)
-      if (tablePosition <= 8) return 'border-r-4 border-yellow-400'; // Playoff spots
-      if (tablePosition >= totalTeams - 1) return 'border-r-4 border-red-400'; // Relegation zone
-    } else if (league === 'chl') {
-      // CHL: playoff (top 16), no playoff qualification, no relegation
-      if (tablePosition <= 16) return 'border-r-4 border-yellow-400'; // Playoff spots
-    }
-    return '';
-  };
-
   return (
     <div className="max-w-6xl mx-auto">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -83,8 +51,10 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lag</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">M</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">V</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">O</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">V</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">T</th>
+                  {/*<th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ÖTV</th>*/}
+                  {/*<th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ÖTF</th>*/}
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">F</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">G</th>
@@ -97,12 +67,13 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 const teamCode = getTeamCode(team);
                 const teamName = getTeamName(team);
                 const teamLogo = getTeamLogo(team);
-                const points = getPoints(team);
+                const points = team.Points;
                 const goalDifference = team.G - team.GA;
                 const actualRank = team.Rank || index + 1;
                 const gamesPlayed = team.GP;
                 const wins = team.W;
-                const ties = team.T;
+                  const overtimeWins = team.OTW;
+                  const overTimeLosses = team.OTL;
                 const losses = team.L;
                 const goalsFor = team.G;
                 const goalsAgainst = team.GA;
@@ -114,7 +85,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     {/* Rank */}
-                    <td className={`px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(index + 1, getTeams().length)}`}>
+                    <td className={`px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(league, index + 1, getTeams().length)}`}>
                       {getRankDisplay(actualRank)}
                     </td>
 
@@ -154,12 +125,17 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                       {wins}
                     </td>
 
-                    {/* Ties */}
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                      {ties}
-                    </td>
+                      {/* Overtime wins */}
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                          {overtimeWins} | {overTimeLosses}
+                      </td>
 
-                    {/* Losses */}
+                      {/*/!* Overtime losses *!/*/}
+                      {/*<td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">*/}
+                      {/*    {overTimeLosses}*/}
+                      {/*</td>*/}
+
+                      {/* Losses */}
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                       {losses}
                     </td>

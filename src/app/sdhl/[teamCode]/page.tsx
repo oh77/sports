@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LeagueService } from '../../services/leagueService';
+import { StatnetService } from '../../services/statnetService';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
-import { CompactStandings } from '../../components/compact-standings';
+import { CompactStandings } from '../../components/standings/compact-standings';
 import { HeadToHead } from '../../components/head-to-head';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
 import { StandingsData } from '../../types/domain/standings';
@@ -17,7 +17,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
   const resolvedParams = React.use(params);
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
   const [teamInfo, setTeamInfo] = useState<GameTeamInfo | null>(null);
-  const [nextGame, setNextGame] = useState<GameInfo | null>(null);
+  const [game, setGame] = useState<GameInfo | null>(null);
   const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
     const loadTeamData = async () => {
       try {
         setLoading(true);
-        const leagueService = new LeagueService('sdhl');
+        const leagueService = new StatnetService('sdhl');
 
         // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
@@ -58,7 +58,7 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
 
         // Get next game
         const next = leagueService.getNextGameForTeam(teamCode);
-        setNextGame(next);
+        setGame(next);
 
         // Get previous and upcoming games
         const prev = leagueService.getPreviousGamesForTeam(teamCode, 3);
@@ -176,18 +176,18 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         </div>
 
         <NextGame
-          game={nextGame}
+          game={game}
           currentTeamCode={teamCode}
           league="sdhl"
           allGames={allGames}
         />
 
         {/* Head to Head */}
-        {nextGame && (
+        {game && (
           <HeadToHead
             games={allGames}
-            teamCode1={nextGame.homeTeamInfo.teamInfo.code}
-            teamCode2={nextGame.awayTeamInfo.teamInfo.code}
+            teamCode1={game.homeTeamInfo.teamInfo.code}
+            teamCode2={game.awayTeamInfo.teamInfo.code}
           />
         )}
 
@@ -197,8 +197,8 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
             <CompactStandings
               standings={standings}
               league="sdhl"
-              teamCode1={teamCode}
-              teamCode2={nextGame ? (nextGame.homeTeamInfo.teamInfo.code === teamCode ? nextGame.awayTeamInfo.teamInfo.code : nextGame.homeTeamInfo.teamInfo.code) : teamCode}
+              teamCode={teamCode}
+              opponentTeamCode={game ? (game.homeTeamInfo.teamInfo.code === teamCode ? game.awayTeamInfo.teamInfo.code : game.homeTeamInfo.teamInfo.code) : undefined}
             />
           </div>
         )}

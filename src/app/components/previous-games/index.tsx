@@ -4,11 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
+import {League} from "@/app/types/domain/league";
 
 interface PreviousGamesProps {
   games: GameInfo[];
   currentTeamCode: string;
-  league: 'shl' | 'sdhl' | 'chl';
+  league: League;
 }
 
 export default function PreviousGames({ games, currentTeamCode, league }: PreviousGamesProps) {

@@ -60,20 +60,21 @@ export function translateStatnetResponseToDomain(statnetResponse: StatnetLeagueR
 
 export function translateStatnetTeamStatsToDomain(statnetStats: StatnetTeamStats): TeamStats {
   return {
-    Rank: statnetStats.Rank,
-    Team: statnetStats.Team,
-    GP: statnetStats.GP,
-    W: statnetStats.W,
-    T: statnetStats.T,
-    L: statnetStats.L,
-    G: statnetStats.G,
-    GPG: statnetStats.GPG,
-    GA: statnetStats.GA,
-    GAPG: statnetStats.GAPG,
-    OTW: statnetStats.OTW,
-    OTL: statnetStats.OTL,
-    SOW: statnetStats.SOW,
-    SOL: statnetStats.SOL,
-    info: translateStatnetStandingsTeamToDomain(statnetStats.info)
+      T: 0,
+      Rank: statnetStats.Rank,
+      Team: statnetStats.Team,
+      GP: statnetStats.GP,
+      W: statnetStats.W,
+      OTW: statnetStats.OTW ?? 0,
+      OTL: statnetStats.OTL ?? 0,
+      L: statnetStats.L,
+      G: statnetStats.G,
+      GPG: statnetStats.GPG,
+      GA: statnetStats.GA,
+      GAPG: statnetStats.GAPG,
+      SOW: statnetStats.SOW,
+      SOL: statnetStats.SOL,
+      Points: statnetStats.Points,
+      info: translateStatnetStandingsTeamToDomain(statnetStats.info)
   };
 }

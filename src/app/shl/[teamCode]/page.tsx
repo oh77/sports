@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LeagueService } from '../../services/leagueService';
+import { StatnetService } from '../../services/statnetService';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
 import { LeagueFooter } from '../../components/league-footer';
-import { CompactStandings } from '../../components/compact-standings';
+import { CompactStandings } from '../../components/standings/compact-standings';
 import { HeadToHead } from '../../components/head-to-head';
 import { GameInfo } from '../../types/domain/game';
 import { TeamInfo } from '../../types/domain/team';
@@ -30,12 +30,12 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
     const loadTeamGame = async () => {
       try {
         setLoading(true);
-        const leagueService = new LeagueService('shl');
+        const leagueService = new StatnetService('shl');
 
         // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
         setAllGames(games);
-        
+
         const nextGame = leagueService.getNextGameForTeam(teamCode);
 
         if (nextGame) {
@@ -187,8 +187,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
             <CompactStandings
               standings={standings}
               league="shl"
-              teamCode1={teamCode}
-              teamCode2={game ? (game.homeTeamInfo.teamInfo.code === teamCode ? game.awayTeamInfo.teamInfo.code : game.homeTeamInfo.teamInfo.code) : teamCode}
+              teamCode={teamCode}
+              opponentTeamCode={game ? (game.homeTeamInfo.teamInfo.code === teamCode ? game.awayTeamInfo.teamInfo.code : game.homeTeamInfo.teamInfo.code) : undefined}
             />
           </div>
         )}

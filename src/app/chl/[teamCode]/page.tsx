@@ -10,7 +10,7 @@ import { getTeamLogoWithFallback } from '../../utils/teamLogos';
 import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
-import { CompactStandings } from '../../components/compact-standings';
+import { CompactStandings } from '../../components/standings/compact-standings';
 import { StandingsData } from '../../types/domain/standings';
 
 
@@ -86,11 +86,6 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           game.homeTeamInfo.teamInfo.code === foundTeam.shortName || game.awayTeamInfo.teamInfo.code === foundTeam.shortName
         );
 
-        // Debug logging to see what games we have
-        console.log('All games:', allGames.map(g => ({ uuid: g.uuid, state: g.state, date: g.startDateTime })));
-        console.log(`Found ${teamGames.length} total games for team ${foundTeam.shortName}`);
-        console.log('Game statuses:', teamGames.map(g => ({ uuid: g.uuid, state: g.state, date: g.startDateTime })));
-
         // Find next game - get the chronologically next game for this team
         const now = new Date();
         const nextGame = teamGames
@@ -159,7 +154,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <h1 className="text-3xl font-bold text-gray-800 mb-4">
-              {error || 'Lag Inte Hittat'}
+              {error || 'inget lag hittat'}
             </h1>
             <p className="text-gray-600 mb-6">
               {error || `Inga kommande matcher hittades för lagkod: ${teamCode}`}
@@ -229,8 +224,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
             <CompactStandings
               standings={standings}
               league="chl"
-              teamCode1={teamCode}
-              teamCode2={game ? (game.homeTeamInfo.teamInfo.code === teamCode ? game.awayTeamInfo.teamInfo.code : game.homeTeamInfo.teamInfo.code) : teamCode}
+              teamCode={teamCode}
+              opponentTeamCode={game ? (game.homeTeamInfo.teamInfo.code === teamCode ? game.awayTeamInfo.teamInfo.code : game.homeTeamInfo.teamInfo.code) : undefined}
             />
           </div>
         )}

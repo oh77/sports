@@ -9,7 +9,8 @@ export async function GET() {
     const cacheKey = generateCacheKey('sdhl-standings');
 
     const data = await getCachedData(cacheKey, async () => {
-      const response = await fetch('https://www.sdhl.se/api/statistics-v2/stats-info/teams_result?count=25&ssgtUuid=n5mqrxbg0g&provider=impleo', {
+    const url = 'https://www.sdhl.se/api/statistics-v2/stats-info/standings_standings?count=25&ssgtUuid=n5mqrxbg0g&provider=impleo';
+      const response = await fetch(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
           'Accept': 'application/json',
@@ -25,16 +26,16 @@ export async function GET() {
 
       const rawData = await response.json();
       const statnetData = rawData[0];
-      
+
       // Translate to domain model
       const domainData: StandingsData = {
         dataColumns: statnetData.dataColumns,
         stats: statnetData.stats.map((stat: StatnetTeamStats) => translateStatnetTeamStatsToDomain(stat))
       };
-      
+
       return domainData;
     });
-    
+
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching SDHL standings:', error);

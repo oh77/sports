@@ -15,6 +15,7 @@ export interface TeamStats {
     OTL: number;
     SOW: number;
     SOL: number;
+    Points: number;
     info: TeamInfo;
 }
 
