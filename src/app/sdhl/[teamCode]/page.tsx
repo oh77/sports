@@ -7,7 +7,7 @@ import { StatnetService } from '../../services/statnetService';
 import PreviousGames from '../../components/previous-games';
 import UpcomingGames from '../../components/upcoming-games';
 import NextGame from '../../components/next-game';
-import { LeagueFooter } from '../../components/league-footer';
+import LeagueFooter from '../../components/league-footer';
 import { CompactStandings } from '../../components/standings/compact-standings';
 import { HeadToHead } from '../../components/head-to-head';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';

@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import {League} from "@/app/types/domain/league";
 
 interface LeagueHeaderProps {
-  league: 'shl' | 'sdhl' | 'chl';
+  league: League;
   gameDate: string;
   logoUrl: string;
   backgroundColor?: string;
@@ -22,10 +23,10 @@ export function LeagueHeader({ league, gameDate, logoUrl, backgroundColor = 'rgb
   const [menuOpen, setMenuOpen] = useState(false);
 
   const otherLeagues = LEAGUES.filter(l => l.id !== league);
-  
+
   // Use darker backgrounds for SHL/SDHL (light page background), lighter for CHL (dark page background)
   const isLightPage = league === 'shl' || league === 'sdhl';
-  const circleClasses = isLightPage 
+  const circleClasses = isLightPage
     ? "w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-800/80 hover:bg-gray-800 transition-all hover:scale-105 flex items-center justify-center overflow-hidden"
     : "w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-105 flex items-center justify-center overflow-hidden";
 
@@ -35,7 +36,7 @@ export function LeagueHeader({ league, gameDate, logoUrl, backgroundColor = 'rgb
       <div className="max-w-4xl mx-auto flex items-center justify-between py-6 px-4 rounded-lg relative" style={{ backgroundColor }}>
         {/* League Logo (Circle) - Left */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setMenuOpen(!menuOpen)}
             className={circleClasses}
             aria-label="Toggle league menu"
@@ -48,15 +49,15 @@ export function LeagueHeader({ league, gameDate, logoUrl, backgroundColor = 'rgb
               className="w-12 h-12 md:w-16 md:h-16 object-contain"
             />
           </button>
-          
+
           {menuOpen && (
             <>
               {/* Backdrop */}
-              <div 
-                className="fixed inset-0 z-40" 
+              <div
+                className="fixed inset-0 z-40"
                 onClick={() => setMenuOpen(false)}
               />
-              
+
               {/* Menu */}
               <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-lg z-50 min-w-[160px] overflow-hidden">
                 <div className="py-2">
@@ -88,23 +89,23 @@ export function LeagueHeader({ league, gameDate, logoUrl, backgroundColor = 'rgb
         </div>
 
         {/* Standings Link Icon - Right */}
-        <Link 
+        <Link
           href={standingsPath}
           className={circleClasses + " group"}
           title="Visa ligatabell"
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
             className={isLightPage ? "h-8 w-8 text-gray-100 group-hover:text-white transition-colors" : "h-8 w-8 text-gray-300 group-hover:text-white transition-colors"}
-            fill="none" 
-            viewBox="0 0 24 24" 
+            fill="none"
+            viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
             />
           </svg>
         </Link>

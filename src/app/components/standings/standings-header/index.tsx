@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import {League} from "@/app/types/domain/league";
 
 interface StandingsHeaderProps {
-  league: 'shl' | 'sdhl' | 'chl';
+  league: League;
   leagueName: string;
   logoUrl: string;
   backgroundColor?: string;
@@ -75,7 +76,7 @@ export function StandingsHeader({ league, logoUrl, backgroundColor = 'rgba(24,29
                   ))}
                   <div className="border-t border-gray-200 mt-2"></div>
                   <Link
-                    href="/public"
+                    href="/"
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors"
                     onClick={() => setMenuOpen(false)}
                   >

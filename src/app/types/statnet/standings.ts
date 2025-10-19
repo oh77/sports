@@ -15,8 +15,9 @@ export interface StatnetTeamStats {
   Team: number;
   GP: number;
   W: number;
-    OTW: number;
-    OTL: number;
+  OTW?: number;
+  OTL?: number;
+  T: number;
   L: number;
   G: number;
   GPG: string;
@@ -24,6 +25,6 @@ export interface StatnetTeamStats {
   GAPG: string;
   SOW: number;
   SOL: number;
-    Points: number;
+  Points: number;
   info: StatnetTeamInfo;
 }

@@ -51,10 +51,8 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lag</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">M</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">V</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">T</th>
-                  {/*<th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ÖTV</th>*/}
-                  {/*<th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ÖTF</th>*/}
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">V</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">O</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">F</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">G</th>
@@ -72,8 +70,8 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 const actualRank = team.Rank || index + 1;
                 const gamesPlayed = team.GP;
                 const wins = team.W;
-                  const overtimeWins = team.OTW;
-                  const overTimeLosses = team.OTL;
+                const tiesText = (team.OTW === null && team.OTL === null) ?
+                    `${team.T}` : `${team.OTW || 0} | ${team.OTL || 0}`;
                 const losses = team.L;
                 const goalsFor = team.G;
                 const goalsAgainst = team.GA;
@@ -125,17 +123,13 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                       {wins}
                     </td>
 
-                      {/* Overtime wins */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                          {overtimeWins} | {overTimeLosses}
-                      </td>
+                    {/* Overtime wins */}
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                        {tiesText}
+                    </td>
 
-                      {/*/!* Overtime losses *!/*/}
-                      {/*<td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">*/}
-                      {/*    {overTimeLosses}*/}
-                      {/*</td>*/}
 
-                      {/* Losses */}
+                    {/* Losses */}
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                       {losses}
                     </td>

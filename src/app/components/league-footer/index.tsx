@@ -10,7 +10,7 @@ interface LeagueFooterProps {
   currentTeamCode?: string;
 }
 
-export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
+function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
   const [teams, setTeams] = useState<TeamInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -86,7 +86,8 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
               isLeague: true
             },
             // Team logos
-            ...teams.map((team, index) => ({
+            ...teams.sort((a, b) => a.full > b.full ? 1 : -1)
+                .map((team, index) => ({
               key: `team-${team.code}-${index}`,
               href: `/${league}/${encodeURIComponent(team.code)}`,
               logo: team.logo,
@@ -130,3 +131,5 @@ export function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
     </footer>
   );
 }
+
+export default LeagueFooter

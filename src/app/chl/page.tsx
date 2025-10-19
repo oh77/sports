@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { GameInfo, LeagueResponse } from '../types/domain/game';
 import { GameGroup } from '../components/game-group';
 import { LeagueHeader } from '../components/league-header';
-import { LeagueFooter } from '../components/league-footer';
+import LeagueFooter from '../components/league-footer';
 
 export default function CHLPage() {
   const [todaysGames, setTodaysGames] = useState<GameInfo[]>([]);

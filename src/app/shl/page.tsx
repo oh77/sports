@@ -7,7 +7,7 @@ import { StatnetService } from '../services/statnetService';
 import { GameInfo } from '../types/domain/game';
 import { GameGroup } from '../components/game-group';
 import { LeagueHeader } from '../components/league-header';
-import { LeagueFooter } from '../components/league-footer';
+import LeagueFooter from '../components/league-footer';
 
 export default function SHLPage() {
   const [games, setGames] = useState<GameInfo[]>([]);

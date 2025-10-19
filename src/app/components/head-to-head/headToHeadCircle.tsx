@@ -8,7 +8,14 @@ interface HeadToHeadCircleProps {
 }
 
 const getTitle = (game: GameInfo, gameDate: Date) =>
-    `${getDay(gameDate)} ${getMonth(gameDate)}: ${game.homeTeamInfo.teamInfo.code}-${game.awayTeamInfo.teamInfo.code} ${game.homeTeamInfo.score}-${game.awayTeamInfo.score} ${game.overtime ? '(OT)' : ''} ${game.shootout ? '(SO)' : ''}`;
+    `${getDay(gameDate)} ${getMonth(gameDate)} | ${game.homeTeamInfo.teamInfo.code}-${game.awayTeamInfo.teamInfo.code} ${game.homeTeamInfo.score}-${game.awayTeamInfo.score} ${game.overtime ? '(OT)' : ''} ${game.shootout ? '(SO)' : ''}`;
+
+const getWinnerAltText = (game: GameInfo) =>
+    (game.homeTeamInfo.score > game.awayTeamInfo.score) ?
+        `${game.homeTeamInfo.teamInfo.short} (H)` :
+        `${game.awayTeamInfo.teamInfo.short} (B)`;
+
+
 
 export const HeadToHeadCircle: React.FC<HeadToHeadCircleProps> = ({game}) => {
 
@@ -32,18 +39,19 @@ export const HeadToHeadCircle: React.FC<HeadToHeadCircleProps> = ({game}) => {
     if (winnerLogo) {
         return <Image
             src={winnerLogo}
-            alt="Winner"
-            width={40}
-            height={40}
+            alt={`Vinnare: ${getWinnerAltText(game)}`}
+            title={getTitle(game, gameDate)}
+            width={48}
+            height={48}
             className="w-10 h-10 object-contain"
         />;
     }
 
     const isToday = new Date(gameDate).toDateString() === new Date().toDateString();
-    return           <div
+    return <div
         className={`w-12 h-12 rounded-full border-2 border-gray-500 flex items-center justify-center overflow-hidden ${winnerLogo ? 'bg-white' : 'bg-white/50'}`}
-        title={getTitle(game, gameDate)}
-    >
+        title={getTitle(game, gameDate)}>
+
         <div className="text-center text-xs text-gray-500 leading-tight font-bold">
         {isToday ? (
             <div>{getTime(gameDate)}</div>

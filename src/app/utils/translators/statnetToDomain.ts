@@ -1,5 +1,5 @@
-import {StatnetGameTeamInfo, StatnetGameInfo, StatnetLeagueResponse} from '../../types/statnet/game';
-import {GameInfo, LeagueResponse} from '../../types/domain/game';
+import {StatnetGameTeamInfo, StatnetGameInfo} from '../../types/statnet/game';
+import {GameInfo} from '../../types/domain/game';
 import { TeamStats } from '../../types/domain/standings';
 import {StatnetTeamInfo, StatnetTeamStats} from "@/app/types/statnet/standings";
 import {TeamInfo} from "@/app/types/domain/team";
@@ -46,18 +46,6 @@ export function translateStatnetGameToDomain(statnetGame: StatnetGameInfo): Game
   };
 }
 
-export function translateStatnetResponseToDomain(statnetResponse: StatnetLeagueResponse): LeagueResponse {
-  return {
-    gameInfo: statnetResponse.gameInfo.map(translateStatnetGameToDomain),
-    teamList: statnetResponse.teamList?.map(statnetTeam => {
-          return {
-            teamInfo: translateStatnetGameTeamToDomain(statnetTeam),
-            score: statnetTeam.score
-          }
-        })
-  };
-}
-
 export function translateStatnetTeamStatsToDomain(statnetStats: StatnetTeamStats): TeamStats {
   return {
       T: 0,
@@ -65,8 +53,8 @@ export function translateStatnetTeamStatsToDomain(statnetStats: StatnetTeamStats
       Team: statnetStats.Team,
       GP: statnetStats.GP,
       W: statnetStats.W,
-      OTW: statnetStats.OTW ?? 0,
-      OTL: statnetStats.OTL ?? 0,
+      OTW: statnetStats.OTW,
+      OTL: statnetStats.OTL,
       L: statnetStats.L,
       G: statnetStats.G,
       GPG: statnetStats.GPG,

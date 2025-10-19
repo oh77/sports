@@ -5,14 +5,14 @@ export interface TeamStats {
     Team: number;
     GP: number;
     W: number;
-    T: number;
+    T?: number;
     L: number;
     G: number;
     GPG: string;
     GA: number;
     GAPG: string;
-    OTW: number;
-    OTL: number;
+    OTW?: number;
+    OTL?: number;
     SOW: number;
     SOL: number;
     Points: number;

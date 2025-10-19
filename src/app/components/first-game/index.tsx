@@ -1,12 +1,12 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { StatnetService } from '../../services/statnetService';
 import { GameInfo } from '../../types/domain/game';
+import {getLongDateString} from "@/app/utils/dateUtils";
+import {League} from "@/app/types/domain/league";
 
 interface FirstGameProps {
-  league?: 'shl' | 'sdhl' | 'chl';
+  league?: League;
 }
 
 export default function FirstGame({ league = 'shl' }: FirstGameProps) {
@@ -35,22 +35,6 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
 
     loadGame();
   }, [league]);
-
-  const formatDateTime = (dateTimeStr: string) => {
-    try {
-      const date = new Date(dateTimeStr);
-      return date.toLocaleDateString('sv-SE', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return dateTimeStr;
-    }
-  };
 
   if (loading) {
     return (
@@ -85,7 +69,7 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
       <div className="text-center mb-4">
         <p className="text-sm text-gray-600 mb-1">Date & Time</p>
         <p className="text-lg font-medium text-gray-800">
-          {formatDateTime(game.startDateTime)}
+          {getLongDateString(game.startDateTime)}
         </p>
       </div>
 

@@ -4,11 +4,12 @@ import React from 'react';
 import Image from 'next/image';
 import { GameInfo } from '../../types/domain/game';
 import { TrendMarkers } from '../trend-markers';
+import {League} from "@/app/types/domain/league";
 
 interface NextGameProps {
   game: GameInfo | null;
   currentTeamCode: string;
-  league: 'shl' | 'sdhl' | 'chl';
+  league: League;
   allGames?: GameInfo[];
 }
 

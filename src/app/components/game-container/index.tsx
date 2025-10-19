@@ -1,10 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
+import {League} from "@/app/types/domain/league";
 
 interface GameContainerProps {
   game: GameInfo;
-  league: 'shl' | 'sdhl' | 'chl';
+  league: League;
 }
 
 export function GameContainer({ game, league }: GameContainerProps) {
