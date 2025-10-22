@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { StatnetService } from '../../services/statnetService';
 import { GameInfo } from '../../types/domain/game';
-import {getLongDateString} from "@/app/utils/dateUtils";
+import {formatLongDateTimeFromString} from "@/app/utils/dateUtils";
 import {League} from "@/app/types/domain/league";
 
 interface FirstGameProps {
   league?: League;
 }
 
-export default function FirstGame({ league = 'shl' }: FirstGameProps) {
+const FirstGame: React.FC<FirstGameProps> = ({ league = 'shl' }) => {
   const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +69,7 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
       <div className="text-center mb-4">
         <p className="text-sm text-gray-600 mb-1">Date & Time</p>
         <p className="text-lg font-medium text-gray-800">
-          {getLongDateString(game.startDateTime)}
+          {formatLongDateTimeFromString(game.startDateTime)}
         </p>
       </div>
 
@@ -125,4 +125,5 @@ export default function FirstGame({ league = 'shl' }: FirstGameProps) {
       </div>
     </div>
   );
-}
+};
+export default FirstGame

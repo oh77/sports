@@ -1,7 +1,5 @@
-'use client';
-
 import { GameInfo } from '../../types/domain/game';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface TrendMarkersProps {
   games: GameInfo[];
@@ -19,25 +17,25 @@ interface TeamGameResult {
   opponentScore: number;
 }
 
-export function TrendMarkers({ games, homeTeamCode, awayTeamCode }: TrendMarkersProps) {
+export const TrendMarkers: React.FC<TrendMarkersProps> = ({ games, homeTeamCode, awayTeamCode }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const getTeamResults = (teamCode: string, limit: number): TeamGameResult[] => {
     return games
       .filter(game => game.state === 'finished')
-      .filter(game => 
-        game.homeTeamInfo.teamInfo.code === teamCode || 
+      .filter(game =>
+        game.homeTeamInfo.teamInfo.code === teamCode ||
         game.awayTeamInfo.teamInfo.code === teamCode
       )
       .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime())
@@ -48,10 +46,10 @@ export function TrendMarkers({ games, homeTeamCode, awayTeamCode }: TrendMarkers
         const teamScore = isHomeTeam ? game.homeTeamInfo.score : game.awayTeamInfo.score;
         const opponentScore = isHomeTeam ? game.awayTeamInfo.score : game.homeTeamInfo.score;
         const opponent = isHomeTeam ? game.awayTeamInfo.teamInfo.short : game.homeTeamInfo.teamInfo.short;
-        
+
         const won = teamScore > opponentScore;
         const afterRegulation = game.overtime || game.shootout;
-        
+
         let result: GameResult;
         if (won) {
           result = afterRegulation ? 'win-ot' : 'win';
@@ -71,7 +69,7 @@ export function TrendMarkers({ games, homeTeamCode, awayTeamCode }: TrendMarkers
 
   // Mobile: 7 games, Desktop: 10 games
   const limit = isMobile ? 7 : 10;
-  
+
   const homeResults = getTeamResults(homeTeamCode, limit);
   const awayResults = getTeamResults(awayTeamCode, limit);
 
@@ -123,5 +121,5 @@ export function TrendMarkers({ games, homeTeamCode, awayTeamCode }: TrendMarkers
       </div>
     </div>
   );
-}
+};
 

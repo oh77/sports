@@ -1,6 +1,6 @@
 import Image from "next/image";
 import React from "react";
-import {getDay, getMonth, getTime} from "@/app/utils/dateUtils";
+import {getDay, formatShortMonthFromDate, formatTimeFromDate} from "@/app/utils/dateUtils";
 import {GameInfo} from "@/app/types/domain/game";
 
 interface HeadToHeadCircleProps {
@@ -8,7 +8,7 @@ interface HeadToHeadCircleProps {
 }
 
 const getTitle = (game: GameInfo, gameDate: Date) =>
-    `${getDay(gameDate)} ${getMonth(gameDate)} | ${game.homeTeamInfo.teamInfo.code}-${game.awayTeamInfo.teamInfo.code} ${game.homeTeamInfo.score}-${game.awayTeamInfo.score} ${game.overtime ? '(OT)' : ''} ${game.shootout ? '(SO)' : ''}`;
+    `${getDay(gameDate)} ${formatShortMonthFromDate(gameDate)} | ${game.homeTeamInfo.teamInfo.code}-${game.awayTeamInfo.teamInfo.code} ${game.homeTeamInfo.score}-${game.awayTeamInfo.score} ${game.overtime ? '(OT)' : ''} ${game.shootout ? '(SO)' : ''}`;
 
 const getWinnerAltText = (game: GameInfo) =>
     (game.homeTeamInfo.score > game.awayTeamInfo.score) ?
@@ -54,9 +54,9 @@ export const HeadToHeadCircle: React.FC<HeadToHeadCircleProps> = ({game}) => {
 
         <div className="text-center text-xs text-gray-500 leading-tight font-bold">
         {isToday ? (
-            <div>{getTime(gameDate)}</div>
+            <div>{formatTimeFromDate(gameDate)}</div>
         ) : (
-            <div>{getDay(gameDate)}<br/>{getMonth(gameDate)}</div>
+            <div>{getDay(gameDate)}<br/>{formatShortMonthFromDate(gameDate)}</div>
         )}
         </div>
     </div>;

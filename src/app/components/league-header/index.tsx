@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {League} from "@/app/types/domain/league";
@@ -19,7 +19,7 @@ const LEAGUES = [
   { id: 'chl', name: 'CHL', path: '/chl' },
 ];
 
-export function LeagueHeader({ league, gameDate, logoUrl, backgroundColor = 'rgba(24,29,38,1)', standingsPath }: LeagueHeaderProps) {
+export const LeagueHeader: React.FC<LeagueHeaderProps> = ({ league, gameDate, logoUrl, backgroundColor = 'rgba(24,29,38,1)', standingsPath }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const otherLeagues = LEAGUES.filter(l => l.id !== league);
@@ -119,5 +119,5 @@ export function LeagueHeader({ league, gameDate, logoUrl, backgroundColor = 'rgb
       </div>
     </div>
   );
-}
+};
 

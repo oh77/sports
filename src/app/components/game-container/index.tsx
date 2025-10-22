@@ -1,21 +1,19 @@
+import React from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
 import {League} from "@/app/types/domain/league";
+import {formatTimeFromDate} from "@/app/utils/dateUtils";
 
 interface GameContainerProps {
   game: GameInfo;
   league: League;
 }
 
-export function GameContainer({ game, league }: GameContainerProps) {
+export const GameContainer: React.FC<GameContainerProps> = ({ game, league }) => {
   const formatTime = (dateTimeStr: string) => {
     try {
-      const date = new Date(dateTimeStr);
-      return date.toLocaleTimeString('sv-SE', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      return formatTimeFromDate(new Date(dateTimeStr));
     } catch {
       return dateTimeStr;
     }
@@ -99,6 +97,6 @@ export function GameContainer({ game, league }: GameContainerProps) {
       </div>
     </div>
   );
-}
+};
 
 export type { StatnetGameInfo } from '../../types/statnet/game';

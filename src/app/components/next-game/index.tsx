@@ -1,10 +1,9 @@
-'use client';
-
 import React from 'react';
 import Image from 'next/image';
 import { GameInfo } from '../../types/domain/game';
 import { TrendMarkers } from '../trend-markers';
 import {League} from "@/app/types/domain/league";
+import {formatTimeFromDate} from "@/app/utils/dateUtils";
 
 interface NextGameProps {
   game: GameInfo | null;
@@ -13,15 +12,11 @@ interface NextGameProps {
   allGames?: GameInfo[];
 }
 
-export default function NextGame({ game, currentTeamCode, league, allGames = [] }: NextGameProps) : React.JSX.Element | null {
+const NextGame: React.FC<NextGameProps> = ({ game, currentTeamCode, league, allGames = [] })=> {
 
   const formatTime = (dateTimeStr: string) => {
     try {
-      const date = new Date(dateTimeStr);
-      return date.toLocaleTimeString('sv-SE', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      return formatTimeFromDate(new Date(dateTimeStr));
     } catch {
       return dateTimeStr;
     }
@@ -138,4 +133,5 @@ export default function NextGame({ game, currentTeamCode, league, allGames = [] 
       </div>
     </div>
   );
-}
+};
+export default NextGame

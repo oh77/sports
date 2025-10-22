@@ -1,10 +1,9 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { GameInfo, GameTeamInfo } from '../../types/domain/game';
+import {GameInfo, GameTeamInfo} from '../../types/domain/game';
 import {League} from "@/app/types/domain/league";
+import {ScoreOrStatus} from "@/app/components/previous-games/scoreOrStatus";
 
 interface PreviousGamesProps {
   games: GameInfo[];
@@ -12,7 +11,7 @@ interface PreviousGamesProps {
   league: League;
 }
 
-export default function PreviousGames({ games, currentTeamCode, league }: PreviousGamesProps) {
+const PreviousGames: React.FC<PreviousGamesProps> = ({ games, currentTeamCode, league }) => {
   const getTeamCode = (teamInfo: GameTeamInfo): string => {
     return teamInfo.teamInfo.code;
   };
@@ -24,8 +23,6 @@ export default function PreviousGames({ games, currentTeamCode, league }: Previo
         {games.map((prevGame) => {
           const isHomeTeam = getTeamCode(prevGame.homeTeamInfo) === currentTeamCode;
           const opponentInfo = isHomeTeam ? prevGame.awayTeamInfo : prevGame.homeTeamInfo;
-          const currentTeamScore = isHomeTeam ? prevGame.homeTeamInfo.score : prevGame.awayTeamInfo.score;
-          const opponentScore = isHomeTeam ? prevGame.awayTeamInfo.score : prevGame.homeTeamInfo.score;
 
           return (
             <div key={prevGame.uuid} className="rounded-lg shadow-lg p-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}>
@@ -53,16 +50,7 @@ export default function PreviousGames({ games, currentTeamCode, league }: Previo
                 </div>
 
                 <div className="text-center">
-                  <div className="text-sm font-bold text-gray-800">
-                    {currentTeamScore} - {opponentScore}
-                  </div>
-                  {((prevGame.state && (prevGame.state.includes('Shootout') || prevGame.state.includes('Overtime'))) ||
-                    ('shootout' in prevGame && prevGame.shootout) ||
-                    ('overtime' in prevGame && prevGame.overtime)) && (
-                    <div className="text-xs text-orange-600 font-medium">
-                      {((prevGame.state && prevGame.state.includes('Shootout')) || ('shootout' in prevGame && prevGame.shootout)) ? 'SO' : 'OT'}
-                    </div>
-                  )}
+                    <ScoreOrStatus gameInfo={prevGame} isHomeTeam={isHomeTeam} />
                 </div>
               </div>
             </div>
@@ -76,4 +64,5 @@ export default function PreviousGames({ games, currentTeamCode, league }: Previo
       </div>
     </div>
   );
-}
+};
+export default PreviousGames

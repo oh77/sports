@@ -5,6 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
 import {League} from "@/app/types/domain/league";
+import {
+    formatLongDateFromString,
+    formatTimeFromString
+} from "@/app/utils/dateUtils";
 
 interface UpcomingGamesProps {
   games: GameInfo[];
@@ -12,35 +16,9 @@ interface UpcomingGamesProps {
   league: League;
 }
 
-export default function UpcomingGames({ games, currentTeamCode, league }: UpcomingGamesProps) {
+const UpcomingGames: React.FC<UpcomingGamesProps> = ({ games, currentTeamCode, league }) => {
   const getTeamCode = (teamInfo: GameTeamInfo): string => {
     return teamInfo.teamInfo.code;
-  };
-
-  const formatTime = (dateTimeStr: string) => {
-    try {
-      const date = new Date(dateTimeStr);
-      return date.toLocaleTimeString('sv-SE', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return dateTimeStr;
-    }
-  };
-
-  const formatDate = (dateTimeStr: string) => {
-    try {
-      const date = new Date(dateTimeStr);
-      return date.toLocaleDateString('sv-SE', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return dateTimeStr;
-    }
   };
 
   return (
@@ -78,10 +56,10 @@ export default function UpcomingGames({ games, currentTeamCode, league }: Upcomi
 
                 <div className="text-center">
                   <div className="text-sm font-bold text-gray-800">
-                    {formatTime(upcomingGame.startDateTime)}
+                    {formatTimeFromString(upcomingGame.startDateTime)}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {formatDate(upcomingGame.startDateTime)}
+                    {formatLongDateFromString(upcomingGame.startDateTime)}
                   </div>
                 </div>
               </div>
@@ -96,4 +74,5 @@ export default function UpcomingGames({ games, currentTeamCode, league }: Upcomi
       </div>
     </div>
   );
-}
+};
+export default UpcomingGames

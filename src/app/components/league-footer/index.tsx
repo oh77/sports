@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TeamInfo } from '../../types/domain/team';
 import { StatnetService } from '../../services/statnetService';
 import { League } from '@/app/types/domain/league';
@@ -10,7 +10,7 @@ interface LeagueFooterProps {
   currentTeamCode?: string;
 }
 
-function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
+const LeagueFooter: React.FC<LeagueFooterProps> = ({ league, currentTeamCode }) => {
   const [teams, setTeams] = useState<TeamInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -130,6 +130,6 @@ function LeagueFooter({ league, currentTeamCode }: LeagueFooterProps) {
       </div>
     </footer>
   );
-}
+};
 
 export default LeagueFooter
