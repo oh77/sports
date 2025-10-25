@@ -47,3 +47,9 @@ export const formatLongDateTimeFromString = (dateTimeStr: string) => {
         return dateTimeStr;
     }
 };
+
+export const isDateTimePassed = (startDateTime: Date, offsetMs: number = 0) => {
+    const now = new Date();
+    return (now.getTime() - startDateTime.getTime()) > offsetMs;
+
+};

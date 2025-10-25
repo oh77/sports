@@ -1,9 +1,9 @@
 import React from "react";
 import Image from 'next/image';
-import Link from 'next/link';
-import { GameInfo, GameTeamInfo } from '../../types/domain/game';
+import { GameInfo } from '../../types/domain/game';
 import {League} from "@/app/types/domain/league";
-import {formatTimeFromDate} from "@/app/utils/dateUtils";
+import {isDateTimePassed} from "@/app/utils/dateUtils";
+import ClickableTeamLogo from "@/app/components/game-container/ClickableTeamLogo";
 
 interface GameContainerProps {
   game: GameInfo;
@@ -11,13 +11,6 @@ interface GameContainerProps {
 }
 
 export const GameContainer: React.FC<GameContainerProps> = ({ game, league }) => {
-  const formatTime = (dateTimeStr: string) => {
-    try {
-      return formatTimeFromDate(new Date(dateTimeStr));
-    } catch {
-      return dateTimeStr;
-    }
-  };
 
   const getStadiumIcon = () => {
     return league === 'shl'
@@ -25,39 +18,19 @@ export const GameContainer: React.FC<GameContainerProps> = ({ game, league }) =>
       : "https://www.sdhl.se/assets/stadium-460843bd.svg";
   };
 
-  const getTeamCode = (team: GameTeamInfo) => {
-    return team.teamInfo.code;
-  };
+    const isGameLive = (game: GameInfo) => {
+        return game.state === 'live' ||
+            (game.state === 'not-started' && isDateTimePassed(new Date(game.startDateTime)));
+    };
 
-  return (
+    const isGameFinished = (game: GameInfo) => game.state === 'finished';
+
+    return (
     <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}>
-      <div className="text-center mb-4">
-        <p className="text-xl font-medium text-gray-800">
-          {formatTime(game.startDateTime)}
-        </p>
-      </div>
 
       <div className="flex items-center justify-between">
         <div className="text-center flex-1">
-          <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-            {game.homeTeamInfo.teamInfo.logo ? (
-              <Image
-                src={game.homeTeamInfo.teamInfo.logo}
-                alt={game.homeTeamInfo.teamInfo.short}
-                width={league === 'shl' ? 48 : 64}
-                height={league === 'shl' ? 48 : 64}
-                className={`object-contain ${league === 'shl' ? 'w-12 h-12' : 'w-16 h-16'}`}
-              />
-            ) : (
-              <span className="text-gray-400 text-xl">🏒</span>
-            )}
-          </div>
-          <Link
-            href={`/${league}/${encodeURIComponent(getTeamCode(game.homeTeamInfo))}`}
-            className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
-          >
-            {game.homeTeamInfo.teamInfo.short}
-          </Link>
+            <ClickableTeamLogo league={league} teamInfo={game.homeTeamInfo.teamInfo} />
         </div>
 
         <div className="text-center mx-6">
@@ -74,27 +47,21 @@ export const GameContainer: React.FC<GameContainerProps> = ({ game, league }) =>
         </div>
 
         <div className="text-center flex-1">
-          <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-            {game.awayTeamInfo.teamInfo.logo ? (
-              <Image
-                src={game.awayTeamInfo.teamInfo.logo}
-                alt={game.awayTeamInfo.teamInfo.short}
-                width={league === 'shl' ? 48 : 64}
-                height={league === 'shl' ? 48 : 64}
-                className={`object-contain ${league === 'shl' ? 'w-12 h-12' : 'w-16 h-16'}`}
-              />
-            ) : (
-              <span className="text-gray-400 text-xl">🏒</span>
-            )}
-          </div>
-          <Link
-            href={`/${league}/${encodeURIComponent(getTeamCode(game.awayTeamInfo))}`}
-            className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
-          >
-            {game.awayTeamInfo.teamInfo.short}
-          </Link>
+            <ClickableTeamLogo league={league} teamInfo={game.awayTeamInfo.teamInfo} />
         </div>
       </div>
+
+        {isGameLive(game) && (
+            <div className="flex items-center">
+                <div className="inline-flex items-center text-sm text-gray-500 mx-auto"><span className="w-2 h-2 rounded-full bg-orange-500 inline-block mr-1"></span>Pågående</div>
+            </div>
+        )}
+        {isGameFinished(game) && (
+            <div className="flex items-center">
+                <div className="inline-flex items-center text-sm text-gray-500 mx-auto"><span className="w-2 h-2 rounded-full bg-green-500 inline-block mr-1"></span>Slut</div>
+            </div>
+        )}
+
     </div>
   );
 };
