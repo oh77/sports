@@ -13,6 +13,7 @@ import { HeadToHead } from '../../components/head-to-head';
 import { GameInfo } from '../../types/domain/game';
 import { TeamInfo } from '../../types/domain/team';
 import { StandingsData } from '../../types/domain/standings';
+import GameStatsContainer from "@/app/components/gamestats-container";
 
 export default function TeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
   const resolvedParams = React.use(params);
@@ -154,17 +155,6 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           </h1>
         </div>
 
-        {/* Next Game Info */}
-        {/* <div className="max-w-2xl mx-auto mb-8">
-          <div className="rounded-lg shadow-lg p-6 text-gray-800" style={{ backgroundColor: 'rgba(128, 128, 128, 0.8)' }}>
-            <div className="text-center">
-              <p className="text-2xl font-semibold">
-                {opponentInfo.short} ({isHomeGame ? 'H' : 'A'})
-              </p>
-            </div>
-          </div>
-        </div> */}
-
         <NextGame
           game={game}
           currentTeamCode={teamCode}
@@ -181,6 +171,11 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           />
         )}
 
+          {game && (
+              <div className="max-w-6xl mx-auto mb-8">
+                  <GameStatsContainer allGames={allGames} currentGame={game} />
+              </div>
+          )}
         {/* Compact Standings */}
         {standings && (
           <div className="max-w-6xl mx-auto mb-8">

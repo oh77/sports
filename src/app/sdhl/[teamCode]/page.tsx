@@ -12,6 +12,7 @@ import { CompactStandings } from '../../components/standings/compact-standings';
 import { HeadToHead } from '../../components/head-to-head';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
 import { StandingsData } from '../../types/domain/standings';
+import GameStatsContainer from "@/app/components/gamestats-container";
 
 export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
   const resolvedParams = React.use(params);
@@ -190,6 +191,12 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
             teamCode2={game.awayTeamInfo.teamInfo.code}
           />
         )}
+
+          {game && (
+              <div className="max-w-6xl mx-auto mb-8">
+                  <GameStatsContainer allGames={allGames} currentGame={game} />
+              </div>
+          )}
 
         {/* Compact Standings */}
         {standings && (
