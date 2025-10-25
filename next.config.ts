@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/chl-production/image/upload/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'sportality.cdn.s8y.se',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

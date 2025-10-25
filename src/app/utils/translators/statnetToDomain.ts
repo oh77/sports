@@ -3,6 +3,8 @@ import {GameInfo} from '../../types/domain/game';
 import { TeamStats } from '../../types/domain/standings';
 import {StatnetTeamInfo, StatnetTeamStats} from "@/app/types/statnet/standings";
 import {TeamInfo} from "@/app/types/domain/team";
+import { PlayerStats, PlayerInfo } from '../../types/domain/player-stats';
+import { StatnetPlayerStats, StatnetPlayerInfo } from '../../types/statnet/player-stats';
 
 export function translateStatnetGameTeamToDomain(statnetTeam: StatnetGameTeamInfo): TeamInfo {
   return {
@@ -64,5 +66,45 @@ export function translateStatnetTeamStatsToDomain(statnetStats: StatnetTeamStats
       SOL: statnetStats.SOL,
       Points: statnetStats.Points,
       info: translateStatnetStandingsTeamToDomain(statnetStats.info)
+  };
+}
+
+export function translateStatnetPlayerInfoToDomain(statnetInfo: StatnetPlayerInfo): PlayerInfo {
+  return {
+    uuid: statnetInfo.uuid,
+    fullName: statnetInfo.fullName,
+    firstName: statnetInfo.firstName,
+    lastName: statnetInfo.lastName,
+    birthDate: statnetInfo.birthDate,
+    nationality: statnetInfo.nationality,
+    number: statnetInfo.number,
+    position: statnetInfo.position,
+    shoots: statnetInfo.shoots,
+    gender: statnetInfo.gender,
+    weight: statnetInfo.weight,
+    height: statnetInfo.height,
+    playerMedia: statnetInfo.playerMedia,
+    team: statnetInfo.team,
+    teamCode: statnetInfo.teamCode,
+    teamId: statnetInfo.teamId
+  };
+}
+
+export function translateStatnetPlayerStatsToDomain(statnetStats: StatnetPlayerStats): PlayerStats {
+  return {
+    Rank: statnetStats.Rank,
+    Player: statnetStats.Player,
+    Team: statnetStats.Team,
+    GP: statnetStats.GP,
+    TP: statnetStats.TP,
+    G: statnetStats.G,
+    A: statnetStats.A,
+    PPG: statnetStats.PPG,
+    PPA: statnetStats.PPA,
+    PPTP: statnetStats.PPTP,
+    SHG: statnetStats.SHG,
+    SHA: statnetStats.SHA,
+    SHTP: statnetStats.SHTP,
+    info: translateStatnetPlayerInfoToDomain(statnetStats.info)
   };
 }
