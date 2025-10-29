@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { PlayerStats, PlayerStatsData } from '../../types/domain/player-stats';
 import { PlayerCard } from '../player-card';
 
@@ -22,13 +21,10 @@ export const TopPlayers: React.FC<TopPlayersProps> = ({ teamCode1, teamCode2, le
       try {
         setLoading(true);
 
-          console.log(`teamCode1: ${teamCode1}`);
-          console.log(`teamCode2: ${teamCode2}`);
-
         // Fetch players for both teams
         const [team1Response, team2Response] = await Promise.all([
-          fetch(`/api/${league}-players?teamCode=${teamCode1}&count=5`),
-          fetch(`/api/${league}-players?teamCode=${teamCode2}&count=5`)
+          fetch(`/api/${league}-players?teamCode=${teamCode1}`),
+          fetch(`/api/${league}-players?teamCode=${teamCode2}`)
         ]);
 
         if (!team1Response.ok || !team2Response.ok) {
@@ -38,23 +34,19 @@ export const TopPlayers: React.FC<TopPlayersProps> = ({ teamCode1, teamCode2, le
         const team1Data: PlayerStatsData = await team1Response.json();
         const team2Data: PlayerStatsData = await team2Response.json();
 
-          console.log(team1Data);
-          console.log('=== === ===');
+        console.log(team1Data.stats, '===' , team2Data.stats);
 
-          console.log(team2Data);
         // Get top players from each team (sorted by total points)
         // Show only 1 player per team for all leagues
         const playerCount = 1;
 
         const topTeam1Players = team1Data.stats
           .sort((a, b) => b.TP - a.TP)
-          .slice(0, playerCount)
-          .map((player, index) => ({ ...player, Rank: index + 1 }));
+          .slice(0, playerCount);
 
         const topTeam2Players = team2Data.stats
           .sort((a, b) => b.TP - a.TP)
-          .slice(0, playerCount)
-          .map((player, index) => ({ ...player, Rank: index + 1 }));
+          .slice(0, playerCount);
 
         setTeam1Players(topTeam1Players);
         setTeam2Players(topTeam2Players);
@@ -104,81 +96,46 @@ export const TopPlayers: React.FC<TopPlayersProps> = ({ teamCode1, teamCode2, le
     return null;
   }
 
+  const getPlayerImageUrl = (player: PlayerStats): string => {
+    if (player.info.playerMedia?.mediaString) {
+      return `https://sportality.cdn.s8y.se/${player.info.playerMedia.mediaString.split('|')[2]}`;
+    }
+    return '/placeholder-player.png'; // Fallback image
+  };
+
   return (
     <div className="max-w-6xl mx-auto mb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Team 1 Top Players */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="space-y-0">
-            {team1Players.map((player) => (
-              <div key={player.info.uuid} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg justify-center">
-                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                  {player.info.playerMedia?.mediaString ? (
-                    <Image
-                      src={`https://sportality.cdn.s8y.se/${player.info.playerMedia.mediaString.split('|')[2]}`}
-                      alt={player.info.fullName}
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-400 text-xl">🏒</span>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-gray-900 text-lg">{player.info.fullName}</h4>
-                    <span className="text-sm text-gray-500">#{player.info.number}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>{player.info.position}</span>
-                    <span className="font-semibold text-blue-600 text-lg">{player.TP} pts</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>{player.G}G {player.A}A</span>
-                    <span>{player.info.nationality}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="space-y-4">
+          {team1Players.map((player) => (
+            <PlayerCard
+              key={player.info.uuid}
+              imageUrl={getPlayerImageUrl(player)}
+              playerName={player.info.fullName}
+              playerNumber={player.info.number}
+              primaryValue={`${player.TP} p`}
+              secondaryValue={`${player.G} + ${player.A}`}
+              rank={player.Rank}
+              nationality={player.info.nationality}
+            />
+          ))}
         </div>
 
         {/* Team 2 Top Players */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="space-y-0">
-            {team2Players.map((player) => (
-              <div key={player.info.uuid} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg justify-center">
-                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                  {player.info.playerMedia?.mediaString ? (
-                    <Image
-                      src={`https://sportality.cdn.s8y.se/${player.info.playerMedia.mediaString.split('|')[2]}`}
-                      alt={player.info.fullName}
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-400 text-xl">🏒</span>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-gray-900 text-lg">{player.info.fullName}</h4>
-                    <span className="text-sm text-gray-500">#{player.info.number}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>{player.info.position}</span>
-                    <span className="font-semibold text-blue-600 text-lg">{player.TP} pts</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>{player.G}G {player.A}A</span>
-                    <span>{player.info.nationality}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="space-y-4">
+          {team2Players.map((player) => (
+            <PlayerCard
+              key={player.info.uuid}
+              imageUrl={getPlayerImageUrl(player)}
+              playerName={player.info.fullName}
+              playerNumber={player.info.number}
+              primaryValue={`${player.TP} p`}
+              secondaryValue={`${player.G} + ${player.A}`}
+              rank={player.Rank}
+              nationality={player.info.nationality}
+            />
+          ))}
         </div>
       </div>
     </div>
