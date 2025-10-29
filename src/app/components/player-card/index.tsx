@@ -21,6 +21,7 @@ const getCountryFlag = (nationality: string): string => {
     'CZ': '🇨🇿', // Czech Republic
     'SK': '🇸🇰', // Slovakia
     'NO': '🇳🇴', // Norway
+    'NOR': '🇳🇴', // Norway
     'DK': '🇩🇰', // Denmark
     'DE': '🇩🇪', // Germany
     'CH': '🇨🇭', // Switzerland
@@ -45,7 +46,7 @@ const getCountryFlag = (nationality: string): string => {
 
   // Try to match the nationality string (could be code like "FI" or full name)
   const code = nationality.toUpperCase().trim();
-  return countryMap[code] || '🏒'; // Fallback to hockey emoji if not found
+  return countryMap[code] || '';
 };
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({
@@ -62,21 +63,32 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
     <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
       <div className="p-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Left side: Number, Name, Nationality */}
+          {/* Left side: Number, Name */}
           <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-gray-600">#{playerNumber}</span>
+            {/* Player Number with Flag Background */}
+            <div className="relative inline-flex items-center justify-center">
+              {/* Flag emoji as background */}
+              <span
+                className="absolute text-8xl opacity-30 -rotate-[30deg] pointer-events-none"
+                title={nationality}
+                aria-hidden="true"
+              >
+                {flagEmoji}
+              </span>
+              {/* Player Number */}
+              <span className="relative text-sm font-semibold text-gray-600 z-10">#{playerNumber}</span>
+            </div>
             <h3 className="text-lg font-bold text-gray-900">{playerName}</h3>
-            <span className="text-xl" title={nationality}>{flagEmoji}</span>
           </div>
-          
+
           {/* Right side: Primary, Secondary, Rank */}
           <div className="flex items-center gap-3">
             {/* Primary Value - Standout */}
             <span className="text-2xl font-bold text-blue-600">{primaryValue}</span>
-            
+
             {/* Secondary Value with spacing inside brackets */}
             <span className="text-base font-semibold text-gray-500">[ {secondaryValue} ]</span>
-            
+
             {/* Rank */}
             {rank && (
               <span className="text-sm font-semibold text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
