@@ -25,40 +25,53 @@ export default function SHLPage() {
         const games = await leagueService.fetchGames();
 
         if (games.length > 0) {
-          const now = new Date();
           const today = new Date();
           const todayString = today.toDateString();
 
-          // Find the next available game date
-          const futureGames = games.filter(game => new Date(game.startDateTime) >= now);
+          // Check if there are any games today (regardless of whether they've started)
+          const todaysGames = games.filter(game => {
+            const gameDate = new Date(game.startDateTime);
+            return gameDate.toDateString() === todayString;
+          });
 
-          if (futureGames.length > 0) {
-            // Get the first future game date
-            const firstGameDate = new Date(futureGames[0].startDateTime);
-            const firstGameDateString = firstGameDate.toDateString();
+          let targetDateString: string;
+          let targetGames: GameInfo[];
 
-            // Check if the next game date is today
-            const targetDateString = firstGameDateString === todayString ? todayString : firstGameDateString;
-
-            // Get all games for the target date
-            const targetGames = games.filter(game => {
-              const gameDate = new Date(game.startDateTime);
-              return gameDate.toDateString() === targetDateString;
-            });
-
-            if (targetGames.length > 0) {
-              setGames(targetGames);
-              setGameDate(firstGameDate.toLocaleDateString('sv-SE', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              }));
-            } else {
-              setError('Inga matcher hittades');
-            }
+          if (todaysGames.length > 0) {
+            // Show all games from today, including started ones
+            targetDateString = todayString;
+            targetGames = todaysGames;
           } else {
-            setError('Inga kommande matcher hittades');
+            // No games today, find the next upcoming game date
+            const now = new Date();
+            const futureGames = games.filter(game => new Date(game.startDateTime) >= now);
+
+            if (futureGames.length > 0) {
+              const firstGameDate = new Date(futureGames[0].startDateTime);
+              targetDateString = firstGameDate.toDateString();
+
+              // Get all games for the target date
+              targetGames = games.filter(game => {
+                const gameDate = new Date(game.startDateTime);
+                return gameDate.toDateString() === targetDateString;
+              });
+            } else {
+              setError('Inga kommande matcher hittades');
+              return;
+            }
+          }
+
+          if (targetGames.length > 0) {
+            setGames(targetGames);
+            const displayDate = new Date(targetGames[0].startDateTime);
+            setGameDate(displayDate.toLocaleDateString('sv-SE', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }));
+          } else {
+            setError('Inga matcher hittades');
           }
         } else {
           setError('Ingen matchdata tillgänglig');

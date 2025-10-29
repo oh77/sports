@@ -82,24 +82,53 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           game.homeTeamInfo.teamInfo.code === foundTeam.short || game.awayTeamInfo.teamInfo.code === foundTeam.short
         );
 
-        // Find next game - get the chronologically next game for this team
+        // Find next game - prioritize games from today (including started ones), then upcoming games
         const now = new Date();
-        const nextGame = teamGames
-          .filter((game: GameInfo) => game.state === 'not-started' && new Date(game.startDateTime) > now)
-          .sort((a: GameInfo, b: GameInfo) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())[0];
+        const today = new Date();
+        const todayString = today.toISOString().split('T')[0];
+
+        // First check if there's a game today (regardless of whether it's started)
+        const todaysGames = teamGames.filter((game: GameInfo) => {
+          const gameDate = new Date(game.startDateTime);
+          return gameDate.toISOString().split('T')[0] === todayString;
+        });
+
+        let nextGame: GameInfo | undefined;
+
+        if (todaysGames.length > 0) {
+          // Return the earliest game today (in case there are multiple)
+          nextGame = todaysGames.sort((a: GameInfo, b: GameInfo) => 
+            new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime()
+          )[0];
+        } else {
+          // No games today, find the next upcoming game
+          nextGame = teamGames
+            .filter((game: GameInfo) => game.state === 'not-started' && new Date(game.startDateTime) > now)
+            .sort((a: GameInfo, b: GameInfo) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())[0];
+        }
 
         setGame(nextGame || null);
 
         // Get previous and upcoming games
         const previous = teamGames
-          .filter((game: GameInfo) => game.state === 'finished')
+          .filter((game: GameInfo) => {
+            const gameDate = new Date(game.startDateTime);
+            const gameDateString = gameDate.toISOString().split('T')[0];
+            // Exclude games from today - only show games from before today
+            return game.state === 'finished' && gameDateString !== todayString;
+          })
           .sort((a: GameInfo, b: GameInfo) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime())
           .slice(0, 5); // Show up to 5 previous games
 
         const upcoming = teamGames
-          .filter((game: GameInfo) => game.state === 'not-started' && game.uuid !== nextGame?.uuid)
+          .filter((game: GameInfo) => {
+            const gameDate = new Date(game.startDateTime);
+            const gameDateString = gameDate.toISOString().split('T')[0];
+            // Exclude games from today and the next game - they're shown in the "next game" container
+            return game.state === 'not-started' && gameDateString !== todayString && game.uuid !== nextGame?.uuid;
+          })
           .sort((a: GameInfo, b: GameInfo) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
-          .slice(0, 5); // Show up to 5 upcoming games (excluding the next game)
+          .slice(0, 5); // Show up to 5 upcoming games (excluding today's games and the next game)
 
         setPreviousGames(previous);
         setUpcomingGames(upcoming);

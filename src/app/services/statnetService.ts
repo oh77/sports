@@ -79,8 +79,31 @@ export class StatnetService {
 
   getNextGameForTeam(teamCode: string): GameInfo | null {
     const now = new Date();
+    const today = new Date();
+    const todayString = today.toDateString();
 
-    // Find the next game for this team (home or away)
+    // First check if there's a game today (regardless of whether it's started)
+    const todaysGames = this.games.filter(game => {
+      try {
+        const gameDate = new Date(game.startDateTime);
+        const isHomeTeam = game.homeTeamInfo?.teamInfo?.code === teamCode;
+        const isAwayTeam = game.awayTeamInfo?.teamInfo?.code === teamCode;
+
+        return (isHomeTeam || isAwayTeam) && gameDate.toDateString() === todayString;
+      } catch (error) {
+        console.warn('Error processing game in getNextGameForTeam:', error);
+        return false;
+      }
+    });
+
+    if (todaysGames.length > 0) {
+      // Return the earliest game today (in case there are multiple)
+      return todaysGames.sort((a, b) => 
+        new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime()
+      )[0];
+    }
+
+    // No games today, find the next upcoming game
     const nextGame = this.games.find(game => {
       try {
         const gameDate = new Date(game.startDateTime);
@@ -99,8 +122,10 @@ export class StatnetService {
 
   getPreviousGamesForTeam(teamCode: string, limit: number = 3): GameInfo[] {
     const now = new Date();
+    const today = new Date();
+    const todayString = today.toDateString();
 
-    // Get all previous games for this team (home or away)
+    // Get all previous games for this team (home or away), excluding today's games
     const previousGames = this.games
       .filter(game => {
         try {
@@ -108,7 +133,8 @@ export class StatnetService {
           const isHomeTeam = game.homeTeamInfo?.teamInfo?.code === teamCode;
           const isAwayTeam = game.awayTeamInfo?.teamInfo?.code === teamCode;
 
-          return (isHomeTeam || isAwayTeam) && gameDate < now;
+          // Exclude games from today - only show games from before today
+          return (isHomeTeam || isAwayTeam) && gameDate.toDateString() !== todayString && gameDate < now;
         } catch (error) {
           console.warn('Error processing game in getPreviousGamesForTeam:', error);
           return false;
@@ -122,8 +148,10 @@ export class StatnetService {
 
   getUpcomingGamesForTeam(teamCode: string, limit: number = 3): GameInfo[] {
     const now = new Date();
+    const today = new Date();
+    const todayString = today.toDateString();
 
-    // Get all upcoming games for this team (home or away)
+    // Get all upcoming games for this team (home or away), excluding today's games
     const upcomingGames = this.games
       .filter(game => {
         try {
@@ -131,14 +159,15 @@ export class StatnetService {
           const isHomeTeam = game.homeTeamInfo?.teamInfo?.code === teamCode;
           const isAwayTeam = game.awayTeamInfo?.teamInfo?.code === teamCode;
 
-          return (isHomeTeam || isAwayTeam) && gameDate > now;
+          // Exclude games from today - they're shown in the "next game" container
+          return (isHomeTeam || isAwayTeam) && gameDate.toDateString() !== todayString && gameDate > now;
         } catch (error) {
           console.warn('Error processing game in getUpcomingGamesForTeam:', error);
           return false;
         }
       })
       .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
-      .slice(1, limit + 1); // Skip the first one (next game) and get the next 3
+      .slice(0, limit); // Get the next N upcoming games (excluding today's games)
 
     return upcomingGames;
   }

@@ -16,43 +16,60 @@ export default function CHLPage() {
   useEffect(() => {
     const fetchNextGameDay = async () => {
       try {
-        // First try to get upcoming games to find the next available date
-        const upcomingResponse = await fetch('/api/chl-games?type=upcoming');
-        if (!upcomingResponse.ok) {
-          throw new Error('Failed to fetch upcoming games');
+        const today = new Date().toISOString().split('T')[0];
+
+        // First check if there are any games today (including started ones)
+        const todayResponse = await fetch(`/api/chl-games?type=date&date=${today}`);
+        if (!todayResponse.ok) {
+          throw new Error('Failed to fetch today\'s games');
         }
-        const upcomingData = await upcomingResponse.json();
+        const todayData: LeagueResponse = await todayResponse.json();
 
-        if (upcomingData.gameInfo && upcomingData.gameInfo.length > 0) {
-          // Get the date of the first upcoming game
-          const firstUpcomingGame = upcomingData.gameInfo[0];
-          const nextGameDate = new Date(firstUpcomingGame.startDateTime);
-          const nextGameDateString = nextGameDate.toISOString().split('T')[0];
-
-          // Check if the next game date is today
-          const today = new Date().toISOString().split('T')[0];
-          const targetDate = nextGameDateString === today ? today : nextGameDateString;
-
-          // Fetch games for the target date
-          const dateResponse = await fetch(`/api/chl-games?type=date&date=${targetDate}`);
-          if (!dateResponse.ok) {
-            throw new Error('Failed to fetch games for date');
+        if (todayData.gameInfo && todayData.gameInfo.length > 0) {
+          // Show all games from today, including started ones
+          setTodaysGames(todayData.gameInfo);
+          const displayDate = new Date(todayData.gameInfo[0].startDateTime);
+          setGameDate(displayDate.toLocaleDateString('sv-SE', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }));
+        } else {
+          // No games today, find the next upcoming game date
+          const upcomingResponse = await fetch('/api/chl-games?type=upcoming');
+          if (!upcomingResponse.ok) {
+            throw new Error('Failed to fetch upcoming games');
           }
-          const dateData: LeagueResponse = await dateResponse.json();
+          const upcomingData = await upcomingResponse.json();
 
-          if (dateData.gameInfo && dateData.gameInfo.length > 0) {
-            setTodaysGames(dateData.gameInfo);
-            setGameDate(nextGameDate.toLocaleDateString('sv-SE', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }));
+          if (upcomingData.gameInfo && upcomingData.gameInfo.length > 0) {
+            // Get the date of the first upcoming game
+            const firstUpcomingGame = upcomingData.gameInfo[0];
+            const nextGameDate = new Date(firstUpcomingGame.startDateTime);
+            const nextGameDateString = nextGameDate.toISOString().split('T')[0];
+
+            // Fetch games for the target date
+            const dateResponse = await fetch(`/api/chl-games?type=date&date=${nextGameDateString}`);
+            if (!dateResponse.ok) {
+              throw new Error('Failed to fetch games for date');
+            }
+            const dateData: LeagueResponse = await dateResponse.json();
+
+            if (dateData.gameInfo && dateData.gameInfo.length > 0) {
+              setTodaysGames(dateData.gameInfo);
+              setGameDate(nextGameDate.toLocaleDateString('sv-SE', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }));
+            } else {
+              setTodaysGames([]);
+            }
           } else {
             setTodaysGames([]);
           }
-        } else {
-          setTodaysGames([]);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
