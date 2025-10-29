@@ -2,39 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { PlayerCard } from '../player-card';
-
-interface GoalieInfo {
-  uuid: string;
-  fullName: string;
-  firstName: string;
-  lastName: string;
-  nationality: string;
-  number: number;
-  position: string;
-  playerMedia?: {
-    mediaString: string;
-  };
-  team: {
-    code: string;
-  };
-}
-
-interface GoalieStats {
-  Rank: number | null;
-  Player: number;
-  Team: number;
-  GP: number; // Games Played
-  SVS: number; // Saves
-  GA: number; // Goals Against
-  SVSPerc: string; // Save Percentage
-  GAA: string; // Goals Against Average
-  SO: number; // Shutouts
-  info: GoalieInfo;
-}
-
-interface GoalieStatsData {
-  stats: GoalieStats[];
-}
+import { GoalieStats, GoalieStatsData } from '../../types/domain/goalie-stats';
 
 interface TopGoaliesProps {
   teamCode1: string;
@@ -86,19 +54,12 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({ teamCode1, teamCode2, le
         }
 
         // Get top goalie from each team (sorted by save percentage)
-        // Handle different possible field names for save percentage
-        const sortBySavePercentage = (a: any, b: any) => {
-          const svsPerA = a.SVSper ?? a.SVSPerc ?? a.SVS_per ?? a.SVSPerc ?? 0;
-          const svsPerB = b.SVSper ?? b.SVSPerc ?? b.SVS_per ?? b.SVSPerc ?? 0;
-          return svsPerB - svsPerA;
-        };
-
         const team1GoaliesFiltered = (team1Data.stats || [])
-          .sort(sortBySavePercentage)
+          // .sort((a: GoalieStats, b: GoalieStats) => b.SVSper - a.SVSper)
           .slice(0, 1);
 
         const team2GoaliesFiltered = (team2Data.stats || [])
-          .sort(sortBySavePercentage)
+          // .sort((a: GoalieStats, b: GoalieStats) => b.SVSper - a.SVSper)
           .slice(0, 1);
 
         setTeam1Goalies(team1GoaliesFiltered);

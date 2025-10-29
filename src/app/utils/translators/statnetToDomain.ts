@@ -5,6 +5,8 @@ import {StatnetTeamInfo, StatnetTeamStats} from "@/app/types/statnet/standings";
 import {TeamInfo} from "@/app/types/domain/team";
 import { PlayerStats, PlayerInfo } from '../../types/domain/player-stats';
 import { StatnetPlayerStats, StatnetPlayerInfo } from '../../types/statnet/player-stats';
+import { GoalieStats, GoalieInfo } from '../../types/domain/goalie-stats';
+import { StatnetGoalieStats, StatnetGoalieInfo } from '../../types/statnet/goalie-stats';
 
 export function translateStatnetGameTeamToDomain(statnetTeam: StatnetGameTeamInfo): TeamInfo {
   return {
@@ -106,5 +108,41 @@ export function translateStatnetPlayerStatsToDomain(statnetStats: StatnetPlayerS
     SHA: statnetStats.SHA,
     SHTP: statnetStats.SHTP,
     info: translateStatnetPlayerInfoToDomain(statnetStats.info)
+  };
+}
+
+export function translateStatnetGoalieInfoToDomain(statnetInfo: StatnetGoalieInfo): GoalieInfo {
+  return {
+    uuid: statnetInfo.uuid,
+    fullName: statnetInfo.fullName,
+    firstName: statnetInfo.firstName,
+    lastName: statnetInfo.lastName,
+    birthDate: statnetInfo.birthDate,
+    nationality: statnetInfo.nationality,
+    number: statnetInfo.number,
+    position: statnetInfo.position,
+    shoots: statnetInfo.shoots,
+    gender: statnetInfo.gender,
+    weight: statnetInfo.weight,
+    height: statnetInfo.height,
+    playerMedia: statnetInfo.playerMedia,
+    team: statnetInfo.team,
+    teamCode: statnetInfo.teamCode,
+    teamId: statnetInfo.teamId
+  };
+}
+
+export function translateStatnetGoalieStatsToDomain(statnetStats: StatnetGoalieStats): GoalieStats {
+  return {
+    Rank: statnetStats.Rank,
+    Player: statnetStats.Player,
+    Team: statnetStats.Team,
+    GP: statnetStats.GP,
+    SVS: statnetStats.SVS,
+    GA: statnetStats.GA,
+    SVSPerc: statnetStats.SVSPerc,
+    GAA: statnetStats.GAA,
+    SO: statnetStats.SO,
+    info: translateStatnetGoalieInfoToDomain(statnetStats.info)
   };
 }

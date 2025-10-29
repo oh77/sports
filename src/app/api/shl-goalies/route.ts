@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
+import { translateStatnetGoalieStatsToDomain } from '../../utils/translators/statnetToDomain';
+import { StatnetGoalieStatsData } from '../../types/statnet/goalie-stats';
+import { GoalieStatsData } from '../../types/domain/goalie-stats';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,19 +29,26 @@ export async function GET(request: NextRequest) {
       }
 
       const rawData = await response.json();
-      const goalieData = Array.isArray(rawData) ? rawData[0] : rawData;
+      const statnetData: StatnetGoalieStatsData = Array.isArray(rawData) ? rawData[0] : rawData;
+
+      // Translate to domain model
+      let domainData: GoalieStatsData = {
+        dataColumns: statnetData.dataColumns,
+        defaultSortKey: statnetData.defaultSortKey,
+        stats: statnetData.stats.map(translateStatnetGoalieStatsToDomain)
+      };
 
       // Filter by team if teamCode is provided
-      if (teamCode && goalieData.stats) {
-        return {
-          ...goalieData,
-          stats: goalieData.stats.filter((goalie: any) => 
-            goalie.info?.team?.code === teamCode
+      if (teamCode) {
+        domainData = {
+          ...domainData,
+          stats: domainData.stats.filter(goalie => 
+            goalie.info.team.code === teamCode
           )
         };
       }
 
-      return goalieData;
+      return domainData;
     });
 
     return NextResponse.json(data);
