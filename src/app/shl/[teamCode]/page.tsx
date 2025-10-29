@@ -10,6 +10,7 @@ import NextGame from '../../components/next-game';
 import LeagueFooter from '../../components/league-footer';
 import { CompactStandings } from '../../components/standings/compact-standings';
 import { HeadToHead } from '../../components/head-to-head';
+import { TopPlayers } from '../../components/top-players';
 import { GameInfo } from '../../types/domain/game';
 import { TeamInfo } from '../../types/domain/team';
 import { StandingsData } from '../../types/domain/standings';
@@ -176,6 +177,16 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
                   <GameStatsContainer allGames={allGames} currentGame={game} />
               </div>
           )}
+          
+        {/* Top Players */}
+        {game && (
+          <TopPlayers
+            teamCode1={game.homeTeamInfo.teamInfo.code}
+            teamCode2={game.awayTeamInfo.teamInfo.code}
+            league="shl"
+          />
+        )}
+
         {/* Compact Standings */}
         {standings && (
           <div className="max-w-6xl mx-auto mb-8">

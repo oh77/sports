@@ -10,6 +10,7 @@ import NextGame from '../../components/next-game';
 import LeagueFooter from '../../components/league-footer';
 import { CompactStandings } from '../../components/standings/compact-standings';
 import { HeadToHead } from '../../components/head-to-head';
+import { TopPlayers } from '../../components/top-players';
 import { GameInfo, GameTeamInfo } from '../../types/domain/game';
 import { StandingsData } from '../../types/domain/standings';
 import GameStatsContainer from "@/app/components/gamestats-container";
@@ -192,11 +193,20 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
           />
         )}
 
-          {game && (
-              <div className="max-w-6xl mx-auto mb-8">
-                  <GameStatsContainer allGames={allGames} currentGame={game} />
-              </div>
-          )}
+        {game && (
+            <div className="max-w-6xl mx-auto mb-8">
+                <GameStatsContainer allGames={allGames} currentGame={game} />
+            </div>
+        )}
+
+        {/* Top Players */}
+        {game && (
+          <TopPlayers
+            teamCode1={game.homeTeamInfo.teamInfo.code}
+            teamCode2={game.awayTeamInfo.teamInfo.code}
+            league="sdhl"
+          />
+        )}
 
         {/* Compact Standings */}
         {standings && (
