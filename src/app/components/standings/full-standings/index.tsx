@@ -10,11 +10,13 @@ import {
   getTeamName,
 } from '@/app/components/standings/standingsUtils';
 import type { League } from '@/app/types/domain/league';
+import type { StandingsFilter } from '@/app/types/domain/standingsFilter';
 import type { StandingsData } from '../../../types/domain/standings';
 
 interface FullStandingsProps {
   standings: StandingsData;
   league: League;
+  filter?: StandingsFilter | undefined;
 }
 
 export function FullStandings({ standings, league }: FullStandingsProps) {

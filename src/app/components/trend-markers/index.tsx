@@ -11,6 +11,7 @@ interface TrendMarkersProps {
 type GameResult = 'win' | 'win-ot' | 'loss' | 'loss-ot';
 
 interface TeamGameResult {
+  uuid: string;
   result: GameResult;
   opponent: string;
   location: 'H' | 'B';
