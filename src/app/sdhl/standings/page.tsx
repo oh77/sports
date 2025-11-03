@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { FullStandings } from '../../components/standings/full-standings';
-import { StandingsData } from '../../types/domain/standings';
 import { StandingsHeader } from '../../components/standings/standings-header';
+import type { StandingsData } from '../../types/domain/standings';
 
 export default function SDHLStandingsPage() {
   const [standings, setStandings] = useState<StandingsData | null>(null);

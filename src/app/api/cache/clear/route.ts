@@ -5,16 +5,16 @@ export async function POST() {
   try {
     // Clear all cache entries
     invalidateCache();
-    
+
     return NextResponse.json({
       message: 'Cache cleared successfully',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Error clearing cache:', error);
     return NextResponse.json(
       { error: 'Failed to clear cache' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

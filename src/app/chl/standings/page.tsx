@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { FullStandings } from '../../components/standings/full-standings';
-import { StandingsData } from '../../types/domain/standings';
 import { StandingsHeader } from '../../components/standings/standings-header';
+import type { StandingsData } from '../../types/domain/standings';
 
 export default function CHLStandingsPage() {
   const [standings, setStandings] = useState<StandingsData | null>(null);
@@ -36,7 +36,10 @@ export default function CHLStandingsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen py-12 relative" style={{ backgroundColor: '#20001c' }}>
+      <main
+        className="min-h-screen py-12 relative"
+        style={{ backgroundColor: '#20001c' }}
+      >
         {/* Background CHL Logo */}
         <div className="fixed top-0 right-0 z-0">
           <div className="w-96 h-96 bg-white rounded-full opacity-10 transform rotate-12"></div>
@@ -61,7 +64,10 @@ export default function CHLStandingsPage() {
 
   if (error || !standings) {
     return (
-      <main className="min-h-screen py-12 relative" style={{ backgroundColor: '#20001c' }}>
+      <main
+        className="min-h-screen py-12 relative"
+        style={{ backgroundColor: '#20001c' }}
+      >
         {/* Background CHL Logo */}
         <div className="fixed top-0 right-0 z-0">
           <div className="w-96 h-96 bg-white rounded-full opacity-10 transform rotate-12"></div>
@@ -91,20 +97,23 @@ export default function CHLStandingsPage() {
   }
 
   return (
-    <main className="min-h-screen py-12 relative" style={{ backgroundColor: '#20001c' }}>
+    <main
+      className="min-h-screen py-12 relative"
+      style={{ backgroundColor: '#20001c' }}
+    >
       {/* Background CHL Logo */}
       <div className="fixed top-0 right-0 z-0">
         <div className="w-96 h-96 bg-white rounded-full opacity-10 transform rotate-12"></div>
       </div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <StandingsHeader
-            league="chl"
-            leagueName="CHL"
-            logoUrl="https://www.chl.hockey/static/img/logo.png"
-            backgroundColor="#20001c"
-            backPath="/chl"
-          />
+      <div className="container mx-auto px-4 relative z-10">
+        <StandingsHeader
+          league="chl"
+          leagueName="CHL"
+          logoUrl="https://www.chl.hockey/static/img/logo.png"
+          backgroundColor="#20001c"
+          backPath="/chl"
+        />
 
         <FullStandings standings={standings} league="chl" />
       </div>

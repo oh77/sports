@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { StatnetService } from '../services/statnetService';
-import { GameInfo } from '../types/domain/game';
+import { useEffect, useState } from 'react';
 import { GameGroup } from '../components/game-group';
-import { LeagueHeader } from '../components/league-header';
 import LeagueFooter from '../components/league-footer';
+import { LeagueHeader } from '../components/league-header';
+import { StatnetService } from '../services/statnetService';
+import type { GameInfo } from '../types/domain/game';
 
 export default function SHLPage() {
   const [games, setGames] = useState<GameInfo[]>([]);
@@ -29,7 +29,7 @@ export default function SHLPage() {
           const todayString = today.toDateString();
 
           // Check if there are any games today (regardless of whether they've started)
-          const todaysGames = games.filter(game => {
+          const todaysGames = games.filter((game) => {
             const gameDate = new Date(game.startDateTime);
             return gameDate.toDateString() === todayString;
           });
@@ -44,14 +44,16 @@ export default function SHLPage() {
           } else {
             // No games today, find the next upcoming game date
             const now = new Date();
-            const futureGames = games.filter(game => new Date(game.startDateTime) >= now);
+            const futureGames = games.filter(
+              (game) => new Date(game.startDateTime) >= now,
+            );
 
             if (futureGames.length > 0) {
               const firstGameDate = new Date(futureGames[0].startDateTime);
               targetDateString = firstGameDate.toDateString();
 
               // Get all games for the target date
-              targetGames = games.filter(game => {
+              targetGames = games.filter((game) => {
                 const gameDate = new Date(game.startDateTime);
                 return gameDate.toDateString() === targetDateString;
               });
@@ -64,12 +66,14 @@ export default function SHLPage() {
           if (targetGames.length > 0) {
             setGames(targetGames);
             const displayDate = new Date(targetGames[0].startDateTime);
-            setGameDate(displayDate.toLocaleDateString('sv-SE', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }));
+            setGameDate(
+              displayDate.toLocaleDateString('sv-SE', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+            );
           } else {
             setError('Inga matcher hittades');
           }
@@ -92,34 +96,36 @@ export default function SHLPage() {
     return date.toLocaleTimeString('sv-SE', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false
+      hour12: false,
     });
   };
 
   // Group games by time
   const groupGamesByTime = (games: GameInfo[]) => {
-    const grouped = games.reduce((acc, game) => {
-      const time = formatGameTime(game.startDateTime);
-      if (!acc[time]) {
-        acc[time] = [];
-      }
-      acc[time].push(game);
-      return acc;
-    }, {} as Record<string, GameInfo[]>);
+    const grouped = games.reduce(
+      (acc, game) => {
+        const time = formatGameTime(game.startDateTime);
+        if (!acc[time]) {
+          acc[time] = [];
+        }
+        acc[time].push(game);
+        return acc;
+      },
+      {} as Record<string, GameInfo[]>,
+    );
 
     // Sort times
     const sortedTimes = Object.keys(grouped).sort((a, b) => {
       const [aHour, aMin] = a.split(':').map(Number);
       const [bHour, bMin] = b.split(':').map(Number);
-      return (aHour * 60 + aMin) - (bHour * 60 + bMin);
+      return aHour * 60 + aMin - (bHour * 60 + bMin);
     });
 
-    return sortedTimes.map(time => ({
+    return sortedTimes.map((time) => ({
       time,
-      games: grouped[time]
+      games: grouped[time],
     }));
   };
-
 
   if (loading) {
     return (
@@ -137,7 +143,10 @@ export default function SHLPage() {
 
         <div className="container mx-auto px-4 relative z-10">
           {/* Header Row */}
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
+          <div
+            className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg"
+            style={{ backgroundColor: 'rgba(24,29,38,1)' }}
+          >
             <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded animate-pulse"></div>
             <div className="text-center">
               <div className="h-8 md:h-12 bg-gray-300 rounded mb-2 w-48 animate-pulse"></div>
@@ -212,13 +221,13 @@ export default function SHLPage() {
         />
       </div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <LeagueHeader
-            league="shl"
-            gameDate={gameDate}
-            logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-            standingsPath="/shl/standings"
-          />
+      <div className="container mx-auto px-4 relative z-10">
+        <LeagueHeader
+          league="shl"
+          gameDate={gameDate}
+          logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
+          standingsPath="/shl/standings"
+        />
 
         <div className="max-w-4xl mx-auto">
           {groupGamesByTime(games).map((group) => (

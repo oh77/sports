@@ -1,5 +1,6 @@
-import { GameInfo } from '../../types/domain/game';
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type { GameInfo } from '../../types/domain/game';
 
 interface TrendMarkersProps {
   games: GameInfo[];
@@ -17,7 +18,11 @@ interface TeamGameResult {
   opponentScore: number;
 }
 
-export const TrendMarkers: React.FC<TrendMarkersProps> = ({ games, homeTeamCode, awayTeamCode }) => {
+export const TrendMarkers: React.FC<TrendMarkersProps> = ({
+  games,
+  homeTeamCode,
+  awayTeamCode,
+}) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -31,21 +36,35 @@ export const TrendMarkers: React.FC<TrendMarkersProps> = ({ games, homeTeamCode,
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const getTeamResults = (teamCode: string, limit: number): TeamGameResult[] => {
+  const getTeamResults = (
+    teamCode: string,
+    limit: number,
+  ): TeamGameResult[] => {
     return games
-      .filter(game => game.state === 'finished')
-      .filter(game =>
-        game.homeTeamInfo.teamInfo.code === teamCode ||
-        game.awayTeamInfo.teamInfo.code === teamCode
+      .filter((game) => game.state === 'finished')
+      .filter(
+        (game) =>
+          game.homeTeamInfo.teamInfo.code === teamCode ||
+          game.awayTeamInfo.teamInfo.code === teamCode,
       )
-      .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.startDateTime).getTime() -
+          new Date(a.startDateTime).getTime(),
+      )
       .slice(0, limit)
       .reverse()
-      .map(game => {
+      .map((game) => {
         const isHomeTeam = game.homeTeamInfo.teamInfo.code === teamCode;
-        const teamScore = isHomeTeam ? game.homeTeamInfo.score : game.awayTeamInfo.score;
-        const opponentScore = isHomeTeam ? game.awayTeamInfo.score : game.homeTeamInfo.score;
-        const opponent = isHomeTeam ? game.awayTeamInfo.teamInfo.short : game.homeTeamInfo.teamInfo.short;
+        const teamScore = isHomeTeam
+          ? game.homeTeamInfo.score
+          : game.awayTeamInfo.score;
+        const opponentScore = isHomeTeam
+          ? game.awayTeamInfo.score
+          : game.homeTeamInfo.score;
+        const opponent = isHomeTeam
+          ? game.awayTeamInfo.teamInfo.short
+          : game.homeTeamInfo.teamInfo.short;
 
         const won = teamScore > opponentScore;
         const afterRegulation = game.overtime || game.shootout;
@@ -58,11 +77,12 @@ export const TrendMarkers: React.FC<TrendMarkersProps> = ({ games, homeTeamCode,
         }
 
         return {
+          uuid: game.uuid,
           result,
           opponent,
           location: isHomeTeam ? 'H' : 'B',
           teamScore,
-          opponentScore
+          opponentScore,
         };
       });
   };
@@ -93,14 +113,22 @@ export const TrendMarkers: React.FC<TrendMarkersProps> = ({ games, homeTeamCode,
 
   const renderTrend = (results: TeamGameResult[], align: 'left' | 'right') => {
     if (results.length === 0) {
-      return <div className={`text-xs text-gray-400 ${align === 'left' ? 'text-left' : 'text-right'}`}>Inga matcher</div>;
+      return (
+        <div
+          className={`text-xs text-gray-400 ${align === 'left' ? 'text-left' : 'text-right'}`}
+        >
+          Inga matcher
+        </div>
+      );
     }
 
     return (
-      <div className={`flex gap-1.5 ${align === 'left' ? 'justify-start' : 'justify-end'}`}>
-        {results.map((gameResult, index) => (
+      <div
+        className={`flex gap-1.5 ${align === 'left' ? 'justify-start' : 'justify-end'}`}
+      >
+        {results.map((gameResult) => (
           <div
-            key={index}
+            key={gameResult.uuid}
             className={`w-3 h-3 rounded-full ${getResultColor(gameResult.result)}`}
             title={`${gameResult.opponent} (${gameResult.location}) ${gameResult.teamScore}-${gameResult.opponentScore}`}
           />
@@ -112,14 +140,9 @@ export const TrendMarkers: React.FC<TrendMarkersProps> = ({ games, homeTeamCode,
   return (
     <div className="mt-4 pt-4">
       <div className="flex justify-between items-center px-2 md:px-4">
-        <div>
-          {renderTrend(homeResults, 'left')}
-        </div>
-        <div>
-          {renderTrend(awayResults, 'right')}
-        </div>
+        <div>{renderTrend(homeResults, 'left')}</div>
+        <div>{renderTrend(awayResults, 'right')}</div>
       </div>
     </div>
   );
 };
-

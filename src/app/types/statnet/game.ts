@@ -1,4 +1,4 @@
-import {VenueInfo} from "@/app/types/domain/game";
+import type { VenueInfo } from '@/app/types/domain/game';
 
 export type StatnetGameState = 'post-game' | 'pre-game';
 

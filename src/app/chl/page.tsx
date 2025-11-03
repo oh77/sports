@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { GameInfo, LeagueResponse } from '../types/domain/game';
+import { useEffect, useState } from 'react';
 import { GameGroup } from '../components/game-group';
-import { LeagueHeader } from '../components/league-header';
 import LeagueFooter from '../components/league-footer';
+import { LeagueHeader } from '../components/league-header';
+import type { GameInfo, LeagueResponse } from '../types/domain/game';
 
 export default function CHLPage() {
   const [todaysGames, setTodaysGames] = useState<GameInfo[]>([]);
@@ -19,9 +19,11 @@ export default function CHLPage() {
         const today = new Date().toISOString().split('T')[0];
 
         // First check if there are any games today (including started ones)
-        const todayResponse = await fetch(`/api/chl-games?type=date&date=${today}`);
+        const todayResponse = await fetch(
+          `/api/chl-games?type=date&date=${today}`,
+        );
         if (!todayResponse.ok) {
-          throw new Error('Failed to fetch today\'s games');
+          throw new Error("Failed to fetch today's games");
         }
         const todayData: LeagueResponse = await todayResponse.json();
 
@@ -29,12 +31,14 @@ export default function CHLPage() {
           // Show all games from today, including started ones
           setTodaysGames(todayData.gameInfo);
           const displayDate = new Date(todayData.gameInfo[0].startDateTime);
-          setGameDate(displayDate.toLocaleDateString('sv-SE', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }));
+          setGameDate(
+            displayDate.toLocaleDateString('sv-SE', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }),
+          );
         } else {
           // No games today, find the next upcoming game date
           const upcomingResponse = await fetch('/api/chl-games?type=upcoming');
@@ -50,7 +54,9 @@ export default function CHLPage() {
             const nextGameDateString = nextGameDate.toISOString().split('T')[0];
 
             // Fetch games for the target date
-            const dateResponse = await fetch(`/api/chl-games?type=date&date=${nextGameDateString}`);
+            const dateResponse = await fetch(
+              `/api/chl-games?type=date&date=${nextGameDateString}`,
+            );
             if (!dateResponse.ok) {
               throw new Error('Failed to fetch games for date');
             }
@@ -58,12 +64,14 @@ export default function CHLPage() {
 
             if (dateData.gameInfo && dateData.gameInfo.length > 0) {
               setTodaysGames(dateData.gameInfo);
-              setGameDate(nextGameDate.toLocaleDateString('sv-SE', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              }));
+              setGameDate(
+                nextGameDate.toLocaleDateString('sv-SE', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                }),
+              );
             } else {
               setTodaysGames([]);
             }
@@ -86,38 +94,43 @@ export default function CHLPage() {
     return date.toLocaleTimeString('sv-SE', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false
+      hour12: false,
     });
   };
 
   // Group games by time
   const groupGamesByTime = (games: GameInfo[]) => {
-    const grouped = games.reduce((acc, game) => {
-      const time = formatGameTime(game.startDateTime);
-      if (!acc[time]) {
-        acc[time] = [];
-      }
-      acc[time].push(game);
-      return acc;
-    }, {} as Record<string, GameInfo[]>);
+    const grouped = games.reduce(
+      (acc, game) => {
+        const time = formatGameTime(game.startDateTime);
+        if (!acc[time]) {
+          acc[time] = [];
+        }
+        acc[time].push(game);
+        return acc;
+      },
+      {} as Record<string, GameInfo[]>,
+    );
 
     // Sort times
     const sortedTimes = Object.keys(grouped).sort((a, b) => {
       const [aHour, aMin] = a.split(':').map(Number);
       const [bHour, bMin] = b.split(':').map(Number);
-      return (aHour * 60 + aMin) - (bHour * 60 + bMin);
+      return aHour * 60 + aMin - (bHour * 60 + bMin);
     });
 
-    return sortedTimes.map(time => ({
+    return sortedTimes.map((time) => ({
       time,
-      games: grouped[time]
+      games: grouped[time],
     }));
   };
 
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#20001c' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: '#20001c' }}
+      >
         <div className="text-white text-xl">Loading CHL games...</div>
       </div>
     );
@@ -125,14 +138,20 @@ export default function CHLPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#20001c' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: '#20001c' }}
+      >
         <div className="text-white text-xl">Error: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen relative" style={{ backgroundColor: '#20001c' }}>
+    <div
+      className="min-h-screen relative"
+      style={{ backgroundColor: '#20001c' }}
+    >
       {/* Background CHL Logo */}
       <div className="fixed top-0 right-0 z-0">
         <Image

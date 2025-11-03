@@ -1,28 +1,28 @@
-import {TeamInfo} from "@/app/types/domain/team";
+import type { TeamInfo } from '@/app/types/domain/team';
 
 export type GameState = 'finished' | 'not-started' | 'live';
 
 export interface GameTeamInfo {
-    teamInfo: TeamInfo;
-    score: number;
+  teamInfo: TeamInfo;
+  score: number;
 }
 
 export interface VenueInfo {
-    name: string;
+  name: string;
 }
 
 export interface GameInfo {
-    uuid: string;
-    startDateTime: string;
-    state: GameState;
-    homeTeamInfo: GameTeamInfo;
-    awayTeamInfo: GameTeamInfo;
-    venueInfo: VenueInfo;
-    overtime?: boolean;
-    shootout?: boolean;
+  uuid: string;
+  startDateTime: string;
+  state: GameState;
+  homeTeamInfo: GameTeamInfo;
+  awayTeamInfo: GameTeamInfo;
+  venueInfo: VenueInfo;
+  overtime?: boolean;
+  shootout?: boolean;
 }
 
 export interface LeagueResponse {
-    gameInfo: GameInfo[];
-    teamList?: GameTeamInfo[];
+  gameInfo: GameInfo[];
+  teamList?: GameTeamInfo[];
 }

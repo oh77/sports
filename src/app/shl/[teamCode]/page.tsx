@@ -1,22 +1,26 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { StatnetService } from '../../services/statnetService';
-import PreviousGames from '../../components/previous-games';
-import UpcomingGames from '../../components/upcoming-games';
-import NextGame from '../../components/next-game';
-import LeagueFooter from '../../components/league-footer';
-import { CompactStandings } from '../../components/standings/compact-standings';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import GameStatsContainer from '@/app/components/gamestats-container';
 import { HeadToHead } from '../../components/head-to-head';
+import LeagueFooter from '../../components/league-footer';
+import NextGame from '../../components/next-game';
+import PreviousGames from '../../components/previous-games';
+import { CompactStandings } from '../../components/standings/compact-standings';
 import { TopPlayers } from '../../components/top-players';
-import { GameInfo } from '../../types/domain/game';
-import { TeamInfo } from '../../types/domain/team';
-import { StandingsData } from '../../types/domain/standings';
-import GameStatsContainer from "@/app/components/gamestats-container";
+import UpcomingGames from '../../components/upcoming-games';
+import { StatnetService } from '../../services/statnetService';
+import type { GameInfo } from '../../types/domain/game';
+import type { StandingsData } from '../../types/domain/standings';
+import type { TeamInfo } from '../../types/domain/team';
 
-export default function TeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
+export default function TeamPage({
+  params,
+}: {
+  params: Promise<{ teamCode: string }>;
+}) {
   const resolvedParams = React.use(params);
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
   const [game, setGame] = useState<GameInfo | null>(null);
@@ -44,7 +48,11 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           setGame(nextGame);
           // Determine which team info to show (home or away)
           const isHomeTeam = nextGame.homeTeamInfo.teamInfo.code === teamCode;
-          setTeamInfo(isHomeTeam ? nextGame.homeTeamInfo.teamInfo : nextGame.awayTeamInfo.teamInfo);
+          setTeamInfo(
+            isHomeTeam
+              ? nextGame.homeTeamInfo.teamInfo
+              : nextGame.awayTeamInfo.teamInfo,
+          );
 
           // Load previous and upcoming games
           const prevGames = leagueService.getPreviousGamesForTeam(teamCode, 3);
@@ -78,9 +86,6 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
     }
   }, [teamCode]);
 
-
-
-
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-100 py-12 relative">
@@ -105,7 +110,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
               {error || 'Lag Inte Hittat'}
             </h1>
             <p className="text-gray-600 mb-6">
-              {error || `Inga kommande matcher hittades för lagkod: ${teamCode}`}
+              {error ||
+                `Inga kommande matcher hittades för lagkod: ${teamCode}`}
             </p>
             <Link
               href="/shl"
@@ -118,7 +124,6 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
       </main>
     );
   }
-
 
   return (
     <main className="min-h-screen bg-gray-100 py-12 relative">
@@ -172,12 +177,12 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           />
         )}
 
-          {game && (
-              <div className="max-w-6xl mx-auto mb-8">
-                  <GameStatsContainer allGames={allGames} currentGame={game} />
-              </div>
-          )}
-          
+        {game && (
+          <div className="max-w-6xl mx-auto mb-8">
+            <GameStatsContainer allGames={allGames} currentGame={game} />
+          </div>
+        )}
+
         {/* Top Players */}
         {game && (
           <TopPlayers
@@ -194,7 +199,13 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
               standings={standings}
               league="shl"
               teamCode={teamCode}
-              opponentTeamCode={game ? (game.homeTeamInfo.teamInfo.code === teamCode ? game.awayTeamInfo.teamInfo.code : game.homeTeamInfo.teamInfo.code) : undefined}
+              opponentTeamCode={
+                game
+                  ? game.homeTeamInfo.teamInfo.code === teamCode
+                    ? game.awayTeamInfo.teamInfo.code
+                    : game.homeTeamInfo.teamInfo.code
+                  : undefined
+              }
             />
           </div>
         )}

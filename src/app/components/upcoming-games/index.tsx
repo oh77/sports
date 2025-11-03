@@ -1,14 +1,14 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { GameInfo, GameTeamInfo } from '../../types/domain/game';
-import {League} from "@/app/types/domain/league";
+import Link from 'next/link';
+import type React from 'react';
+import type { League } from '@/app/types/domain/league';
 import {
-    formatLongDateFromString,
-    formatTimeFromString
-} from "@/app/utils/dateUtils";
+  formatLongDateFromString,
+  formatTimeFromString,
+} from '@/app/utils/dateUtils';
+import type { GameInfo, GameTeamInfo } from '../../types/domain/game';
 
 interface UpcomingGamesProps {
   games: GameInfo[];
@@ -16,21 +16,34 @@ interface UpcomingGamesProps {
   league: League;
 }
 
-const UpcomingGames: React.FC<UpcomingGamesProps> = ({ games, currentTeamCode, league }) => {
+const UpcomingGames: React.FC<UpcomingGamesProps> = ({
+  games,
+  currentTeamCode,
+  league,
+}) => {
   const getTeamCode = (teamInfo: GameTeamInfo): string => {
     return teamInfo.teamInfo.code;
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Kommande Matcher</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+        Kommande Matcher
+      </h2>
       <div className="space-y-3">
         {games.map((upcomingGame) => {
-          const isHomeTeam = getTeamCode(upcomingGame.homeTeamInfo) === currentTeamCode;
-          const opponentInfo = isHomeTeam ? upcomingGame.awayTeamInfo : upcomingGame.homeTeamInfo;
+          const isHomeTeam =
+            getTeamCode(upcomingGame.homeTeamInfo) === currentTeamCode;
+          const opponentInfo = isHomeTeam
+            ? upcomingGame.awayTeamInfo
+            : upcomingGame.homeTeamInfo;
 
           return (
-            <div key={upcomingGame.uuid} className="rounded-lg shadow-lg p-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}>
+            <div
+              key={upcomingGame.uuid}
+              className="rounded-lg shadow-lg p-3"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -75,4 +88,4 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({ games, currentTeamCode, l
     </div>
   );
 };
-export default UpcomingGames
+export default UpcomingGames;

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import type React from 'react';
 
 interface PlayerCardProps {
   imageUrl: string;
@@ -14,34 +14,34 @@ interface PlayerCardProps {
 
 const getCountryFlag = (nationality: string): string => {
   const countryMap: Record<string, string> = {
-    'FI': '🇫🇮', // Finland
-    'SE': '🇸🇪', // Sweden
-    'CA': '🇨🇦', // Canada
-    'US': '🇺🇸', // United States
-    'CZ': '🇨🇿', // Czech Republic
-    'SK': '🇸🇰', // Slovakia
-    'NO': '🇳🇴', // Norway
-    'NOR': '🇳🇴', // Norway
-    'DK': '🇩🇰', // Denmark
-    'DE': '🇩🇪', // Germany
-    'CH': '🇨🇭', // Switzerland
-    'AT': '🇦🇹', // Austria
-    'FR': '🇫🇷', // France
-    'RU': '🇷🇺', // Russia
-    'LV': '🇱🇻', // Latvia
-    'EE': '🇪🇪', // Estonia
-    'LT': '🇱🇹', // Lithuania
-    'PL': '🇵🇱', // Poland
-    'BE': '🇧🇪', // Belgium
-    'NL': '🇳🇱', // Netherlands
-    'GB': '🇬🇧', // Great Britain
-    'IE': '🇮🇪', // Ireland
-    'IT': '🇮🇹', // Italy
-    'ES': '🇪🇸', // Spain
-    'AU': '🇦🇺', // Australia
-    'JP': '🇯🇵', // Japan
-    'KR': '🇰🇷', // South Korea
-    'CN': '🇨🇳', // China
+    FI: '🇫🇮', // Finland
+    SE: '🇸🇪', // Sweden
+    CA: '🇨🇦', // Canada
+    US: '🇺🇸', // United States
+    CZ: '🇨🇿', // Czech Republic
+    SK: '🇸🇰', // Slovakia
+    NO: '🇳🇴', // Norway
+    NOR: '🇳🇴', // Norway
+    DK: '🇩🇰', // Denmark
+    DE: '🇩🇪', // Germany
+    CH: '🇨🇭', // Switzerland
+    AT: '🇦🇹', // Austria
+    FR: '🇫🇷', // France
+    RU: '🇷🇺', // Russia
+    LV: '🇱🇻', // Latvia
+    EE: '🇪🇪', // Estonia
+    LT: '🇱🇹', // Lithuania
+    PL: '🇵🇱', // Poland
+    BE: '🇧🇪', // Belgium
+    NL: '🇳🇱', // Netherlands
+    GB: '🇬🇧', // Great Britain
+    IE: '🇮🇪', // Ireland
+    IT: '🇮🇹', // Italy
+    ES: '🇪🇸', // Spain
+    AU: '🇦🇺', // Australia
+    JP: '🇯🇵', // Japan
+    KR: '🇰🇷', // South Korea
+    CN: '🇨🇳', // China
   };
 
   // Try to match the nationality string (could be code like "FI" or full name)
@@ -76,7 +76,9 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
                 {flagEmoji}
               </span>
               {/* Player Number */}
-              <span className="relative text-sm font-semibold text-gray-600 z-10">#{playerNumber}</span>
+              <span className="relative text-sm font-semibold text-gray-600 z-10">
+                #{playerNumber}
+              </span>
             </div>
             <h3 className="text-lg font-bold text-gray-900">{playerName}</h3>
           </div>
@@ -84,10 +86,14 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
           {/* Right side: Primary, Secondary, Rank */}
           <div className="flex items-center gap-3">
             {/* Primary Value - Standout */}
-            <span className="text-2xl font-bold text-blue-600">{primaryValue}</span>
+            <span className="text-2xl font-bold text-blue-600">
+              {primaryValue}
+            </span>
 
             {/* Secondary Value with spacing inside brackets */}
-            <span className="text-base font-semibold text-gray-500">[ {secondaryValue} ]</span>
+            <span className="text-base font-semibold text-gray-500">
+              [ {secondaryValue} ]
+            </span>
 
             {/* Rank */}
             {rank && (

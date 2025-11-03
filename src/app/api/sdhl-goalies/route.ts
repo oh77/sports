@@ -1,27 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import type { GoalieStatsData } from '../../types/domain/goalie-stats';
+import type { StatnetGoalieStatsData } from '../../types/statnet/goalie-stats';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
 import { translateStatnetGoalieStatsToDomain } from '../../utils/translators/statnetToDomain';
-import { StatnetGoalieStatsData } from '../../types/statnet/goalie-stats';
-import { GoalieStatsData } from '../../types/domain/goalie-stats';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const teamCode = searchParams.get('teamCode');
-    
+
     const cacheKey = generateCacheKey('sdhl-goalies-summary');
 
     const data = await getCachedData(cacheKey, async () => {
       const url = `https://www.sdhl.se/api/statistics-v2/stats-info/goalkeepers_summary?count=25&ssgtUuid=n5mqrxbg0g&provider=impleo`;
-      
+
       const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'application/json',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          Accept: 'application/json',
           'Accept-Language': 'en-US,en;q=0.9',
-          'Referer': 'https://www.sdhl.se/',
-          'Origin': 'https://www.sdhl.se'
-        }
+          Referer: 'https://www.sdhl.se/',
+          Origin: 'https://www.sdhl.se',
+        },
       });
 
       if (!response.ok) {
@@ -29,22 +30,24 @@ export async function GET(request: NextRequest) {
       }
 
       const rawData = await response.json();
-      const statnetData: StatnetGoalieStatsData = Array.isArray(rawData) ? rawData[0] : rawData;
+      const statnetData: StatnetGoalieStatsData = Array.isArray(rawData)
+        ? rawData[0]
+        : rawData;
 
       // Translate to domain model
       let domainData: GoalieStatsData = {
         dataColumns: statnetData.dataColumns,
         defaultSortKey: statnetData.defaultSortKey,
-        stats: statnetData.stats.map(translateStatnetGoalieStatsToDomain)
+        stats: statnetData.stats.map(translateStatnetGoalieStatsToDomain),
       };
 
       // Filter by team if teamCode is provided
       if (teamCode) {
         domainData = {
           ...domainData,
-          stats: domainData.stats.filter(goalie => 
-            goalie.info.team.code === teamCode
-          )
+          stats: domainData.stats.filter(
+            (goalie) => goalie.info.team.code === teamCode,
+          ),
         };
       }
 
@@ -56,7 +59,7 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching SDHL goalie stats:', error);
     return NextResponse.json(
       { error: 'Failed to fetch goalie statistics' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

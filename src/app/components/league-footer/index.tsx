@@ -1,16 +1,20 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import { TeamInfo } from '../../types/domain/team';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type { League } from '@/app/types/domain/league';
 import { StatnetService } from '../../services/statnetService';
-import { League } from '@/app/types/domain/league';
+import type { TeamInfo } from '../../types/domain/team';
 
 interface LeagueFooterProps {
   league: League;
   currentTeamCode?: string;
 }
 
-const LeagueFooter: React.FC<LeagueFooterProps> = ({ league, currentTeamCode }) => {
+const LeagueFooter: React.FC<LeagueFooterProps> = ({
+  league,
+  currentTeamCode,
+}) => {
   const [teams, setTeams] = useState<TeamInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,16 +38,15 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({ league, currentTeamCode }) 
     loadTeams();
   }, [league]);
 
-
   const getLeagueLogo = () => {
     if (league === 'shl') {
-      return "https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg";
+      return 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg';
     } else if (league === 'sdhl') {
-      return "https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg";
+      return 'https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg';
     } else if (league === 'chl') {
-      return "https://www.chl.hockey/static/img/logo.png";
+      return 'https://www.chl.hockey/static/img/logo.png';
     }
-    return "";
+    return '';
   };
 
   const getLeagueName = () => {
@@ -83,30 +86,33 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({ league, currentTeamCode }) 
               logo: getLeagueLogo(),
               alt: `${getLeagueName()} Logo`,
               tooltip: getLeagueName(),
-              isLeague: true
+              isLeague: true,
             },
             // Team logos
-            ...teams.sort((a, b) => a.full > b.full ? 1 : -1)
-                .map((team, index) => ({
-              key: `team-${team.code}-${index}`,
-              href: `/${league}/${encodeURIComponent(team.code)}`,
-              logo: team.logo,
-              alt: team.full,
-              tooltip: team.full,
-              isCurrentTeam: currentTeamCode === team.code,
-              isLeague: false
-            }))
+            ...teams
+              .sort((a, b) => (a.full > b.full ? 1 : -1))
+              .map((team, index) => ({
+                key: `team-${team.code}-${index}`,
+                href: `/${league}/${encodeURIComponent(team.code)}`,
+                logo: team.logo,
+                alt: team.full,
+                tooltip: team.full,
+                isCurrentTeam: currentTeamCode === team.code,
+                isLeague: false,
+              })),
           ].map((item) => (
             <Link
               key={item.key}
               href={item.href}
               className={`group relative transition-all duration-200 ${
-                'isCurrentTeam' in item && item.isCurrentTeam 
-                  ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800' 
+                'isCurrentTeam' in item && item.isCurrentTeam
+                  ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800'
                   : 'hover:scale-110'
               }`}
             >
-              <div className={`w-12 h-12 ${item.isLeague ? 'bg-gray-800' : 'bg-gray-100'} rounded-full flex items-center justify-center overflow-hidden`}>
+              <div
+                className={`w-12 h-12 ${item.isLeague ? 'bg-gray-800' : 'bg-gray-100'} rounded-full flex items-center justify-center overflow-hidden`}
+              >
                 {item.logo ? (
                   <Image
                     src={item.logo}
@@ -132,4 +138,4 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({ league, currentTeamCode }) 
   );
 };
 
-export default LeagueFooter
+export default LeagueFooter;

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type { League } from '@/app/types/domain/league';
+import { formatLongDateTimeFromString } from '@/app/utils/dateUtils';
 import { StatnetService } from '../../services/statnetService';
-import { GameInfo } from '../../types/domain/game';
-import {formatLongDateTimeFromString} from "@/app/utils/dateUtils";
-import {League} from "@/app/types/domain/league";
+import type { GameInfo } from '../../types/domain/game';
 
 interface FirstGameProps {
   league?: League;
@@ -53,7 +54,9 @@ const FirstGame: React.FC<FirstGameProps> = ({ league = 'shl' }) => {
       <div className="bg-white rounded-lg shadow-lg p-6 w-full md:w-80">
         <div className="text-center">
           <div className="text-red-500 text-2xl mb-2">⚠️</div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Game Data</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            No Game Data
+          </h3>
           <p className="text-gray-600">Unable to load upcoming games</p>
         </div>
       </div>
@@ -126,4 +129,4 @@ const FirstGame: React.FC<FirstGameProps> = ({ league = 'shl' }) => {
     </div>
   );
 };
-export default FirstGame
+export default FirstGame;

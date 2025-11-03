@@ -1,8 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type {
+  GoalieStats,
+  GoalieStatsData,
+} from '../../types/domain/goalie-stats';
 import { PlayerCard } from '../player-card';
-import { GoalieStats, GoalieStatsData } from '../../types/domain/goalie-stats';
 
 interface TopGoaliesProps {
   teamCode1: string;
@@ -17,7 +21,11 @@ const getPlayerImageUrl = (player: GoalieStats): string => {
   return '/placeholder-player.png';
 };
 
-export const TopGoalies: React.FC<TopGoaliesProps> = ({ teamCode1, teamCode2, league }) => {
+export const TopGoalies: React.FC<TopGoaliesProps> = ({
+  teamCode1,
+  teamCode2,
+  league,
+}) => {
   const [team1Goalies, setTeam1Goalies] = useState<GoalieStats[]>([]);
   const [team2Goalies, setTeam2Goalies] = useState<GoalieStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +43,7 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({ teamCode1, teamCode2, le
         // Fetch goalies for both teams using server-side API routes
         const [team1Response, team2Response] = await Promise.all([
           fetch(`/api/${league}-goalies?teamCode=${teamCode1}`),
-          fetch(`/api/${league}-goalies?teamCode=${teamCode2}`)
+          fetch(`/api/${league}-goalies?teamCode=${teamCode2}`),
         ]);
 
         if (!team1Response.ok || !team2Response.ok) {
@@ -45,22 +53,10 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({ teamCode1, teamCode2, le
         const team1Data: GoalieStatsData = await team1Response.json();
         const team2Data: GoalieStatsData = await team2Response.json();
 
-      console.log(team1Data.stats, '===' , team2Data.stats);
-
-
-          // Debug: Log the first goalie to see the structure
-        if (team1Data.stats && team1Data.stats.length > 0) {
-          console.log('Sample goalie data structure:', team1Data.stats[0]);
-        }
-
         // Get top goalie from each team (sorted by save percentage)
-        const team1GoaliesFiltered = (team1Data.stats || [])
-          // .sort((a: GoalieStats, b: GoalieStats) => b.SVSper - a.SVSper)
-          .slice(0, 1);
+        const team1GoaliesFiltered = (team1Data.stats || []).slice(0, 1);
 
-        const team2GoaliesFiltered = (team2Data.stats || [])
-          // .sort((a: GoalieStats, b: GoalieStats) => b.SVSper - a.SVSper)
-          .slice(0, 1);
+        const team2GoaliesFiltered = (team2Data.stats || []).slice(0, 1);
 
         setTeam1Goalies(team1GoaliesFiltered);
         setTeam2Goalies(team2GoaliesFiltered);

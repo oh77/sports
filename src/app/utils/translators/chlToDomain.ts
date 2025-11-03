@@ -1,6 +1,6 @@
-import { CHLGame, CHLTeamInfo } from '../../types/chl/game';
-import { GameInfo, LeagueResponse } from '../../types/domain/game';
-import { TeamInfo } from '../../types/domain/team';
+import type { CHLGame, CHLTeamInfo } from '../../types/chl/game';
+import type { GameInfo, LeagueResponse } from '../../types/domain/game';
+import type { TeamInfo } from '../../types/domain/team';
 
 /**
  * Construct CHL team logo URL from externalId
@@ -19,7 +19,7 @@ export function translateCHLTeamToDomain(chlTeam: CHLTeamInfo): TeamInfo {
     short: chlTeam.shortName,
     long: chlTeam.name,
     full: chlTeam.name,
-    logo: getCHLLogoUrl(chlTeam.externalId)
+    logo: getCHLLogoUrl(chlTeam.externalId),
   };
 }
 
@@ -38,9 +38,9 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
         short: chlGame.homeTeam.shortName,
         long: chlGame.homeTeam.name,
         full: chlGame.homeTeam.name,
-        logo: getCHLLogoUrl(chlGame.homeTeam.externalId)
+        logo: getCHLLogoUrl(chlGame.homeTeam.externalId),
       },
-      score: chlGame.scores?.home || 0
+      score: chlGame.scores?.home || 0,
     },
     awayTeamInfo: {
       teamInfo: {
@@ -49,21 +49,23 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
         short: chlGame.awayTeam.shortName,
         long: chlGame.awayTeam.name,
         full: chlGame.awayTeam.name,
-        logo: getCHLLogoUrl(chlGame.awayTeam.externalId)
+        logo: getCHLLogoUrl(chlGame.awayTeam.externalId),
       },
-      score: chlGame.scores?.away || 0
+      score: chlGame.scores?.away || 0,
     },
     venueInfo: {
-      name: chlGame.venue
+      name: chlGame.venue,
     },
     overtime: false, // CHL doesn't provide overtime info in the current structure
-    shootout: false  // CHL doesn't provide shootout info in the current structure
+    shootout: false, // CHL doesn't provide shootout info in the current structure
   };
 }
 
-export function translateCHLGamesToDomainResponse(chlGames: CHLGame[]): LeagueResponse {
+export function translateCHLGamesToDomainResponse(
+  chlGames: CHLGame[],
+): LeagueResponse {
   return {
     gameInfo: chlGames.map(translateCHLGameToDomain),
-    teamList: [] // CHL games don't include team list in the same way
+    teamList: [], // CHL games don't include team list in the same way
   };
 }

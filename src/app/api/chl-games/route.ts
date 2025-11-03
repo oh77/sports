@@ -1,5 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { CHLService } from '../../services/chlService';
+import { type NextRequest, NextResponse } from 'next/server';
+import {
+  getAllGames,
+  getAllRecentGames,
+  getAllUpcomingGames,
+  getGamesByDate,
+  getRecentGames,
+  getUpcomingGames,
+} from '../../services/chlService';
+import type { CHLGame } from '../../types/chl/game';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
 import { translateCHLGamesToDomainResponse } from '../../utils/translators/chlToDomain';
 
@@ -10,36 +18,39 @@ export async function GET(request: NextRequest) {
     const date = searchParams.get('date');
 
     // Generate cache key with parameters
-    const cacheKey = generateCacheKey('chl-games', { type, ...(date && { date }) });
+    const cacheKey = generateCacheKey('chl-games', {
+      type,
+      ...(date && { date }),
+    });
 
     // Get cached data or fetch fresh data
     const result = await getCachedData(cacheKey, async () => {
-      let games;
+      let games: CHLGame[];
 
       switch (type) {
         case 'upcoming':
-          games = await CHLService.getUpcomingGames();
+          games = await getUpcomingGames();
           break;
         case 'recent':
-          games = await CHLService.getRecentGames();
+          games = await getRecentGames();
           break;
         case 'all-upcoming':
-          games = await CHLService.getAllUpcomingGames();
+          games = await getAllUpcomingGames();
           break;
         case 'all-recent':
-          games = await CHLService.getAllRecentGames();
+          games = await getAllRecentGames();
           break;
         case 'all':
-          games = await CHLService.getAllGames();
+          games = await getAllGames();
           break;
         case 'date':
           if (!date) {
             throw new Error('Date parameter is required for date type');
           }
-          games = await CHLService.getGamesByDate(date);
+          games = await getGamesByDate(date);
           break;
         default:
-          games = await CHLService.getUpcomingGames();
+          games = await getUpcomingGames();
       }
 
       // Translate CHL games to domain models
@@ -51,7 +62,7 @@ export async function GET(request: NextRequest) {
     console.error('Error in CHL games API route:', error);
     return NextResponse.json(
       { error: 'Failed to fetch CHL games' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

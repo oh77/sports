@@ -47,7 +47,12 @@ export interface CHLResults {
   scores: CHLScores;
 }
 
-export type CHLGameStatus = 'finished' | 'not-started' | 'live' | 'postponed' | 'cancelled';
+export type CHLGameStatus =
+  | 'finished'
+  | 'not-started'
+  | 'live'
+  | 'postponed'
+  | 'cancelled';
 
 export interface CHLMatch {
   _type: string;

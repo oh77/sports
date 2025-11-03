@@ -2,15 +2,15 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { StandingsData, TeamStats } from '../../../types/domain/standings';
-import { League } from '@/app/types/domain/league';
 import {
-    getRankBorderClass,
-    getRankDisplay,
-    getTeamCode,
-    getTeamName,
-    getTeamLogo
-} from "@/app/components/standings/standingsUtils";
+  getRankBorderClass,
+  getRankDisplay,
+  getTeamCode,
+  getTeamLogo,
+  getTeamName,
+} from '@/app/components/standings/standingsUtils';
+import type { League } from '@/app/types/domain/league';
+import type { StandingsData, TeamStats } from '../../../types/domain/standings';
 
 interface CompactStandingsProps {
   standings: StandingsData;
@@ -19,12 +19,15 @@ interface CompactStandingsProps {
   opponentTeamCode?: string;
 }
 
-export function CompactStandings({ standings, league, teamCode, opponentTeamCode }: CompactStandingsProps) {
-
+export function CompactStandings({
+  standings,
+  league,
+  teamCode,
+  opponentTeamCode,
+}: CompactStandingsProps) {
   const getTeams = () => {
     return standings.stats || [];
   };
-
 
   // Find teams and their neighbors
   const getCompactTeams = () => {
@@ -35,19 +38,19 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
     const result: Array<{ team: TeamStats; index: number; rank: number }> = [];
 
     const getTeamIndex = (teamCode: string) => {
-        return teams.findIndex(team => getTeamCode(team) === teamCode);
-    }
+      return teams.findIndex((team) => getTeamCode(team) === teamCode);
+    };
 
     const getTeamIndices = () => {
-        if (opponentTeamCode) {
-            return [getTeamIndex(teamCode), getTeamIndex(opponentTeamCode)];
-        }
+      if (opponentTeamCode) {
+        return [getTeamIndex(teamCode), getTeamIndex(opponentTeamCode)];
+      }
 
-        return [getTeamIndex(teamCode)];
-      };
+      return [getTeamIndex(teamCode)];
+    };
 
     // Add teams and their neighbors
-  getTeamIndices().forEach(teamIndex => {
+    getTeamIndices().forEach((teamIndex) => {
       if (teamIndex === -1) return; // Team not found
 
       const team = teams[teamIndex];
@@ -60,7 +63,7 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
         result.push({
           team,
           index: teamIndex,
-          rank
+          rank,
         });
       }
 
@@ -75,7 +78,7 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
           result.push({
             team: teamAbove,
             index: teamIndex - 1,
-            rank: teamAboveRank
+            rank: teamAboveRank,
           });
         }
       }
@@ -91,7 +94,7 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
           result.push({
             team: teamBelow,
             index: teamIndex + 1,
-            rank: teamBelowRank
+            rank: teamBelowRank,
           });
         }
       }
@@ -134,7 +137,7 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
     });
 
     // Find the position of the team
-    const position = sortedTeams.findIndex(team => {
+    const position = sortedTeams.findIndex((team) => {
       return getTeamCode(team) === teamCode;
     });
 
@@ -163,11 +166,21 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
         <table className="w-full">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lag</th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">M</th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P</th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">GM</th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                #
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Lag
+              </th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                M
+              </th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                P
+              </th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                GM
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -186,7 +199,9 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
                   className="hover:bg-gray-50 transition-colors"
                 >
                   {/* Rank */}
-                  <td className={`px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(league, fullPosition, totalTeams)}`}>
+                  <td
+                    className={`px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(league, fullPosition, totalTeams)}`}
+                  >
                     {getRankDisplay(rank)}
                   </td>
 
@@ -210,7 +225,9 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
                         )}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{teamName}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {teamName}
+                        </div>
                       </div>
                     </Link>
                   </td>
@@ -227,7 +244,8 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
 
                   {/* Goal Difference */}
                   <td className="px-3 py-3 whitespace-nowrap text-sm text-center font-medium text-gray-900">
-                    {goalDifference > 0 ? '+' : ''}{goalDifference}
+                    {goalDifference > 0 ? '+' : ''}
+                    {goalDifference}
                   </td>
                 </tr>
               );
@@ -235,7 +253,6 @@ export function CompactStandings({ standings, league, teamCode, opponentTeamCode
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }

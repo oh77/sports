@@ -41,8 +41,8 @@ export interface PlayerStats {
   Team: number;
   GP: number; // Games Played
   TP: number; // Total Points
-  G: number;  // Goals
-  A: number;  // Assists
+  G: number; // Goals
+  A: number; // Assists
   PPG: number; // Power Play Goals
   PPA: number; // Power Play Assists
   PPTP: number; // Power Play Total Points

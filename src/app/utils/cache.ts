@@ -11,7 +11,7 @@ class MemoryCache {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: ttlMs
+      ttl: ttlMs,
     });
   }
 
@@ -23,7 +23,7 @@ class MemoryCache {
     }
 
     const now = Date.now();
-    const isExpired = (now - entry.timestamp) > entry.ttl;
+    const isExpired = now - entry.timestamp > entry.ttl;
 
     if (isExpired) {
       this.cache.delete(key);
@@ -45,7 +45,7 @@ class MemoryCache {
   cleanup(): void {
     const now = Date.now();
     for (const [key, entry] of this.cache.entries()) {
-      if ((now - entry.timestamp) > entry.ttl) {
+      if (now - entry.timestamp > entry.ttl) {
         this.cache.delete(key);
       }
     }
@@ -55,7 +55,7 @@ class MemoryCache {
   stats(): { size: number; keys: string[] } {
     return {
       size: this.cache.size,
-      keys: Array.from(this.cache.keys())
+      keys: Array.from(this.cache.keys()),
     };
   }
 
@@ -68,9 +68,12 @@ class MemoryCache {
 const cache = new MemoryCache();
 
 // Cleanup expired entries every 10 minutes
-setInterval(() => {
-  cache.cleanup();
-}, 10 * 60 * 1000);
+setInterval(
+  () => {
+    cache.cleanup();
+  },
+  10 * 60 * 1000,
+);
 
 /**
  * Generate cache key in format: <section>-<yymmddhh>
@@ -78,7 +81,10 @@ setInterval(() => {
  * @param params Optional parameters to include in the key
  * @returns Cache key string
  */
-export function generateCacheKey(section: string, params?: Record<string, string>): string {
+export function generateCacheKey(
+  section: string,
+  params?: Record<string, string>,
+): string {
   const now = new Date();
   const year = now.getFullYear().toString().slice(-2);
   const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -108,10 +114,10 @@ export function generateCacheKey(section: string, params?: Record<string, string
 export async function getCachedData<T>(
   cacheKey: string,
   fetcher: () => Promise<T>,
-  ttlMs: number = 60 * 60 * 1000 // 60 minutes default
+  ttlMs: number = 60 * 60 * 1000, // 60 minutes default
 ): Promise<T> {
   // Try to get from cache first
-  const cached = null;//cache.get<T>(cacheKey);
+  const cached = null; //cache.get<T>(cacheKey);
   if (cached !== null) {
     console.log(`Cache hit for key: ${cacheKey}`);
     return cached;

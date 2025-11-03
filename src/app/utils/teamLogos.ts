@@ -1,10 +1,14 @@
-import { CHLTeamInfo } from '../types/chl/game';
+import type { CHLTeamInfo } from '../types/chl/game';
 
 /**
  * Get team logo URL based on team information
  * Uses CHL's Cloudinary CDN for real team logos
  */
-export function getTeamLogo(team: CHLTeamInfo | { shortName: string; externalId?: string; country?: { code: string } }): string {
+export function getTeamLogo(
+  team:
+    | CHLTeamInfo
+    | { shortName: string; externalId?: string; country?: { code: string } },
+): string {
   const externalId = 'externalId' in team ? team.externalId : undefined;
   const shortName = team.shortName;
 
@@ -37,7 +41,9 @@ function getGenericTeamLogo(shortName: string): string {
 /**
  * Get team logo with fallback
  */
-export function getTeamLogoWithFallback(team: CHLTeamInfo | { shortName: string; country?: { code: string } }): string {
+export function getTeamLogoWithFallback(
+  team: CHLTeamInfo | { shortName: string; country?: { code: string } },
+): string {
   try {
     return getTeamLogo(team);
   } catch (error) {

@@ -1,9 +1,9 @@
-import React from 'react';
 import Image from 'next/image';
-import { GameInfo } from '../../types/domain/game';
+import type React from 'react';
+import type { League } from '@/app/types/domain/league';
+import { formatTimeFromDate } from '@/app/utils/dateUtils';
+import type { GameInfo } from '../../types/domain/game';
 import { TrendMarkers } from '../trend-markers';
-import {League} from "@/app/types/domain/league";
-import {formatTimeFromDate} from "@/app/utils/dateUtils";
 
 interface NextGameProps {
   game: GameInfo | null;
@@ -12,8 +12,12 @@ interface NextGameProps {
   allGames?: GameInfo[];
 }
 
-const NextGame: React.FC<NextGameProps> = ({ game, currentTeamCode, league, allGames = [] })=> {
-
+const NextGame: React.FC<NextGameProps> = ({
+  game,
+  currentTeamCode,
+  league,
+  allGames = [],
+}) => {
   const formatTime = (dateTimeStr: string) => {
     try {
       return formatTimeFromDate(new Date(dateTimeStr));
@@ -29,7 +33,7 @@ const NextGame: React.FC<NextGameProps> = ({ game, currentTeamCode, league, allG
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       });
     } catch {
       return dateTimeStr;
@@ -45,15 +49,19 @@ const NextGame: React.FC<NextGameProps> = ({ game, currentTeamCode, league, allG
   const opponentInfo = isHomeTeam ? game.awayTeamInfo : game.homeTeamInfo;
   const homeOrAway = isHomeTeam ? 'H' : 'B';
 
-  const stadiumIconUrl = league === 'sdhl'
-    ? 'https://www.sdhl.se/assets/stadium-460843bd.svg'
-    : league === 'chl'
-    ? 'https://www.shl.se/assets/stadium-460843bd.svg' // Use SHL stadium icon for CHL
-    : 'https://www.shl.se/assets/stadium-460843bd.svg';
+  const stadiumIconUrl =
+    league === 'sdhl'
+      ? 'https://www.sdhl.se/assets/stadium-460843bd.svg'
+      : league === 'chl'
+        ? 'https://www.shl.se/assets/stadium-460843bd.svg' // Use SHL stadium icon for CHL
+        : 'https://www.shl.se/assets/stadium-460843bd.svg';
 
   return (
     <div className="max-w-6xl mx-auto mb-8">
-      <div className="rounded-lg shadow-lg overflow-hidden relative" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}>
+      <div
+        className="rounded-lg shadow-lg overflow-hidden relative"
+        style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+      >
         {/* Container for content with logos (excludes trend markers) */}
         <div className="relative py-8" style={{ minHeight: '250px' }}>
           {/* Home Team Logo - Left side, mobile: 70% hidden, desktop: 35% hidden */}
@@ -134,4 +142,4 @@ const NextGame: React.FC<NextGameProps> = ({ game, currentTeamCode, league, allG
     </div>
   );
 };
-export default NextGame
+export default NextGame;

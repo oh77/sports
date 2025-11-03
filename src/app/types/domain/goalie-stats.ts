@@ -1,4 +1,4 @@
-import { PlayerInfo } from './player-stats';
+import type { PlayerInfo } from './player-stats';
 
 export type GoalieInfo = PlayerInfo;
 

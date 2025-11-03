@@ -1,9 +1,9 @@
-import React from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import {GameInfo, GameTeamInfo} from '../../types/domain/game';
-import {League} from "@/app/types/domain/league";
-import {ScoreOrStatus} from "@/app/components/previous-games/scoreOrStatus";
+import Link from 'next/link';
+import type React from 'react';
+import { ScoreOrStatus } from '@/app/components/previous-games/scoreOrStatus';
+import type { League } from '@/app/types/domain/league';
+import type { GameInfo, GameTeamInfo } from '../../types/domain/game';
 
 interface PreviousGamesProps {
   games: GameInfo[];
@@ -11,21 +11,34 @@ interface PreviousGamesProps {
   league: League;
 }
 
-const PreviousGames: React.FC<PreviousGamesProps> = ({ games, currentTeamCode, league }) => {
+const PreviousGames: React.FC<PreviousGamesProps> = ({
+  games,
+  currentTeamCode,
+  league,
+}) => {
   const getTeamCode = (teamInfo: GameTeamInfo): string => {
     return teamInfo.teamInfo.code;
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Tidigare Matcher</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+        Tidigare Matcher
+      </h2>
       <div className="space-y-3">
         {games.map((prevGame) => {
-          const isHomeTeam = getTeamCode(prevGame.homeTeamInfo) === currentTeamCode;
-          const opponentInfo = isHomeTeam ? prevGame.awayTeamInfo : prevGame.homeTeamInfo;
+          const isHomeTeam =
+            getTeamCode(prevGame.homeTeamInfo) === currentTeamCode;
+          const opponentInfo = isHomeTeam
+            ? prevGame.awayTeamInfo
+            : prevGame.homeTeamInfo;
 
           return (
-            <div key={prevGame.uuid} className="rounded-lg shadow-lg p-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}>
+            <div
+              key={prevGame.uuid}
+              className="rounded-lg shadow-lg p-3"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -50,7 +63,7 @@ const PreviousGames: React.FC<PreviousGamesProps> = ({ games, currentTeamCode, l
                 </div>
 
                 <div className="text-center">
-                    <ScoreOrStatus gameInfo={prevGame} isHomeTeam={isHomeTeam} />
+                  <ScoreOrStatus gameInfo={prevGame} isHomeTeam={isHomeTeam} />
                 </div>
               </div>
             </div>
@@ -65,4 +78,4 @@ const PreviousGames: React.FC<PreviousGamesProps> = ({ games, currentTeamCode, l
     </div>
   );
 };
-export default PreviousGames
+export default PreviousGames;

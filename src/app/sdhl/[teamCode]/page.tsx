@@ -1,21 +1,25 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { StatnetService } from '../../services/statnetService';
-import PreviousGames from '../../components/previous-games';
-import UpcomingGames from '../../components/upcoming-games';
-import NextGame from '../../components/next-game';
-import LeagueFooter from '../../components/league-footer';
-import { CompactStandings } from '../../components/standings/compact-standings';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import GameStatsContainer from '@/app/components/gamestats-container';
 import { HeadToHead } from '../../components/head-to-head';
+import LeagueFooter from '../../components/league-footer';
+import NextGame from '../../components/next-game';
+import PreviousGames from '../../components/previous-games';
+import { CompactStandings } from '../../components/standings/compact-standings';
 import { TopPlayers } from '../../components/top-players';
-import { GameInfo, GameTeamInfo } from '../../types/domain/game';
-import { StandingsData } from '../../types/domain/standings';
-import GameStatsContainer from "@/app/components/gamestats-container";
+import UpcomingGames from '../../components/upcoming-games';
+import { StatnetService } from '../../services/statnetService';
+import type { GameInfo, GameTeamInfo } from '../../types/domain/game';
+import type { StandingsData } from '../../types/domain/standings';
 
-export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
+export default function SDHLTeamPage({
+  params,
+}: {
+  params: Promise<{ teamCode: string }>;
+}) {
   const resolvedParams = React.use(params);
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
   const [teamInfo, setTeamInfo] = useState<GameTeamInfo | null>(null);
@@ -43,9 +47,10 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         }
 
         // Find team info from any game
-        const teamGame = games.find(game =>
-          game.homeTeamInfo.teamInfo.code === teamCode ||
-          game.awayTeamInfo.teamInfo.code === teamCode
+        const teamGame = games.find(
+          (game) =>
+            game.homeTeamInfo.teamInfo.code === teamCode ||
+            game.awayTeamInfo.teamInfo.code === teamCode,
         );
 
         if (!teamGame) {
@@ -79,7 +84,6 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         } catch (err) {
           console.error('Failed to load standings:', err);
         }
-
       } catch (err) {
         setError('Misslyckades att ladda lagdata');
         console.error(err);
@@ -91,7 +95,6 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
     loadTeamData();
   }, [teamCode]);
 
-
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-100 py-12 relative">
@@ -102,7 +105,10 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
 
         <div className="container mx-auto px-4 relative z-10">
           {/* Header */}
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
+          <div
+            className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg"
+            style={{ backgroundColor: 'rgba(24,29,38,1)' }}
+          >
             <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded animate-pulse"></div>
             <div className="h-8 md:h-12 bg-gray-300 rounded w-48 animate-pulse"></div>
           </div>
@@ -158,7 +164,10 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg" style={{ backgroundColor: 'rgba(24,29,38,1)' }}>
+        <div
+          className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg"
+          style={{ backgroundColor: 'rgba(24,29,38,1)' }}
+        >
           <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full flex items-center justify-center">
             {teamInfo.teamInfo.logo ? (
               <Image
@@ -194,9 +203,9 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
         )}
 
         {game && (
-            <div className="max-w-6xl mx-auto mb-8">
-                <GameStatsContainer allGames={allGames} currentGame={game} />
-            </div>
+          <div className="max-w-6xl mx-auto mb-8">
+            <GameStatsContainer allGames={allGames} currentGame={game} />
+          </div>
         )}
 
         {/* Top Players */}
@@ -215,7 +224,13 @@ export default function SDHLTeamPage({ params }: { params: Promise<{ teamCode: s
               standings={standings}
               league="sdhl"
               teamCode={teamCode}
-              opponentTeamCode={game ? (game.homeTeamInfo.teamInfo.code === teamCode ? game.awayTeamInfo.teamInfo.code : game.homeTeamInfo.teamInfo.code) : undefined}
+              opponentTeamCode={
+                game
+                  ? game.homeTeamInfo.teamInfo.code === teamCode
+                    ? game.awayTeamInfo.teamInfo.code
+                    : game.homeTeamInfo.teamInfo.code
+                  : undefined
+              }
             />
           </div>
         )}

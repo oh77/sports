@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {League} from "@/app/types/domain/league";
+import { useState } from 'react';
+import type { League } from '@/app/types/domain/league';
 
 interface StandingsHeaderProps {
   league: League;
@@ -19,24 +19,33 @@ const LEAGUES = [
   { id: 'chl', name: 'CHL', path: '/chl' },
 ];
 
-export function StandingsHeader({ league, logoUrl, backgroundColor = 'rgba(24,29,38,1)', backPath }: StandingsHeaderProps) {
+export function StandingsHeader({
+  league,
+  logoUrl,
+  backgroundColor = 'rgba(24,29,38,1)',
+  backPath,
+}: StandingsHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const otherLeagues = LEAGUES.filter(l => l.id !== league);
+  const otherLeagues = LEAGUES.filter((l) => l.id !== league);
 
   // Use darker backgrounds for SHL/SDHL (light page background), lighter for CHL (dark page background)
   const isLightPage = league === 'shl' || league === 'sdhl';
   const circleClasses = isLightPage
-    ? "w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-800/80 hover:bg-gray-800 transition-all hover:scale-105 flex items-center justify-center overflow-hidden"
-    : "w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-105 flex items-center justify-center overflow-hidden";
+    ? 'w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-800/80 hover:bg-gray-800 transition-all hover:scale-105 flex items-center justify-center overflow-hidden'
+    : 'w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-105 flex items-center justify-center overflow-hidden';
 
   return (
     <div className="relative mb-8">
       {/* Header with circles */}
-      <div className="max-w-6xl mx-auto flex items-center justify-between py-6 px-4 rounded-lg relative" style={{ backgroundColor }}>
+      <div
+        className="max-w-6xl mx-auto flex items-center justify-between py-6 px-4 rounded-lg relative"
+        style={{ backgroundColor }}
+      >
         {/* League Logo (Circle) - Left */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setMenuOpen(!menuOpen)}
             className={circleClasses}
             aria-label="Toggle league menu"
@@ -53,9 +62,16 @@ export function StandingsHeader({ league, logoUrl, backgroundColor = 'rgba(24,29
           {menuOpen && (
             <>
               {/* Backdrop */}
-              <div
-                className="fixed inset-0 z-40"
+              <button
+                type="button"
+                className="fixed inset-0 z-40 border-0 bg-transparent p-0"
                 onClick={() => setMenuOpen(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape' || e.key === 'Enter') {
+                    setMenuOpen(false);
+                  }
+                }}
+                aria-label="Close menu"
               />
 
               {/* Menu */}
@@ -91,16 +107,22 @@ export function StandingsHeader({ league, logoUrl, backgroundColor = 'rgba(24,29
         {/* Back Arrow Icon - Right */}
         <Link
           href={backPath}
-          className={circleClasses + " group"}
+          className={`${circleClasses} group`}
           title="Tillbaka"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className={isLightPage ? "h-8 w-8 text-gray-100 group-hover:text-white transition-colors" : "h-8 w-8 text-gray-300 group-hover:text-white transition-colors"}
+            className={
+              isLightPage
+                ? 'h-8 w-8 text-gray-100 group-hover:text-white transition-colors'
+                : 'h-8 w-8 text-gray-300 group-hover:text-white transition-colors'
+            }
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-label="Tillbaka"
           >
+            <title>Tillbaka</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -113,4 +135,3 @@ export function StandingsHeader({ league, logoUrl, backgroundColor = 'rgba(24,29
     </div>
   );
 }
-

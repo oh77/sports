@@ -1,18 +1,21 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { GameInfo, LeagueResponse } from '../../types/domain/game';
-import { TeamInfo } from '../../types/domain/team';
+import Link from 'next/link';
+import React, { useCallback, useEffect, useState } from 'react';
 import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
-import UpcomingGames from '../../components/upcoming-games';
 import { CompactStandings } from '../../components/standings/compact-standings';
-import { StandingsData } from '../../types/domain/standings';
+import UpcomingGames from '../../components/upcoming-games';
+import type { GameInfo, LeagueResponse } from '../../types/domain/game';
+import type { StandingsData } from '../../types/domain/standings';
+import type { TeamInfo } from '../../types/domain/team';
 
-
-export default function TeamPage({ params }: { params: Promise<{ teamCode: string }> }) {
+export default function TeamPage({
+  params,
+}: {
+  params: Promise<{ teamCode: string }>;
+}) {
   const resolvedParams = React.use(params);
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
   const [game, setGame] = useState<GameInfo | null>(null);
@@ -25,9 +28,12 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
   const [allTeams, setAllTeams] = useState<TeamInfo[]>([]);
 
   // Helper function to match team code with short name
-  const matchTeamCode = (teamCode: string, teamShortName: string): boolean => {
-    return teamShortName.toUpperCase() === teamCode.toUpperCase();
-  };
+  const matchTeamCode = useCallback(
+    (teamCode: string, teamShortName: string): boolean => {
+      return teamShortName.toUpperCase() === teamCode.toUpperCase();
+    },
+    [],
+  );
 
   useEffect(() => {
     const loadTeamData = async () => {
@@ -35,30 +41,37 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         setLoading(true);
 
         // Fetch CHL games and teams - use all games to get complete data
-        const [upcomingGamesResponse, recentGamesResponse, teamsResponse] = await Promise.all([
-          fetch('/api/chl-games?type=all-upcoming'),
-          fetch('/api/chl-games?type=all-recent'),
-          fetch('/api/chl-teams')
-        ]);
+        const [upcomingGamesResponse, recentGamesResponse, teamsResponse] =
+          await Promise.all([
+            fetch('/api/chl-games?type=all-upcoming'),
+            fetch('/api/chl-games?type=all-recent'),
+            fetch('/api/chl-teams'),
+          ]);
 
         if (!upcomingGamesResponse.ok) {
-          throw new Error(`Failed to fetch upcoming games: ${upcomingGamesResponse.status}`);
+          throw new Error(
+            `Failed to fetch upcoming games: ${upcomingGamesResponse.status}`,
+          );
         }
         if (!recentGamesResponse.ok) {
-          throw new Error(`Failed to fetch recent games: ${recentGamesResponse.status}`);
+          throw new Error(
+            `Failed to fetch recent games: ${recentGamesResponse.status}`,
+          );
         }
         if (!teamsResponse.ok) {
           throw new Error(`Failed to fetch teams: ${teamsResponse.status}`);
         }
 
-        const upcomingGamesData: LeagueResponse = await upcomingGamesResponse.json();
-        const recentGamesData: LeagueResponse = await recentGamesResponse.json();
+        const upcomingGamesData: LeagueResponse =
+          await upcomingGamesResponse.json();
+        const recentGamesData: LeagueResponse =
+          await recentGamesResponse.json();
         const teamsData: TeamInfo[] = await teamsResponse.json();
 
         // Combine all games from both responses
         const allGames = [
           ...(recentGamesData.gameInfo || []),
-          ...(upcomingGamesData.gameInfo || [])
+          ...(upcomingGamesData.gameInfo || []),
         ];
         const teams = teamsData;
 
@@ -67,7 +80,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
 
         // Find the team by matching the team code with team short names
         const foundTeam = teams.find((team: TeamInfo) =>
-          matchTeamCode(teamCode, team.short)
+          matchTeamCode(teamCode, team.short),
         );
 
         if (!foundTeam) {
@@ -78,8 +91,10 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         setTeamInfo(foundTeam);
 
         // Find games for this team (now using domain GameInfo models)
-        const teamGames = allGames.filter((game: GameInfo) =>
-          game.homeTeamInfo.teamInfo.code === foundTeam.short || game.awayTeamInfo.teamInfo.code === foundTeam.short
+        const teamGames = allGames.filter(
+          (game: GameInfo) =>
+            game.homeTeamInfo.teamInfo.code === foundTeam.short ||
+            game.awayTeamInfo.teamInfo.code === foundTeam.short,
         );
 
         // Find next game - prioritize games from today (including started ones), then upcoming games
@@ -97,14 +112,24 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
 
         if (todaysGames.length > 0) {
           // Return the earliest game today (in case there are multiple)
-          nextGame = todaysGames.sort((a: GameInfo, b: GameInfo) => 
-            new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime()
+          nextGame = todaysGames.sort(
+            (a: GameInfo, b: GameInfo) =>
+              new Date(a.startDateTime).getTime() -
+              new Date(b.startDateTime).getTime(),
           )[0];
         } else {
           // No games today, find the next upcoming game
           nextGame = teamGames
-            .filter((game: GameInfo) => game.state === 'not-started' && new Date(game.startDateTime) > now)
-            .sort((a: GameInfo, b: GameInfo) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())[0];
+            .filter(
+              (game: GameInfo) =>
+                game.state === 'not-started' &&
+                new Date(game.startDateTime) > now,
+            )
+            .sort(
+              (a: GameInfo, b: GameInfo) =>
+                new Date(a.startDateTime).getTime() -
+                new Date(b.startDateTime).getTime(),
+            )[0];
         }
 
         setGame(nextGame || null);
@@ -117,7 +142,11 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
             // Exclude games from today - only show games from before today
             return game.state === 'finished' && gameDateString !== todayString;
           })
-          .sort((a: GameInfo, b: GameInfo) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime())
+          .sort(
+            (a: GameInfo, b: GameInfo) =>
+              new Date(b.startDateTime).getTime() -
+              new Date(a.startDateTime).getTime(),
+          )
           .slice(0, 5); // Show up to 5 previous games
 
         const upcoming = teamGames
@@ -125,9 +154,17 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
             const gameDate = new Date(game.startDateTime);
             const gameDateString = gameDate.toISOString().split('T')[0];
             // Exclude games from today and the next game - they're shown in the "next game" container
-            return game.state === 'not-started' && gameDateString !== todayString && game.uuid !== nextGame?.uuid;
+            return (
+              game.state === 'not-started' &&
+              gameDateString !== todayString &&
+              game.uuid !== nextGame?.uuid
+            );
           })
-          .sort((a: GameInfo, b: GameInfo) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
+          .sort(
+            (a: GameInfo, b: GameInfo) =>
+              new Date(a.startDateTime).getTime() -
+              new Date(b.startDateTime).getTime(),
+          )
           .slice(0, 5); // Show up to 5 upcoming games (excluding today's games and the next game)
 
         setPreviousGames(previous);
@@ -143,7 +180,6 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
         } catch (err) {
           console.error('Failed to load standings:', err);
         }
-
       } catch (err) {
         setError('Misslyckades att ladda lagdata');
         console.error('CHL Team Page Error:', err);
@@ -155,8 +191,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
     if (teamCode) {
       loadTeamData();
     }
-  }, [teamCode]);
-
+  }, [teamCode, matchTeamCode]);
 
   if (loading) {
     return (
@@ -182,7 +217,8 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
               {error || 'inget lag hittat'}
             </h1>
             <p className="text-gray-600 mb-6">
-              {error || `Inga kommande matcher hittades för lagkod: ${teamCode}`}
+              {error ||
+                `Inga kommande matcher hittades för lagkod: ${teamCode}`}
             </p>
             <Link
               href="/chl"
@@ -195,7 +231,6 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
       </main>
     );
   }
-
 
   return (
     <main className="min-h-screen bg-gray-100 py-12 relative">
@@ -229,11 +264,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
           </h1>
         </div>
 
-        <NextGame
-          game={game}
-          currentTeamCode={teamCode}
-          league="chl"
-        />
+        <NextGame game={game} currentTeamCode={teamCode} league="chl" />
 
         {/* Compact Standings */}
         {standings && (
@@ -242,7 +273,13 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
               standings={standings}
               league="chl"
               teamCode={teamCode}
-              opponentTeamCode={game ? (game.homeTeamInfo.teamInfo.code === teamCode ? game.awayTeamInfo.teamInfo.code : game.homeTeamInfo.teamInfo.code) : undefined}
+              opponentTeamCode={
+                game
+                  ? game.homeTeamInfo.teamInfo.code === teamCode
+                    ? game.awayTeamInfo.teamInfo.code
+                    : game.homeTeamInfo.teamInfo.code
+                  : undefined
+              }
             />
           </div>
         )}
@@ -277,7 +314,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
                     logo: 'https://www.chl.hockey/static/img/logo.png',
                     alt: 'CHL Logo',
                     tooltip: 'CHL',
-                    isLeague: true
+                    isLeague: true,
                   },
                   // Team logos
                   ...allTeams.map((team) => ({
@@ -286,20 +323,23 @@ export default function TeamPage({ params }: { params: Promise<{ teamCode: strin
                     logo: team.logo || '/placeholder-team.png',
                     alt: `${team.full} logo`,
                     tooltip: team.full,
-                    isCurrentTeam: team.short.toUpperCase() === teamCode.toUpperCase(),
-                    isLeague: false
-                  }))
+                    isCurrentTeam:
+                      team.short.toUpperCase() === teamCode.toUpperCase(),
+                    isLeague: false,
+                  })),
                 ].map((item) => (
                   <Link
                     key={item.key}
                     href={item.href}
                     className={`group relative transition-all duration-200 ${
-                      'isCurrentTeam' in item && item.isCurrentTeam 
-                        ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800' 
+                      'isCurrentTeam' in item && item.isCurrentTeam
+                        ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800'
                         : 'hover:scale-110'
                     }`}
                   >
-                    <div className={`w-12 h-12 ${item.isLeague ? 'bg-gray-800' : 'bg-gray-100'} rounded-full flex items-center justify-center overflow-hidden`}>
+                    <div
+                      className={`w-12 h-12 ${item.isLeague ? 'bg-gray-800' : 'bg-gray-100'} rounded-full flex items-center justify-center overflow-hidden`}
+                    >
                       <Image
                         src={item.logo}
                         alt={item.alt}

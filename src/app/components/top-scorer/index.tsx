@@ -1,7 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { PlayerStats, PlayerStatsData } from '../../types/domain/player-stats';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type {
+  PlayerStats,
+  PlayerStatsData,
+} from '../../types/domain/player-stats';
 import { PlayerCard } from '../player-card';
 
 interface TopScorerProps {
@@ -10,7 +14,11 @@ interface TopScorerProps {
   league: string;
 }
 
-export const TopScorer: React.FC<TopScorerProps> = ({ teamCode1, teamCode2, league }) => {
+export const TopScorer: React.FC<TopScorerProps> = ({
+  teamCode1,
+  teamCode2,
+  league,
+}) => {
   const [team1Players, setTeam1Players] = useState<PlayerStats[]>([]);
   const [team2Players, setTeam2Players] = useState<PlayerStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +32,7 @@ export const TopScorer: React.FC<TopScorerProps> = ({ teamCode1, teamCode2, leag
         // Fetch players for both teams
         const [team1Response, team2Response] = await Promise.all([
           fetch(`/api/${league}-players?teamCode=${teamCode1}`),
-          fetch(`/api/${league}-players?teamCode=${teamCode2}`)
+          fetch(`/api/${league}-players?teamCode=${teamCode2}`),
         ]);
 
         if (!team1Response.ok || !team2Response.ok) {
