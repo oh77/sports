@@ -147,7 +147,7 @@ export default function TeamPage({
               new Date(b.startDateTime).getTime() -
               new Date(a.startDateTime).getTime(),
           )
-          .slice(0, 5); // Show up to 5 previous games
+          .slice(0, 3); // Show up to 3 previous games
 
         const upcoming = teamGames
           .filter((game: GameInfo) => {
@@ -165,7 +165,7 @@ export default function TeamPage({
               new Date(a.startDateTime).getTime() -
               new Date(b.startDateTime).getTime(),
           )
-          .slice(0, 5); // Show up to 5 upcoming games (excluding today's games and the next game)
+          .slice(0, 3); // Show up to 3 upcoming games (excluding today's games and the next game)
 
         setPreviousGames(previous);
         setUpcomingGames(upcoming);

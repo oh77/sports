@@ -6,11 +6,12 @@ import type {
   CHLTeamsApiResponse,
 } from '../types/chl/game';
 
-const CHL_API_URL = 'https://www.chl.hockey/api/s3/live?q=live-events.json';
+const CHL_SCHEDULE_URL =
+  'https://www.chl.hockey/api/s3?q=schedule-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json';
 
 async function fetchCHLData(): Promise<CHLApiResponse> {
   try {
-    const response = await fetch(CHL_API_URL);
+    const response = await fetch(CHL_SCHEDULE_URL);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
