@@ -10,8 +10,8 @@ import {
   getTeamName,
 } from '@/app/components/standings/standingsUtils';
 import type { League } from '@/app/types/domain/league';
+import type { StandingsData } from '@/app/types/domain/standings';
 import type { StandingsFilter } from '@/app/types/domain/standingsFilter';
-import type { StandingsData } from '../../../types/domain/standings';
 
 interface FullStandingsProps {
   standings: StandingsData;

@@ -6,11 +6,20 @@ import { useEffect, useState } from 'react';
 import { GameGroup } from '../components/game-group';
 import LeagueFooter from '../components/league-footer';
 import { LeagueHeader } from '../components/league-header';
+import { PreviousGameDays } from '../components/previous-game-days';
 import { StatnetService } from '../services/statnetService';
 import type { GameInfo } from '../types/domain/game';
 
+interface PreviousGameDayData {
+  date: string;
+  games: GameInfo[];
+}
+
 export default function SHLPage() {
   const [games, setGames] = useState<GameInfo[]>([]);
+  const [previousGameDays, setPreviousGameDays] = useState<
+    PreviousGameDayData[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gameDate, setGameDate] = useState<string>('');
@@ -74,6 +83,50 @@ export default function SHLPage() {
                 day: 'numeric',
               }),
             );
+
+            // Find two previous game days
+            const targetDate = new Date(targetGames[0].startDateTime);
+            const finishedGames = games.filter(
+              (game) => game.state === 'finished',
+            );
+
+            // Get unique game dates before target date
+            const gameDates = new Set<string>();
+            finishedGames.forEach((game) => {
+              const gameDate = new Date(game.startDateTime);
+              if (gameDate < targetDate) {
+                gameDates.add(gameDate.toDateString());
+              }
+            });
+
+            // Sort dates descending and take the two most recent
+            const sortedDates = Array.from(gameDates)
+              .map((dateStr) => new Date(dateStr))
+              .sort((a, b) => b.getTime() - a.getTime())
+              .slice(0, 2);
+
+            // Group games by date for previous game days
+            const previousDays: PreviousGameDayData[] = sortedDates.map(
+              (date) => {
+                const dateString = date.toDateString();
+                const dayGames = finishedGames.filter((game) => {
+                  const gameDate = new Date(game.startDateTime);
+                  return gameDate.toDateString() === dateString;
+                });
+
+                return {
+                  date: date.toLocaleDateString('sv-SE', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  }),
+                  games: dayGames,
+                };
+              },
+            );
+
+            setPreviousGameDays(previousDays);
           } else {
             setError('Inga matcher hittades');
           }
@@ -183,7 +236,7 @@ export default function SHLPage() {
         <div className="container mx-auto px-4 relative z-10">
           <LeagueHeader
             league="shl"
-            gameDate={gameDate || 'Inga Matcher Tillgängliga'}
+            gameDate=""
             logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
             standingsPath="/shl/standings"
           />
@@ -224,12 +277,28 @@ export default function SHLPage() {
       <div className="container mx-auto px-4 relative z-10">
         <LeagueHeader
           league="shl"
-          gameDate={gameDate}
+          gameDate=""
           logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
           standingsPath="/shl/standings"
         />
 
         <div className="max-w-4xl mx-auto">
+          {/* Previous Game Days */}
+          {previousGameDays.length > 0 && (
+            <PreviousGameDays
+              previousGameDays={previousGameDays}
+              league="shl"
+            />
+          )}
+
+          {/* Current Game Day Date Header */}
+          <div className="text-center mb-6">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
+              {gameDate}
+            </h1>
+          </div>
+
+          {/* Current Game Day */}
           {groupGamesByTime(games).map((group) => (
             <GameGroup
               key={group.time}
