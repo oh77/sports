@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
+import GameStatsContainer from '../../components/gamestats-container';
 import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
 import { CompactStandings } from '../../components/standings/compact-standings';
@@ -26,6 +27,7 @@ export default function TeamPage({
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [standings, setStandings] = useState<StandingsData | null>(null);
   const [allTeams, setAllTeams] = useState<TeamInfo[]>([]);
+  const [allGames, setAllGames] = useState<GameInfo[]>([]);
 
   // Helper function to match team code with short name
   const matchTeamCode = useCallback(
@@ -69,7 +71,7 @@ export default function TeamPage({
         const teamsData: TeamInfo[] = await teamsResponse.json();
 
         // Combine all games from both responses
-        const allGames = [
+        const allGamesData = [
           ...(recentGamesData.gameInfo || []),
           ...(upcomingGamesData.gameInfo || []),
         ];
@@ -77,6 +79,9 @@ export default function TeamPage({
 
         // Store all teams for footer
         setAllTeams(teams);
+
+        // Store all games for trend indicators
+        setAllGames(allGamesData);
 
         // Find the team by matching the team code with team short names
         const foundTeam = teams.find((team: TeamInfo) =>
@@ -91,7 +96,7 @@ export default function TeamPage({
         setTeamInfo(foundTeam);
 
         // Find games for this team (now using domain GameInfo models)
-        const teamGames = allGames.filter(
+        const teamGames = allGamesData.filter(
           (game: GameInfo) =>
             game.homeTeamInfo.teamInfo.code === foundTeam.short ||
             game.awayTeamInfo.teamInfo.code === foundTeam.short,
@@ -264,7 +269,19 @@ export default function TeamPage({
           </h1>
         </div>
 
-        <NextGame game={game} currentTeamCode={teamCode} league="chl" />
+        <NextGame
+          game={game}
+          currentTeamCode={teamCode}
+          league="chl"
+          allGames={allGames}
+        />
+
+        {/* Game Stats - Home/Away and Last 5 Games */}
+        {game && (
+          <div className="max-w-6xl mx-auto mb-8">
+            <GameStatsContainer allGames={allGames} currentGame={game} />
+          </div>
+        )}
 
         {/* Compact Standings */}
         {standings && (

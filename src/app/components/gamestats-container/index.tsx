@@ -44,21 +44,33 @@ export const GameStatsContainer: React.FC<HomeAwayContainerProps> = ({
   );
 
   const homeLastFiveGames = React.useMemo(() => {
-    const homeTeamGames = finishedGames.filter(
-      (g) =>
-        g.homeTeamInfo.teamInfo.code === homeTeamCode ||
-        g.awayTeamInfo.teamInfo.code === homeTeamCode,
-    );
-    return homeTeamGames.slice(-5);
+    const homeTeamGames = finishedGames
+      .filter(
+        (g) =>
+          g.homeTeamInfo.teamInfo.code === homeTeamCode ||
+          g.awayTeamInfo.teamInfo.code === homeTeamCode,
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.startDateTime).getTime() -
+          new Date(a.startDateTime).getTime(),
+      );
+    return homeTeamGames.slice(0, 5);
   }, [finishedGames, homeTeamCode]);
 
   const awayLastFiveGames = React.useMemo(() => {
-    const awayTeamGames = finishedGames.filter(
-      (g) =>
-        g.homeTeamInfo.teamInfo.code === awayTeamCode ||
-        g.awayTeamInfo.teamInfo.code === awayTeamCode,
-    );
-    return awayTeamGames.slice(-5);
+    const awayTeamGames = finishedGames
+      .filter(
+        (g) =>
+          g.homeTeamInfo.teamInfo.code === awayTeamCode ||
+          g.awayTeamInfo.teamInfo.code === awayTeamCode,
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.startDateTime).getTime() -
+          new Date(a.startDateTime).getTime(),
+      );
+    return awayTeamGames.slice(0, 5);
   }, [finishedGames, awayTeamCode]);
 
   return (
