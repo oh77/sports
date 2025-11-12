@@ -7,6 +7,8 @@ import GameStatsContainer from '../../components/gamestats-container';
 import NextGame from '../../components/next-game';
 import PreviousGames from '../../components/previous-games';
 import { CompactStandings } from '../../components/standings/compact-standings';
+import { TopGoalie } from '../../components/top-goalie';
+import { TopPlayer } from '../../components/top-player';
 import UpcomingGames from '../../components/upcoming-games';
 import type { GameInfo, LeagueResponse } from '../../types/domain/game';
 import type { StandingsData } from '../../types/domain/standings';
@@ -280,6 +282,49 @@ export default function TeamPage({
         {game && (
           <div className="max-w-6xl mx-auto mb-8">
             <GameStatsContainer allGames={allGames} currentGame={game} />
+          </div>
+        )}
+
+        {/* Top Scorers and Goalies for Both Teams */}
+        {game && (
+          <div className="max-w-6xl mx-auto mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Home Team */}
+              <div>
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <TopPlayer
+                      league="chl"
+                      teamCode={game.homeTeamInfo.teamInfo.code}
+                    />
+                  </div>
+                  <div>
+                    <TopGoalie
+                      league="chl"
+                      teamCode={game.homeTeamInfo.teamInfo.code}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Away Team */}
+              <div>
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <TopPlayer
+                      league="chl"
+                      teamCode={game.awayTeamInfo.teamInfo.code}
+                    />
+                  </div>
+                  <div>
+                    <TopGoalie
+                      league="chl"
+                      teamCode={game.awayTeamInfo.teamInfo.code}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
