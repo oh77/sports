@@ -7,6 +7,8 @@ export interface TeamStreak {
   teamLogo: string | null;
   streak: number;
   streakType: 'win' | 'loss';
+  longestWinStreak: number;
+  longestLossStreak: number;
 }
 
 export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
@@ -80,7 +82,7 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
       return;
     }
 
-    // Count consecutive wins or losses from the most recent game
+    // Count consecutive wins or losses from the most recent game (current streak)
     const firstResult = games[0];
     let streak = 1;
     const streakType: 'win' | 'loss' = firstResult.won ? 'win' : 'loss';
@@ -97,6 +99,28 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
       }
     }
 
+    // Calculate longest win and loss streaks
+    let longestWinStreak = 0;
+    let longestLossStreak = 0;
+    let currentWinStreak = 0;
+    let currentLossStreak = 0;
+
+    games.forEach((game) => {
+      if (game.won) {
+        currentWinStreak++;
+        currentLossStreak = 0;
+        if (currentWinStreak > longestWinStreak) {
+          longestWinStreak = currentWinStreak;
+        }
+      } else {
+        currentLossStreak++;
+        currentWinStreak = 0;
+        if (currentLossStreak > longestLossStreak) {
+          longestLossStreak = currentLossStreak;
+        }
+      }
+    });
+
     if (streak > 0) {
       streaks.push({
         teamCode: info.teamCode,
@@ -105,6 +129,8 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
         teamLogo: info.teamLogo,
         streak,
         streakType,
+        longestWinStreak,
+        longestLossStreak,
       });
     }
   });

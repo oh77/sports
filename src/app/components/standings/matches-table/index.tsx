@@ -15,6 +15,12 @@ interface MatchesTableProps {
 export function MatchesTable({ league: _league, games }: MatchesTableProps) {
   const [homeWins, setHomeWins] = useState<LargestWin[]>([]);
   const [awayWins, setAwayWins] = useState<LargestWin[]>([]);
+  const [highestScoring, setHighestScoring] = useState<
+    Array<LargestWin & { totalGoals: number }>
+  >([]);
+  const [lowestScoring, setLowestScoring] = useState<
+    Array<LargestWin & { totalGoals: number }>
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,9 +30,16 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
     }
 
     try {
-      const { homeWins: hWins, awayWins: aWins } = calculateLargestWins(games);
+      const {
+        homeWins: hWins,
+        awayWins: aWins,
+        highestScoring: hScoring,
+        lowestScoring: lScoring,
+      } = calculateLargestWins(games);
       setHomeWins(hWins);
       setAwayWins(aWins);
+      setHighestScoring(hScoring);
+      setLowestScoring(lScoring);
     } catch (error) {
       console.error('Error calculating largest wins:', error);
     } finally {
@@ -47,7 +60,12 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
     );
   }
 
-  if (homeWins.length === 0 && awayWins.length === 0) {
+  if (
+    homeWins.length === 0 &&
+    awayWins.length === 0 &&
+    highestScoring.length === 0 &&
+    lowestScoring.length === 0
+  ) {
     return (
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -127,7 +145,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
                     colSpan={5}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Hemmavinst
+                    Största hemmavinster
                   </th>
                 </tr>
               </thead>
@@ -166,7 +184,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
                     colSpan={5}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Bortavinst
+                    Största bortavinster
                   </th>
                 </tr>
               </thead>
@@ -178,6 +196,84 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
                       className="hover:bg-gray-50 transition-colors"
                     >
                       {renderMatchRow(match, false)}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-3 text-sm text-gray-400 text-center"
+                    >
+                      Ingen data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Highest Scoring Table */}
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th
+                    colSpan={5}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Målrikaste
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {highestScoring.length > 0 ? (
+                  highestScoring.map((match) => (
+                    <tr
+                      key={`high-${match.date}-${match.homeTeam}-${match.awayTeam}`}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      {renderMatchRow(match, match.homeScore > match.awayScore)}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-3 text-sm text-gray-400 text-center"
+                    >
+                      Ingen data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Lowest Scoring Table */}
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th
+                    colSpan={5}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Målsnålaste
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {lowestScoring.length > 0 ? (
+                  lowestScoring.map((match) => (
+                    <tr
+                      key={`low-${match.date}-${match.homeTeam}-${match.awayTeam}`}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      {renderMatchRow(match, match.homeScore > match.awayScore)}
                     </tr>
                   ))
                 ) : (

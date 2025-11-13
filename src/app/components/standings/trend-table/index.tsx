@@ -57,6 +57,14 @@ export function TrendTable({ league, games }: TrendTableProps) {
     );
   }
 
+  const getString = (team: TeamStreak) => {
+    if (team.streakType === 'win') {
+      return team.streak === 1 ? 'vinst' : 'vinster';
+    } else {
+      return team.streak === 1 ? 'förlust' : 'förluster';
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -70,6 +78,9 @@ export function TrendTable({ league, games }: TrendTableProps) {
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Lag
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Längsta
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Trend
@@ -117,7 +128,28 @@ export function TrendTable({ league, games }: TrendTableProps) {
                     </Link>
                   </td>
 
-                  {/* Streak */}
+                  {/* Longest Streaks */}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                    <span className="font-medium">
+                      {team.longestWinStreak > 0 ? (
+                        <span className="text-green-600">
+                          {team.longestWinStreak}
+                        </span>
+                      ) : (
+                        <span className="text-green-600">-</span>
+                      )}
+                      <span className="text-gray-500 mx-1">:</span>
+                      {team.longestLossStreak > 0 ? (
+                        <span className="text-red-600">
+                          {team.longestLossStreak}
+                        </span>
+                      ) : (
+                        <span className="text-red-600">-</span>
+                      )}
+                    </span>
+                  </td>
+
+                  {/* Current Streak */}
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
                     <span
                       className={`font-medium ${
@@ -126,8 +158,7 @@ export function TrendTable({ league, games }: TrendTableProps) {
                           : 'text-red-600'
                       }`}
                     >
-                      {team.streak}{' '}
-                      {team.streakType === 'win' ? 'vinster' : 'förluster'}
+                      {team.streak} {getString(team)}
                     </span>
                   </td>
                 </tr>
