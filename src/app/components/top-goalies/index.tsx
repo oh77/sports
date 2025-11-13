@@ -14,13 +14,6 @@ interface TopGoaliesProps {
   league: string;
 }
 
-const getPlayerImageUrl = (player: GoalieStats): string => {
-  if (player.info.playerMedia?.mediaString) {
-    return `https://sportality.cdn.s8y.se/${player.info.playerMedia.mediaString.split('|')[2]}`;
-  }
-  return '/placeholder-player.png';
-};
-
 export const TopGoalies: React.FC<TopGoaliesProps> = ({
   teamCode1,
   teamCode2,
@@ -109,7 +102,6 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({
         {team1Goalies.map((goalie) => (
           <PlayerCard
             key={goalie.info.uuid}
-            imageUrl={getPlayerImageUrl(goalie)}
             playerName={goalie.info.fullName}
             playerNumber={goalie.info.number}
             primaryValue={`${goalie.SVSPerc} %`}
@@ -125,7 +117,6 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({
         {team2Goalies.map((goalie) => (
           <PlayerCard
             key={goalie.info.uuid}
-            imageUrl={getPlayerImageUrl(goalie)}
             playerName={goalie.info.fullName}
             playerNumber={goalie.info.number}
             primaryValue={`${goalie.SVSPerc} %`}

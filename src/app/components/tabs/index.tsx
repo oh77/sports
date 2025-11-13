@@ -87,7 +87,7 @@ export function Tabs({
             key={tab.id}
             type="button"
             onClick={() => handleTabClick(tab.id)}
-            className={`px-6 py-3 font-medium text-sm transition-colors ${
+            className={`px-6 py-3 font-medium text-sm transition-colors cursor-pointer ${
               activeTab === tab.id
                 ? isDark
                   ? 'text-white border-b-2 border-white'

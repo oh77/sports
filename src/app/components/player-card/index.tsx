@@ -3,7 +3,6 @@
 import type React from 'react';
 
 interface PlayerCardProps {
-  imageUrl: string;
   playerName: string;
   playerNumber: number;
   primaryValue: string;

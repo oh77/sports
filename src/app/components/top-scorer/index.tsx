@@ -67,13 +67,6 @@ export const TopScorer: React.FC<TopScorerProps> = ({
     fetchTopPlayers();
   }, [teamCode1, teamCode2, league]);
 
-  const getPlayerImageUrl = (player: PlayerStats): string => {
-    if (player.info.playerMedia?.mediaString) {
-      return `https://sportality.cdn.s8y.se/${player.info.playerMedia.mediaString.split('|')[2]}`;
-    }
-    return '/placeholder-player.png'; // Fallback image
-  };
-
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -112,7 +105,6 @@ export const TopScorer: React.FC<TopScorerProps> = ({
         {team1Players.map((player) => (
           <PlayerCard
             key={player.info.uuid}
-            imageUrl={getPlayerImageUrl(player)}
             playerName={player.info.fullName}
             playerNumber={player.info.number}
             primaryValue={`${player.TP} p`}
@@ -128,7 +120,6 @@ export const TopScorer: React.FC<TopScorerProps> = ({
         {team2Players.map((player) => (
           <PlayerCard
             key={player.info.uuid}
-            imageUrl={getPlayerImageUrl(player)}
             playerName={player.info.fullName}
             playerNumber={player.info.number}
             primaryValue={`${player.TP} p`}

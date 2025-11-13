@@ -13,11 +13,6 @@ interface TopGoalieProps {
   teamCode?: string;
 }
 
-const getPlayerImageUrl = (goalie: GoalieStats): string => {
-  // CHL doesn't have player media, use placeholder
-  return '/placeholder-player.png';
-};
-
 export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
   const [topGoalie, setTopGoalie] = useState<GoalieStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -89,7 +84,6 @@ export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
     <div className="space-y-4">
       <PlayerCard
         key={topGoalie.info.uuid}
-        imageUrl={getPlayerImageUrl(topGoalie)}
         playerName={topGoalie.info.fullName}
         playerNumber={topGoalie.info.number}
         primaryValue={`${topGoalie.SVSPerc} %`}

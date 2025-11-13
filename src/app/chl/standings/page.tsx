@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { FullStandings } from '../../components/standings/full-standings';
+import { MatchesTable } from '../../components/standings/matches-table';
 import { StandingsHeader } from '../../components/standings/standings-header';
 import { TrendTable } from '../../components/standings/trend-table';
 import { Tabs } from '../../components/tabs';
@@ -143,6 +144,11 @@ export default function CHLStandingsPage() {
                   id: 'trend',
                   label: 'Trend',
                   content: <TrendTable league="chl" games={games} />,
+                },
+                {
+                  id: 'matches',
+                  label: 'Matcher',
+                  content: <MatchesTable league="chl" games={games} />,
                 },
               ]}
               defaultTab="table"

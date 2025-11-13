@@ -51,3 +51,14 @@ export const isDateTimePassed = (startDateTime: Date, offsetMs: number = 0) => {
   const now = new Date();
   return now.getTime() - startDateTime.getTime() > offsetMs;
 };
+
+export const formatShortDateFromString = (dateTimeStr: string) => {
+  try {
+    const date = new Date(dateTimeStr);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('sv-SE', { month: 'short' });
+    return `${day} ${month}`;
+  } catch {
+    return dateTimeStr;
+  }
+};

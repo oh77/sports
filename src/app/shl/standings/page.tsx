@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import type { StandingsFilter } from '@/app/types/domain/standingsFilter';
 import { FullStandings } from '../../components/standings/full-standings';
+import { MatchesTable } from '../../components/standings/matches-table';
 import { StandingsHeader } from '../../components/standings/standings-header';
 import {
   calculateStandingsForMonth,
@@ -411,6 +412,11 @@ function SHLStandingsContent() {
                 id: 'trend',
                 label: 'Trend',
                 content: <TrendTable league="shl" games={games} />,
+              },
+              {
+                id: 'matches',
+                label: 'Matcher',
+                content: <MatchesTable league="shl" games={games} />,
               },
             ]}
             defaultTab="table"

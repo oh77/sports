@@ -66,8 +66,8 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
       teamGames.set(awayCode, []);
     }
 
-    teamGames.get(homeCode)!.push({ won: homeScore > awayScore });
-    teamGames.get(awayCode)!.push({ won: awayScore > homeScore });
+    teamGames.get(homeCode)?.push({ won: homeScore > awayScore });
+    teamGames.get(awayCode)?.push({ won: awayScore > homeScore });
   });
 
   // Calculate streaks for each team
