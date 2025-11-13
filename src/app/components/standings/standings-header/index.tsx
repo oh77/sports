@@ -14,9 +14,9 @@ interface StandingsHeaderProps {
 }
 
 const LEAGUES = [
-  { id: 'shl', name: 'SHL', path: '/shl' },
-  { id: 'sdhl', name: 'SDHL', path: '/sdhl' },
-  { id: 'chl', name: 'CHL', path: '/chl' },
+  { id: 'shl', name: 'SHL', path: '/shl/standings' },
+  { id: 'sdhl', name: 'SDHL', path: '/sdhl/standings' },
+  { id: 'chl', name: 'CHL', path: '/chl/standings' },
 ];
 
 export function StandingsHeader({

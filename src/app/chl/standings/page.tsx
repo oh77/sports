@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { FullStandings } from '../../components/standings/full-standings';
 import { StandingsHeader } from '../../components/standings/standings-header';
+import { TrendTable } from '../../components/standings/trend-table';
+import { Tabs } from '../../components/tabs';
+import type { GameInfo, LeagueResponse } from '../../types/domain/game';
 import type { StandingsData } from '../../types/domain/standings';
 
 export default function CHLStandingsPage() {
   const [standings, setStandings] = useState<StandingsData | null>(null);
+  const [games, setGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,15 +18,22 @@ export default function CHLStandingsPage() {
     const loadStandings = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/chl-standings');
+        const [standingsResponse, gamesResponse] = await Promise.all([
+          fetch('/api/chl-standings'),
+          fetch('/api/chl-games?type=all-recent'),
+        ]);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!standingsResponse.ok) {
+          throw new Error(`HTTP error! status: ${standingsResponse.status}`);
         }
 
-        const data = await response.json();
-
+        const data = await standingsResponse.json();
         setStandings(data);
+
+        if (gamesResponse.ok) {
+          const gamesData: LeagueResponse = await gamesResponse.json();
+          setGames(gamesData.gameInfo || []);
+        }
       } catch (err) {
         setError('Failed to load standings');
         console.error(err);
@@ -115,7 +126,30 @@ export default function CHLStandingsPage() {
           backPath="/chl"
         />
 
-        <FullStandings standings={standings} league="chl" />
+        <div className="max-w-6xl mx-auto">
+          <Suspense
+            fallback={
+              <div className="animate-pulse h-96 bg-gray-700 rounded"></div>
+            }
+          >
+            <Tabs
+              tabs={[
+                {
+                  id: 'table',
+                  label: 'Tabell',
+                  content: <FullStandings standings={standings} league="chl" />,
+                },
+                {
+                  id: 'trend',
+                  label: 'Trend',
+                  content: <TrendTable league="chl" games={games} />,
+                },
+              ]}
+              defaultTab="table"
+              variant="dark"
+            />
+          </Suspense>
+        </div>
       </div>
     </main>
   );
