@@ -130,7 +130,6 @@ export default function CHLPage() {
       <main
         className="min-h-screen flex items-center justify-center"
         style={{ backgroundColor: '#20001c' }}
-        role="main"
         aria-busy="true"
       >
         <h1 className="text-white text-xl">Loading CHL games...</h1>
@@ -143,7 +142,6 @@ export default function CHLPage() {
       <main
         className="min-h-screen flex items-center justify-center"
         style={{ backgroundColor: '#20001c' }}
-        role="main"
       >
         <h1 className="text-white text-xl">Error: {error}</h1>
       </main>
@@ -154,16 +152,16 @@ export default function CHLPage() {
     <main
       className="min-h-screen relative"
       style={{ backgroundColor: '#20001c' }}
-      role="main"
     >
       {/* Background CHL Logo */}
-      <div className="fixed top-0 right-0 z-0">
+      <div className="fixed top-0 right-0 z-0" aria-hidden="true">
         <Image
           src="https://www.chl.hockey/static/img/logo.png"
-          alt="CHL Background"
+          alt=""
           width={400}
           height={400}
           className="opacity-10 transform rotate-12"
+          role="presentation"
         />
       </div>
 

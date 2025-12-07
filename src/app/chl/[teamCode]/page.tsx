@@ -242,14 +242,18 @@ export default function TeamPage({
   return (
     <main className="min-h-screen bg-gray-100 py-12 relative">
       {/* Background Team Logo */}
-      <div className="absolute inset-0 flex items-center justify-center z-0 px-8">
+      <div
+        className="absolute inset-0 flex items-center justify-center z-0 px-8"
+        aria-hidden="true"
+      >
         <div className="opacity-10 w-full h-full flex items-center justify-center">
           <Image
             src={teamInfo.logo || '/placeholder-team.png'}
-            alt={`${teamInfo.full} background logo`}
+            alt=""
             width={400}
             height={400}
             className="w-96 h-96 object-contain transform rotate-12"
+            role="presentation"
           />
         </div>
       </div>

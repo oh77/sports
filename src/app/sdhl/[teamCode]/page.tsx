@@ -151,13 +151,17 @@ export default function SDHLTeamPage({
     <main className="min-h-screen bg-gray-100 py-12 relative">
       {/* Background Team Logo */}
       {teamInfo.teamInfo.logo && (
-        <div className="absolute inset-0 flex items-center justify-center z-0 px-8">
+        <div
+          className="absolute inset-0 flex items-center justify-center z-0 px-8"
+          aria-hidden="true"
+        >
           <Image
             src={teamInfo.teamInfo.logo}
-            alt={`${teamInfo.teamInfo.short} Background`}
+            alt=""
             width={1200}
             height={1200}
             className="opacity-10 w-full h-full object-contain"
+            role="presentation"
           />
         </div>
       )}

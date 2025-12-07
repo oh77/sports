@@ -184,13 +184,14 @@ export default function SHLPage() {
     return (
       <main className="min-h-screen py-12 relative bg-[rgba(24,29,38,1)]">
         {/* Background SHL Logo */}
-        <div className="fixed top-0 right-0 z-0">
+        <div className="fixed top-0 right-0 z-0" aria-hidden="true">
           <Image
             src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-            alt="SHL Background"
+            alt=""
             width={400}
             height={400}
             className="opacity-10 transform rotate-12"
+            role="presentation"
           />
         </div>
 
@@ -223,13 +224,14 @@ export default function SHLPage() {
     return (
       <main className="min-h-screen py-12 relative bg-[rgba(24,29,38,1)]">
         {/* Background SHL Logo */}
-        <div className="fixed top-0 right-0 z-0">
+        <div className="fixed top-0 right-0 z-0" aria-hidden="true">
           <Image
             src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-            alt="SHL Background"
+            alt=""
             width={400}
             height={400}
             className="opacity-10 transform rotate-12"
+            role="presentation"
           />
         </div>
 
@@ -264,13 +266,14 @@ export default function SHLPage() {
   return (
     <main className="min-h-screen bg-gray-100 py-12 relative">
       {/* Sticky Background SHL Logo */}
-      <div className="fixed top-0 right-0 z-0">
+      <div className="fixed top-0 right-0 z-0" aria-hidden="true">
         <Image
           src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-          alt="SHL Background"
+          alt=""
           width={400}
           height={400}
           className="opacity-10 transform rotate-12"
+          role="presentation"
         />
       </div>
 

@@ -3,10 +3,7 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main
-      className="min-h-screen bg-gray-100 flex items-center justify-center p-4"
-      role="main"
-    >
+    <main className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <h1 className="sr-only">Gameday – välj liga</h1>
       <div className="text-center">
         <div className="flex flex-col md:flex-row gap-4 md:gap-8">
