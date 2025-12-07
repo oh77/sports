@@ -127,30 +127,34 @@ export default function CHLPage() {
 
   if (loading) {
     return (
-      <div
+      <main
         className="min-h-screen flex items-center justify-center"
         style={{ backgroundColor: '#20001c' }}
+        role="main"
+        aria-busy="true"
       >
-        <div className="text-white text-xl">Loading CHL games...</div>
-      </div>
+        <h1 className="text-white text-xl">Loading CHL games...</h1>
+      </main>
     );
   }
 
   if (error) {
     return (
-      <div
+      <main
         className="min-h-screen flex items-center justify-center"
         style={{ backgroundColor: '#20001c' }}
+        role="main"
       >
-        <div className="text-white text-xl">Error: {error}</div>
-      </div>
+        <h1 className="text-white text-xl">Error: {error}</h1>
+      </main>
     );
   }
 
   return (
-    <div
+    <main
       className="min-h-screen relative"
       style={{ backgroundColor: '#20001c' }}
+      role="main"
     >
       {/* Background CHL Logo */}
       <div className="fixed top-0 right-0 z-0">
@@ -166,7 +170,7 @@ export default function CHLPage() {
       <div className="relative z-10 container mx-auto px-4">
         <LeagueHeader
           league="chl"
-          gameDate={gameDate || 'Inga Matcher Tillgängliga'}
+          gameDate={gameDate || 'Inga matcher tillgängliga'}
           logoUrl="https://www.chl.hockey/static/img/logo.png"
           backgroundColor="#20001c"
           standingsPath="/chl/standings"
@@ -197,6 +201,6 @@ export default function CHLPage() {
 
         <LeagueFooter league="chl" />
       </div>
-    </div>
+    </main>
   );
 }
