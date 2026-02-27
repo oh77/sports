@@ -45,7 +45,7 @@ export const ScoreOrStatus: React.FC<ScoreOrStatusProps> = ({
       </div>
       {(gameInfo.overtime || gameInfo.shootout) && (
         <div className="text-xs text-orange-400 font-medium">
-          {gameInfo.shootout ? 'SO' : 'OT'}
+          {gameInfo.shootout ? 'Str' : 'ÖT'}
         </div>
       )}
     </>

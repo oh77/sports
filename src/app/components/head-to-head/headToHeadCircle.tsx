@@ -12,7 +12,7 @@ interface HeadToHeadCircleProps {
 }
 
 const getTitle = (game: GameInfo, gameDate: Date) =>
-  `${getDay(gameDate)} ${formatShortMonthFromDate(gameDate)} | ${game.homeTeamInfo.teamInfo.code}-${game.awayTeamInfo.teamInfo.code} ${game.homeTeamInfo.score}-${game.awayTeamInfo.score} ${game.overtime ? '(OT)' : ''} ${game.shootout ? '(SO)' : ''}`;
+  `${getDay(gameDate)} ${formatShortMonthFromDate(gameDate)} | ${game.homeTeamInfo.teamInfo.code}-${game.awayTeamInfo.teamInfo.code} ${game.homeTeamInfo.score}-${game.awayTeamInfo.score} ${game.overtime ? '(ÖT)' : ''} ${game.shootout ? '(Str)' : ''}`;
 
 const getWinnerAltText = (game: GameInfo) =>
   game.homeTeamInfo.score > game.awayTeamInfo.score
