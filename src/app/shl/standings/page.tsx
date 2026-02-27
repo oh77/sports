@@ -7,6 +7,7 @@ import type { StandingsFilter } from '@/app/types/domain/standingsFilter';
 import { FullStandings } from '../../components/standings/full-standings';
 import { GoalDistributionTable } from '../../components/standings/goal-distribution-table';
 import { MatchesTable } from '../../components/standings/matches-table';
+import { UpcomingGamesTable } from '../../components/standings/upcoming-games-table';
 import { StandingsHeader } from '../../components/standings/standings-header';
 import {
   calculateStandingsForMonth,
@@ -427,6 +428,13 @@ function SHLStandingsContent() {
                 label: 'Resultat',
                 content: (
                   <GoalDistributionTable league="shl" games={games} />
+                ),
+              },
+              {
+                id: 'upcoming',
+                label: 'Kommande',
+                content: (
+                  <UpcomingGamesTable league="shl" games={games} />
                 ),
               },
             ]}
