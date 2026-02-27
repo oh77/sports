@@ -17,14 +17,17 @@ export const PreviousGameDay: React.FC<PreviousGameDayProps> = ({
   league,
 }) => {
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       {/* Date Header */}
-      <div className="mb-4 text-center">
-        <h2 className="text-xl font-bold text-gray-800">{date}</h2>
+      <div className="mb-2 text-center">
+        <h2 className="text-lg font-bold text-gray-800">{date}</h2>
       </div>
 
-      {/* Games - no time grouping */}
-      <div className="space-y-4">
+      {/* Games in one container with dividers */}
+      <div
+        className="rounded-lg shadow-lg divide-y divide-gray-200"
+        style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
+      >
         {games.map((game, index) => (
           <PreviousGame key={game.uuid || index} game={game} league={league} />
         ))}

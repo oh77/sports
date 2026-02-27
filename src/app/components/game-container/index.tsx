@@ -8,11 +8,13 @@ import type { GameInfo } from '../../types/domain/game';
 interface GameContainerProps {
   game: GameInfo;
   league: League;
+  compact?: boolean;
 }
 
 export const GameContainer: React.FC<GameContainerProps> = ({
   game,
   league,
+  compact = false,
 }) => {
   const getStadiumIcon = () => {
     return league === 'shl'
@@ -30,20 +32,25 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 
   const isGameFinished = (game: GameInfo) => game.state === 'finished';
 
+  const wrapperClass = compact
+    ? 'px-4 py-3'
+    : 'rounded-lg shadow-lg p-6';
+  const wrapperStyle = compact
+    ? undefined
+    : { backgroundColor: 'rgba(255, 255, 255, 0.8)' };
+
   return (
-    <div
-      className="rounded-lg shadow-lg p-6"
-      style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
-    >
-      <div className="flex items-center justify-between">
-        <div className="text-center flex-1">
+    <div className={wrapperClass} style={wrapperStyle}>
+      <div className="flex items-center">
+        <div className="flex-1 flex justify-end pr-8">
           <ClickableTeamLogo
             league={league}
             teamInfo={game.homeTeamInfo.teamInfo}
+            compact={compact}
           />
         </div>
 
-        <div className="text-center mx-6">
+        <div className="text-center w-40 shrink-0">
           <Image
             src={getStadiumIcon()}
             alt="Arena"
@@ -51,13 +58,16 @@ export const GameContainer: React.FC<GameContainerProps> = ({
             height={40}
             className="mx-auto mb-2 brightness-0"
           />
-          <p className="text-sm text-gray-500 mt-1">{game.venueInfo.name}</p>
+          <p className="text-sm text-gray-500 mt-1 truncate">
+            {game.venueInfo.name}
+          </p>
         </div>
 
-        <div className="text-center flex-1">
+        <div className="flex-1 flex justify-start pl-8">
           <ClickableTeamLogo
             league={league}
             teamInfo={game.awayTeamInfo.teamInfo}
+            compact={compact}
           />
         </div>
       </div>
