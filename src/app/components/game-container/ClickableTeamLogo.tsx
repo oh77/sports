@@ -1,8 +1,12 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type React from 'react';
 import type { League } from '@/app/types/domain/league';
 import type { TeamInfo } from '@/app/types/domain/team';
+import { teamPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 
 interface ClickableTeamLogoProps {
   league: League;
@@ -15,6 +19,7 @@ const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
   teamInfo,
   compact = false,
 }) => {
+  const season = useSeason();
   const containerSize = 'w-16 h-16';
   const logoSize = league === 'shl' ? 'w-12 h-12' : 'w-16 h-16';
   const logoPx = league === 'shl' ? 48 : 64;
@@ -22,7 +27,7 @@ const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
 
   return (
     <Link
-      href={`/${league}/${encodeURIComponent(teamInfo.code)}`}
+      href={teamPath(league, season, teamInfo.code)}
       title={teamInfo.full}
       className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
     >

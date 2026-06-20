@@ -2,6 +2,8 @@
 
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { withSeason } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import type {
   GoalieStats,
   GoalieStatsData,
@@ -19,6 +21,7 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({
   teamCode2,
   league,
 }) => {
+  const season = useSeason();
   const [team1Goalies, setTeam1Goalies] = useState<GoalieStats[]>([]);
   const [team2Goalies, setTeam2Goalies] = useState<GoalieStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,8 +38,12 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({
 
         // Fetch goalies for both teams using server-side API routes
         const [team1Response, team2Response] = await Promise.all([
-          fetch(`/api/${league}-goalies?teamCode=${teamCode1}`),
-          fetch(`/api/${league}-goalies?teamCode=${teamCode2}`),
+          fetch(
+            withSeason(`/api/${league}-goalies?teamCode=${teamCode1}`, season),
+          ),
+          fetch(
+            withSeason(`/api/${league}-goalies?teamCode=${teamCode2}`, season),
+          ),
         ]);
 
         if (!team1Response.ok || !team2Response.ok) {
@@ -62,7 +69,7 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({
     };
 
     fetchTopGoalies();
-  }, [teamCode1, teamCode2, league]);
+  }, [teamCode1, teamCode2, league, season]);
 
   if (loading) {
     return (

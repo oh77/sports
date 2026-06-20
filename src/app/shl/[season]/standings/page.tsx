@@ -4,11 +4,10 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import type { StandingsFilter } from '@/app/types/domain/standingsFilter';
-import { FullStandings } from '../../components/standings/full-standings';
-import { GoalDistributionTable } from '../../components/standings/goal-distribution-table';
-import { MatchesTable } from '../../components/standings/matches-table';
-import { UpcomingGamesTable } from '../../components/standings/upcoming-games-table';
-import { StandingsHeader } from '../../components/standings/standings-header';
+import { FullStandings } from '../../../components/standings/full-standings';
+import { GoalDistributionTable } from '../../../components/standings/goal-distribution-table';
+import { MatchesTable } from '../../../components/standings/matches-table';
+import { StandingsHeader } from '../../../components/standings/standings-header';
 import {
   calculateStandingsForMonth,
   calculateStandingsFromGames,
@@ -16,17 +15,21 @@ import {
   formatMonthLabel,
   formatMonthShortLabel,
   getAvailableMonths,
-} from '../../components/standings/standingsUtils';
-import { TrendTable } from '../../components/standings/trend-table';
-import { Tabs } from '../../components/tabs';
-import type { GameInfo } from '../../types/domain/game';
-import type { StandingsData } from '../../types/domain/standings';
-import type { StatnetLeagueResponse } from '../../types/statnet/game';
-import { translateStatnetGameToDomain } from '../../utils/translators/statnetToDomain';
+} from '../../../components/standings/standingsUtils';
+import { TrendTable } from '../../../components/standings/trend-table';
+import { UpcomingGamesTable } from '../../../components/standings/upcoming-games-table';
+import { Tabs } from '../../../components/tabs';
+import type { GameInfo } from '../../../types/domain/game';
+import type { StandingsData } from '../../../types/domain/standings';
+import type { StatnetLeagueResponse } from '../../../types/statnet/game';
+import { leagueBasePath, withSeason } from '../../../utils/leaguePaths';
+import { translateStatnetGameToDomain } from '../../../utils/translators/statnetToDomain';
+import { useSeason } from '../../../utils/useSeason';
 
-function SDHLStandingsContent() {
+function SHLStandingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const season = useSeason();
   const [standings, setStandings] = useState<StandingsData | null>(null);
   const [games, setGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,8 +45,8 @@ function SDHLStandingsContent() {
       try {
         setLoading(true);
         const [standingsResponse, gamesResponse] = await Promise.all([
-          fetch('/api/sdhl-standings'),
-          fetch('/api/sdhl-games'),
+          fetch(withSeason('/api/shl-standings', season)),
+          fetch(withSeason('/api/shl-games', season)),
         ]);
 
         if (!standingsResponse.ok) {
@@ -69,7 +72,7 @@ function SDHLStandingsContent() {
     };
 
     loadData();
-  }, []);
+  }, [season]);
 
   // Update filter when URL changes
   useEffect(() => {
@@ -111,10 +114,10 @@ function SDHLStandingsContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-100 py-12 relative">
-        {/* Background SDHL Logo */}
+        {/* Background SHL Logo */}
         <div className="fixed top-0 right-0 z-0" aria-hidden="true">
           <Image
-            src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
+            src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
             alt=""
             width={400}
             height={400}
@@ -125,10 +128,10 @@ function SDHLStandingsContent() {
 
         <div className="container mx-auto px-4 relative z-10">
           <StandingsHeader
-            league="sdhl"
-            leagueName="SDHL Ligatabell"
-            logoUrl="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
-            backPath="/sdhl"
+            league="shl"
+            leagueName="SHL Ligatabell"
+            logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
+            backPath={leagueBasePath('shl', season)}
           />
 
           <div className="animate-pulse">
@@ -142,10 +145,10 @@ function SDHLStandingsContent() {
   if (error || (!standings && filter === 'season')) {
     return (
       <main className="min-h-screen bg-gray-100 py-12 relative">
-        {/* Background SDHL Logo */}
+        {/* Background SHL Logo */}
         <div className="fixed top-0 right-0 z-0" aria-hidden="true">
           <Image
-            src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
+            src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
             alt=""
             width={400}
             height={400}
@@ -156,10 +159,10 @@ function SDHLStandingsContent() {
 
         <div className="container mx-auto px-4 relative z-10">
           <StandingsHeader
-            league="sdhl"
-            leagueName="SDHL Ligatabell"
-            logoUrl="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
-            backPath="/sdhl"
+            league="shl"
+            leagueName="SHL Ligatabell"
+            logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
+            backPath={leagueBasePath('shl', season)}
           />
 
           <div className="text-center">
@@ -178,10 +181,10 @@ function SDHLStandingsContent() {
 
   return (
     <main className="min-h-screen bg-gray-100 py-12 relative">
-      {/* Background SDHL Logo */}
+      {/* Background SHL Logo */}
       <div className="fixed top-0 right-0 z-0" aria-hidden="true">
         <Image
-          src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
+          src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
           alt=""
           width={400}
           height={400}
@@ -192,10 +195,10 @@ function SDHLStandingsContent() {
 
       <div className="container mx-auto px-4 relative z-10">
         <StandingsHeader
-          league="sdhl"
-          leagueName="SDHL Ligatabell"
-          logoUrl="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
-          backPath="/sdhl"
+          league="shl"
+          leagueName="SHL Ligatabell"
+          logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
+          backPath={leagueBasePath('shl', season)}
         />
 
         <div className="max-w-6xl mx-auto">
@@ -223,9 +226,12 @@ function SDHLStandingsContent() {
                           } else {
                             params.set('filter', newFilter);
                           }
-                          router.push(`/sdhl/standings?${params.toString()}`, {
-                            scroll: false,
-                          });
+                          router.push(
+                            `/shl/${season}/standings?${params.toString()}`,
+                            {
+                              scroll: false,
+                            },
+                          );
                         }}
                         className="md:hidden px-4 py-2 w-full border border-gray-300 rounded-lg bg-white text-gray-900 font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
@@ -257,7 +263,7 @@ function SDHLStandingsContent() {
                             );
                             params.delete('filter');
                             router.push(
-                              `/sdhl/standings?${params.toString()}`,
+                              `/shl/${season}/standings?${params.toString()}`,
                               {
                                 scroll: false,
                               },
@@ -282,7 +288,7 @@ function SDHLStandingsContent() {
                             );
                             params.set('filter', 'home');
                             router.push(
-                              `/sdhl/standings?${params.toString()}`,
+                              `/shl/${season}/standings?${params.toString()}`,
                               {
                                 scroll: false,
                               },
@@ -305,7 +311,7 @@ function SDHLStandingsContent() {
                             );
                             params.set('filter', 'away');
                             router.push(
-                              `/sdhl/standings?${params.toString()}`,
+                              `/shl/${season}/standings?${params.toString()}`,
                               {
                                 scroll: false,
                               },
@@ -330,7 +336,7 @@ function SDHLStandingsContent() {
                             );
                             params.set('filter', 'last5');
                             router.push(
-                              `/sdhl/standings?${params.toString()}`,
+                              `/shl/${season}/standings?${params.toString()}`,
                               {
                                 scroll: false,
                               },
@@ -353,7 +359,7 @@ function SDHLStandingsContent() {
                             );
                             params.set('filter', 'last10');
                             router.push(
-                              `/sdhl/standings?${params.toString()}`,
+                              `/shl/${season}/standings?${params.toString()}`,
                               {
                                 scroll: false,
                               },
@@ -376,7 +382,7 @@ function SDHLStandingsContent() {
                             );
                             params.set('filter', 'last15');
                             router.push(
-                              `/sdhl/standings?${params.toString()}`,
+                              `/shl/${season}/standings?${params.toString()}`,
                               {
                                 scroll: false,
                               },
@@ -403,7 +409,7 @@ function SDHLStandingsContent() {
                               );
                               params.set('filter', monthKey);
                               router.push(
-                                `/sdhl/standings?${params.toString()}`,
+                                `/shl/${season}/standings?${params.toString()}`,
                                 {
                                   scroll: false,
                                 },
@@ -424,7 +430,7 @@ function SDHLStandingsContent() {
                     {displayStandings && (
                       <FullStandings
                         standings={displayStandings}
-                        league="sdhl"
+                        league="shl"
                         filter={filter}
                       />
                     )}
@@ -434,26 +440,22 @@ function SDHLStandingsContent() {
               {
                 id: 'trend',
                 label: 'Trend',
-                content: <TrendTable league="sdhl" games={games} />,
+                content: <TrendTable league="shl" games={games} />,
               },
               {
                 id: 'matches',
                 label: 'Matcher',
-                content: <MatchesTable league="sdhl" games={games} />,
+                content: <MatchesTable league="shl" games={games} />,
               },
               {
                 id: 'results',
                 label: 'Resultat',
-                content: (
-                  <GoalDistributionTable league="sdhl" games={games} />
-                ),
+                content: <GoalDistributionTable league="shl" games={games} />,
               },
               {
                 id: 'upcoming',
                 label: 'Kommande',
-                content: (
-                  <UpcomingGamesTable league="sdhl" games={games} />
-                ),
+                content: <UpcomingGamesTable league="shl" games={games} />,
               },
             ]}
             defaultTab="table"
@@ -465,17 +467,18 @@ function SDHLStandingsContent() {
   );
 }
 
-export default function SDHLStandingsPage() {
+export default function SHLStandingsPage() {
+  const season = useSeason();
   return (
     <Suspense
       fallback={
         <main className="min-h-screen bg-gray-100 py-12 relative">
           <div className="container mx-auto px-4 relative z-10">
             <StandingsHeader
-              league="sdhl"
-              leagueName="SDHL Ligatabell"
-              logoUrl="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
-              backPath="/sdhl"
+              league="shl"
+              leagueName="SHL Ligatabell"
+              logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
+              backPath={leagueBasePath('shl', season)}
             />
             <div className="animate-pulse">
               <div className="h-96 bg-gray-300 rounded"></div>
@@ -484,7 +487,7 @@ export default function SDHLStandingsPage() {
         </main>
       }
     >
-      <SDHLStandingsContent />
+      <SHLStandingsContent />
     </Suspense>
   );
 }

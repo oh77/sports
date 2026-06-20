@@ -2,6 +2,8 @@
 
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { withSeason } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import type {
   GoalieStats,
   GoalieStatsData,
@@ -14,6 +16,7 @@ interface TopGoalieProps {
 }
 
 export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
+  const season = useSeason();
   const [topGoalie, setTopGoalie] = useState<GoalieStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +29,7 @@ export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
         const url = teamCode
           ? `/api/${league}-goalies?teamCode=${encodeURIComponent(teamCode)}`
           : `/api/${league}-goalies`;
-        const response = await fetch(url);
+        const response = await fetch(withSeason(url, season));
 
         if (!response.ok) {
           throw new Error('Failed to fetch goalie data');
@@ -51,7 +54,7 @@ export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
     };
 
     fetchTopGoalie();
-  }, [league, teamCode]);
+  }, [league, teamCode, season]);
 
   if (loading) {
     return (

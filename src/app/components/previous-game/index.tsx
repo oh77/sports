@@ -1,8 +1,12 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type React from 'react';
 import type { League } from '@/app/types/domain/league';
 import type { TeamInfo } from '@/app/types/domain/team';
+import { teamPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import type { GameInfo } from '../../types/domain/game';
 
 interface PreviousGameProps {
@@ -13,10 +17,14 @@ interface PreviousGameProps {
 function SmallTeamLogo({
   league,
   teamInfo,
-}: { league: League; teamInfo: TeamInfo }) {
+}: {
+  league: League;
+  teamInfo: TeamInfo;
+}) {
+  const season = useSeason();
   return (
     <Link
-      href={`/${league}/${encodeURIComponent(teamInfo.code)}`}
+      href={teamPath(league, season, teamInfo.code)}
       title={teamInfo.full}
       className="hover:opacity-80"
     >
@@ -61,7 +69,10 @@ export const PreviousGame: React.FC<PreviousGameProps> = ({ game, league }) => {
       <div className="flex items-center">
         {/* Home Team */}
         <div className="flex-1 flex justify-end pr-6">
-          <SmallTeamLogo league={league} teamInfo={game.homeTeamInfo.teamInfo} />
+          <SmallTeamLogo
+            league={league}
+            teamInfo={game.homeTeamInfo.teamInfo}
+          />
         </div>
 
         {/* Score */}
@@ -90,7 +101,10 @@ export const PreviousGame: React.FC<PreviousGameProps> = ({ game, league }) => {
 
         {/* Away Team */}
         <div className="flex-1 flex justify-start pl-6">
-          <SmallTeamLogo league={league} teamInfo={game.awayTeamInfo.teamInfo} />
+          <SmallTeamLogo
+            league={league}
+            teamInfo={game.awayTeamInfo.teamInfo}
+          />
         </div>
       </div>
     </div>

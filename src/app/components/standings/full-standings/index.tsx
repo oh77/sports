@@ -12,6 +12,8 @@ import {
 import type { League } from '@/app/types/domain/league';
 import type { StandingsData } from '@/app/types/domain/standings';
 import type { StandingsFilter } from '@/app/types/domain/standingsFilter';
+import { teamPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 
 interface FullStandingsProps {
   standings: StandingsData;
@@ -20,6 +22,7 @@ interface FullStandingsProps {
 }
 
 export function FullStandings({ standings, league }: FullStandingsProps) {
+  const season = useSeason();
   const getTeams = () => {
     const teams = standings.stats || [];
 
@@ -116,7 +119,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                       {/* Team */}
                       <td className="px-4 py-4 whitespace-nowrap">
                         <Link
-                          href={`/${league}/${encodeURIComponent(teamCode)}`}
+                          href={teamPath(league, season, teamCode)}
                           className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
                         >
                           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">

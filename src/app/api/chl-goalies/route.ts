@@ -1,23 +1,26 @@
 import { NextResponse } from 'next/server';
+import { chlResourceUrl, resolveChlSeason } from '../../config/chl';
 import type { CHLGoalieStatsApiResponse } from '../../types/chl/goalie-stats';
 import type { GoalieStatsData } from '../../types/domain/goalie-stats';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
 import { translateCHLGoalieStatsToDomain } from '../../utils/translators/statnetToDomain';
 
-const CHL_GOALIES_URL =
-  'https://www.chl.hockey/api/s3?q=statistic-goalkeepers-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json';
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const teamCode = searchParams.get('teamCode');
+    const season = resolveChlSeason(searchParams.get('season'));
 
-    const cacheKey = generateCacheKey('chl-goalies-summary');
+    const cacheKey = generateCacheKey('chl-goalies-summary', {
+      season: season.key,
+    });
 
     const domainData = await getCachedData(
       cacheKey,
       async (): Promise<GoalieStatsData> => {
-        const response = await fetch(CHL_GOALIES_URL);
+        const response = await fetch(
+          chlResourceUrl('statistic-goalkeepers', season.seasonId),
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

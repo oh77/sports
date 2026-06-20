@@ -24,7 +24,7 @@ function heatmapStyle(
   const alpha = 0.1 + intensity * 0.55;
   const color =
     type === 'scored'
-      ? `rgba(34, 197, 94, ${alpha})`  // green-500
+      ? `rgba(34, 197, 94, ${alpha})` // green-500
       : `rgba(239, 68, 68, ${alpha})`; // red-500
   return { backgroundColor: color };
 }
@@ -130,10 +130,7 @@ export function GoalDistributionTable({
                 <React.Fragment key={team.code}>
                   {/* Team divider row */}
                   <tr className="bg-gray-50 border-t-2 border-gray-300">
-                    <td
-                      colSpan={11}
-                      className="px-4 py-2"
-                    >
+                    <td colSpan={11} className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         {team.logo && (
                           <Image

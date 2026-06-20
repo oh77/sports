@@ -1,15 +1,18 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { FullStandings } from '../../components/standings/full-standings';
-import { MatchesTable } from '../../components/standings/matches-table';
-import { StandingsHeader } from '../../components/standings/standings-header';
-import { TrendTable } from '../../components/standings/trend-table';
-import { Tabs } from '../../components/tabs';
-import type { GameInfo, LeagueResponse } from '../../types/domain/game';
-import type { StandingsData } from '../../types/domain/standings';
+import { FullStandings } from '../../../components/standings/full-standings';
+import { MatchesTable } from '../../../components/standings/matches-table';
+import { StandingsHeader } from '../../../components/standings/standings-header';
+import { TrendTable } from '../../../components/standings/trend-table';
+import { Tabs } from '../../../components/tabs';
+import type { GameInfo, LeagueResponse } from '../../../types/domain/game';
+import type { StandingsData } from '../../../types/domain/standings';
+import { leagueBasePath, withSeason } from '../../../utils/leaguePaths';
+import { useSeason } from '../../../utils/useSeason';
 
 export default function CHLStandingsPage() {
+  const season = useSeason();
   const [standings, setStandings] = useState<StandingsData | null>(null);
   const [games, setGames] = useState<GameInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,8 +23,8 @@ export default function CHLStandingsPage() {
       try {
         setLoading(true);
         const [standingsResponse, gamesResponse] = await Promise.all([
-          fetch('/api/chl-standings'),
-          fetch('/api/chl-games?type=all-recent'),
+          fetch(withSeason('/api/chl-standings', season)),
+          fetch(withSeason('/api/chl-games?type=all-recent', season)),
         ]);
 
         if (!standingsResponse.ok) {
@@ -44,7 +47,7 @@ export default function CHLStandingsPage() {
     };
 
     loadStandings();
-  }, []);
+  }, [season]);
 
   if (loading) {
     return (
@@ -63,7 +66,7 @@ export default function CHLStandingsPage() {
             leagueName="CHL"
             logoUrl="https://www.chl.hockey/static/img/logo.png"
             backgroundColor="#20001c"
-            backPath="/chl"
+            backPath={leagueBasePath('chl', season)}
           />
 
           <div className="animate-pulse">
@@ -91,7 +94,7 @@ export default function CHLStandingsPage() {
             leagueName="CHL"
             logoUrl="https://www.chl.hockey/static/img/logo.png"
             backgroundColor="#20001c"
-            backPath="/chl"
+            backPath={leagueBasePath('chl', season)}
           />
 
           <div className="text-center">
@@ -124,7 +127,7 @@ export default function CHLStandingsPage() {
           leagueName="CHL"
           logoUrl="https://www.chl.hockey/static/img/logo.png"
           backgroundColor="#20001c"
-          backPath="/chl"
+          backPath={leagueBasePath('chl', season)}
         />
 
         <div className="max-w-6xl mx-auto">

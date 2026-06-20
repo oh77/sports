@@ -1,3 +1,4 @@
+import type { GameType } from '../config/statnet';
 import type { GameInfo, LeagueResponse } from '../types/domain/game';
 import type { League } from '../types/domain/league';
 import type { TeamInfo } from '../types/domain/team';
@@ -8,20 +9,25 @@ import {
 } from '../utils/translators/statnetToDomain';
 
 export class StatnetService {
-  private readonly API_URL: string;
+  private readonly seasonQuery: string;
   private readonly TEAMS_API_URL: string;
   private readonly league: League;
   private games: GameInfo[] = [];
 
-  constructor(league: League) {
-    this.API_URL = `/api/${league}-games`;
-    this.TEAMS_API_URL = `/api/${league}-teams`;
+  constructor(league: League, season?: string) {
+    this.seasonQuery = season ? `?season=${encodeURIComponent(season)}` : '';
+    this.TEAMS_API_URL = `/api/${league}-teams${this.seasonQuery}`;
     this.league = league;
   }
 
-  async fetchGames(): Promise<GameInfo[]> {
+  /** Fetch games for a schedule phase (defaults to the regular season). */
+  async fetchGames(gameType?: GameType): Promise<GameInfo[]> {
     try {
-      const response = await fetch(this.API_URL);
+      let url = `/api/${this.league}-games${this.seasonQuery}`;
+      if (gameType) {
+        url += `${this.seasonQuery ? '&' : '?'}gameType=${gameType}`;
+      }
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

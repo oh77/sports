@@ -2,6 +2,8 @@
 
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { withSeason } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import type {
   PlayerStats,
   PlayerStatsData,
@@ -14,6 +16,7 @@ interface TopPlayerProps {
 }
 
 export const TopPlayer: React.FC<TopPlayerProps> = ({ league, teamCode }) => {
+  const season = useSeason();
   const [topPlayer, setTopPlayer] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +29,7 @@ export const TopPlayer: React.FC<TopPlayerProps> = ({ league, teamCode }) => {
         const url = teamCode
           ? `/api/${league}-players?teamCode=${encodeURIComponent(teamCode)}`
           : `/api/${league}-players`;
-        const response = await fetch(url);
+        const response = await fetch(withSeason(url, season));
 
         if (!response.ok) {
           throw new Error('Failed to fetch player data');
@@ -51,7 +54,7 @@ export const TopPlayer: React.FC<TopPlayerProps> = ({ league, teamCode }) => {
     };
 
     fetchTopPlayer();
-  }, [league, teamCode]);
+  }, [league, teamCode, season]);
 
   if (loading) {
     return (

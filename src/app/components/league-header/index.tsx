@@ -4,7 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type React from 'react';
 import { useState } from 'react';
+import { SeasonSwitcher } from '@/app/components/season-switcher';
 import type { League } from '@/app/types/domain/league';
+import { leagueBasePath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 
 interface LeagueHeaderProps {
   league: League;
@@ -14,10 +17,10 @@ interface LeagueHeaderProps {
   standingsPath: string;
 }
 
-const LEAGUES = [
-  { id: 'shl', name: 'SHL', path: '/shl' },
-  { id: 'sdhl', name: 'SDHL', path: '/sdhl' },
-  { id: 'chl', name: 'CHL', path: '/chl' },
+const LEAGUES: { id: League; name: string }[] = [
+  { id: 'shl', name: 'SHL' },
+  { id: 'sdhl', name: 'SDHL' },
+  { id: 'chl', name: 'CHL' },
 ];
 
 export const LeagueHeader: React.FC<LeagueHeaderProps> = ({
@@ -28,8 +31,11 @@ export const LeagueHeader: React.FC<LeagueHeaderProps> = ({
   standingsPath,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const season = useSeason();
 
   const otherLeagues = LEAGUES.filter((l) => l.id !== league);
+  // All leagues carry a season segment; keys are shared across leagues.
+  const leagueHref = (id: League) => leagueBasePath(id, season);
 
   // Use darker backgrounds for SHL/SDHL (light page background), lighter for CHL (dark page background)
   const isLightPage = league === 'shl' || league === 'sdhl';
@@ -85,7 +91,7 @@ export const LeagueHeader: React.FC<LeagueHeaderProps> = ({
                   {otherLeagues.map((l) => (
                     <Link
                       key={l.id}
-                      href={l.path}
+                      href={leagueHref(l.id)}
                       className="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors"
                       onClick={() => setMenuOpen(false)}
                     >
@@ -105,6 +111,9 @@ export const LeagueHeader: React.FC<LeagueHeaderProps> = ({
             </>
           )}
         </div>
+
+        {/* Season Switcher - Center */}
+        <SeasonSwitcher />
 
         {/* Standings Link Icon - Right */}
         <Link

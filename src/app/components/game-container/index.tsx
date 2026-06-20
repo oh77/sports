@@ -32,9 +32,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 
   const isGameFinished = (game: GameInfo) => game.state === 'finished';
 
-  const wrapperClass = compact
-    ? 'px-4 py-3'
-    : 'rounded-lg shadow-lg p-6';
+  const wrapperClass = compact ? 'px-4 py-3' : 'rounded-lg shadow-lg p-6';
   const wrapperStyle = compact
     ? undefined
     : { backgroundColor: 'rgba(255, 255, 255, 0.8)' };

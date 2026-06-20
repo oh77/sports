@@ -3,23 +3,36 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
-import GameStatsContainer from '../../../../components/gamestats-container';
-import NextGame from '../../../../components/next-game';
-import PreviousGames from '../../../../components/previous-games';
-import { CompactStandings } from '../../../../components/standings/compact-standings';
-import { TopGoalie } from '../../../../components/top-goalie';
-import { TopPlayer } from '../../../../components/top-player';
-import UpcomingGames from '../../../../components/upcoming-games';
-import type { GameInfo, LeagueResponse } from '../../../../types/domain/game';
-import type { StandingsData } from '../../../../types/domain/standings';
-import type { TeamInfo } from '../../../../types/domain/team';
+import GameStatsContainer from '../../../../../components/gamestats-container';
+import NextGame from '../../../../../components/next-game';
+import PreviousGames from '../../../../../components/previous-games';
+import { CompactStandings } from '../../../../../components/standings/compact-standings';
+import { TopGoalie } from '../../../../../components/top-goalie';
+import { TopPlayer } from '../../../../../components/top-player';
+import UpcomingGames from '../../../../../components/upcoming-games';
+import type {
+  GameInfo,
+  LeagueResponse,
+} from '../../../../../types/domain/game';
+import type { StandingsData } from '../../../../../types/domain/standings';
+import type { TeamInfo } from '../../../../../types/domain/team';
+import {
+  leagueBasePath,
+  teamPath,
+  withSeason,
+} from '../../../../../utils/leaguePaths';
 
 export default function TeamPage({
   params,
 }: {
-  params: Promise<{ teamCode: string; opponentTeamCode: string }>;
+  params: Promise<{
+    season: string;
+    teamCode: string;
+    opponentTeamCode: string;
+  }>;
 }) {
   const resolvedParams = React.use(params);
+  const season = resolvedParams.season;
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
   const opponentTeamCode = decodeURIComponent(resolvedParams.opponentTeamCode);
   const [game, setGame] = useState<GameInfo | null>(null);
@@ -48,9 +61,9 @@ export default function TeamPage({
         // Fetch CHL games and teams - use all games to get complete data
         const [upcomingGamesResponse, recentGamesResponse, teamsResponse] =
           await Promise.all([
-            fetch('/api/chl-games?type=all-upcoming'),
-            fetch('/api/chl-games?type=all-recent'),
-            fetch('/api/chl-teams'),
+            fetch(withSeason('/api/chl-games?type=all-upcoming', season)),
+            fetch(withSeason('/api/chl-games?type=all-recent', season)),
+            fetch(withSeason('/api/chl-teams', season)),
           ]);
 
         if (!upcomingGamesResponse.ok) {
@@ -188,7 +201,9 @@ export default function TeamPage({
 
         // Load standings data
         try {
-          const standingsResponse = await fetch('/api/chl-standings');
+          const standingsResponse = await fetch(
+            withSeason('/api/chl-standings', season),
+          );
           if (standingsResponse.ok) {
             const standingsData = await standingsResponse.json();
             setStandings(standingsData);
@@ -207,7 +222,7 @@ export default function TeamPage({
     if (teamCode) {
       loadTeamData();
     }
-  }, [teamCode, opponentTeamCode, matchTeamCode]);
+  }, [teamCode, opponentTeamCode, matchTeamCode, season]);
 
   if (loading) {
     return (
@@ -237,7 +252,7 @@ export default function TeamPage({
                 `Inga kommande matcher hittades för lagkod: ${teamCode}`}
             </p>
             <Link
-              href="/chl"
+              href={leagueBasePath('chl', season)}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
               Tillbaka till CHL
@@ -305,16 +320,10 @@ export default function TeamPage({
             <div>
               <div className="grid grid-cols-1 gap-6">
                 <div>
-                  <TopPlayer
-                    league="chl"
-                    teamCode={teamCode}
-                  />
+                  <TopPlayer league="chl" teamCode={teamCode} />
                 </div>
                 <div>
-                  <TopGoalie
-                    league="chl"
-                    teamCode={teamCode}
-                  />
+                  <TopGoalie league="chl" teamCode={teamCode} />
                 </div>
               </div>
             </div>
@@ -323,16 +332,10 @@ export default function TeamPage({
             <div>
               <div className="grid grid-cols-1 gap-6">
                 <div>
-                  <TopPlayer
-                    league="chl"
-                    teamCode={opponentTeamCode}
-                  />
+                  <TopPlayer league="chl" teamCode={opponentTeamCode} />
                 </div>
                 <div>
-                  <TopGoalie
-                    league="chl"
-                    teamCode={opponentTeamCode}
-                  />
+                  <TopGoalie league="chl" teamCode={opponentTeamCode} />
                 </div>
               </div>
             </div>
@@ -377,7 +380,7 @@ export default function TeamPage({
                   // CHL league logo as first item
                   {
                     key: 'league-chl',
-                    href: '/chl',
+                    href: leagueBasePath('chl', season),
                     logo: 'https://www.chl.hockey/static/img/logo.png',
                     alt: 'CHL Logo',
                     tooltip: 'CHL',
@@ -386,7 +389,7 @@ export default function TeamPage({
                   // Team logos
                   ...allTeams.map((team) => ({
                     key: `team-${team.short}`,
-                    href: `/chl/${team.short.toUpperCase()}`,
+                    href: teamPath('chl', season, team.short.toUpperCase()),
                     logo: team.logo || '/placeholder-team.png',
                     alt: `${team.full} logo`,
                     tooltip: team.full,

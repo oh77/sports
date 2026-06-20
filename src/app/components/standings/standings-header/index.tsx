@@ -3,7 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { SeasonSwitcher } from '@/app/components/season-switcher';
 import type { League } from '@/app/types/domain/league';
+import { standingsPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 
 interface StandingsHeaderProps {
   league: League;
@@ -13,10 +16,10 @@ interface StandingsHeaderProps {
   backPath: string;
 }
 
-const LEAGUES = [
-  { id: 'shl', name: 'SHL', path: '/shl/standings' },
-  { id: 'sdhl', name: 'SDHL', path: '/sdhl/standings' },
-  { id: 'chl', name: 'CHL', path: '/chl/standings' },
+const LEAGUES: { id: League; name: string }[] = [
+  { id: 'shl', name: 'SHL' },
+  { id: 'sdhl', name: 'SDHL' },
+  { id: 'chl', name: 'CHL' },
 ];
 
 export function StandingsHeader({
@@ -26,8 +29,10 @@ export function StandingsHeader({
   backPath,
 }: StandingsHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const season = useSeason();
 
   const otherLeagues = LEAGUES.filter((l) => l.id !== league);
+  const leagueHref = (id: League) => standingsPath(id, season);
 
   // Use darker backgrounds for SHL/SDHL (light page background), lighter for CHL (dark page background)
   const isLightPage = league === 'shl' || league === 'sdhl';
@@ -83,7 +88,7 @@ export function StandingsHeader({
                   {otherLeagues.map((l) => (
                     <Link
                       key={l.id}
-                      href={l.path}
+                      href={leagueHref(l.id)}
                       className="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors"
                       onClick={() => setMenuOpen(false)}
                     >
@@ -103,6 +108,9 @@ export function StandingsHeader({
             </>
           )}
         </div>
+
+        {/* Season Switcher - Center */}
+        <SeasonSwitcher />
 
         {/* Back Arrow Icon - Right */}
         <Link

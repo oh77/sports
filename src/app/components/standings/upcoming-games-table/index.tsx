@@ -69,9 +69,7 @@ export function UpcomingGamesTable({
         const dateKey = toDateKey(g.startDateTime);
         if (entryMap.has(dateKey)) continue; // one game per date per team
         entryMap.set(dateKey, {
-          opponent: isHome
-            ? g.awayTeamInfo.teamInfo
-            : g.homeTeamInfo.teamInfo,
+          opponent: isHome ? g.awayTeamInfo.teamInfo : g.homeTeamInfo.teamInfo,
           isHome,
           dateKey,
           date: g.startDateTime,
@@ -139,7 +137,10 @@ export function UpcomingGamesTable({
             </thead>
             <tbody className="divide-y divide-gray-200">
               {rows.map(({ team, entryMap }) => (
-                <tr key={team.code} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={team.code}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   {/* Team logo */}
                   <td className="px-4 py-2 sticky left-0 bg-white z-10">
                     <div className="w-10 h-10 flex items-center justify-center">

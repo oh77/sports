@@ -8,6 +8,8 @@ import {
   formatLongDateFromString,
   formatTimeFromString,
 } from '@/app/utils/dateUtils';
+import { teamPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import type { GameInfo, GameTeamInfo } from '../../types/domain/game';
 
 interface UpcomingGamesProps {
@@ -21,6 +23,7 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({
   currentTeamCode,
   league,
 }) => {
+  const season = useSeason();
   const getTeamCode = (teamInfo: GameTeamInfo): string => {
     return teamInfo.teamInfo.code;
   };
@@ -60,7 +63,7 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({
                     )}
                   </div>
                   <Link
-                    href={`/${league}/${encodeURIComponent(getTeamCode(opponentInfo))}`}
+                    href={teamPath(league, season, getTeamCode(opponentInfo))}
                     className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
                   >
                     {opponentInfo.teamInfo.short} ({isHomeTeam ? 'H' : 'A'})

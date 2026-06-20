@@ -1,8 +1,11 @@
+'use client';
+
 import Image from 'next/image';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import type { League } from '@/app/types/domain/league';
 import { formatLongDateTimeFromString } from '@/app/utils/dateUtils';
+import { useSeason } from '@/app/utils/useSeason';
 import { StatnetService } from '../../services/statnetService';
 import type { GameInfo } from '../../types/domain/game';
 
@@ -11,6 +14,7 @@ interface FirstGameProps {
 }
 
 const FirstGame: React.FC<FirstGameProps> = ({ league = 'shl' }) => {
+  const season = useSeason();
   const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +23,7 @@ const FirstGame: React.FC<FirstGameProps> = ({ league = 'shl' }) => {
     const loadGame = async () => {
       try {
         setLoading(true);
-        const leagueService = new StatnetService(league);
+        const leagueService = new StatnetService(league, season);
 
         // Fetch games from API (cached server-side)
         await leagueService.fetchGames();
@@ -35,7 +39,7 @@ const FirstGame: React.FC<FirstGameProps> = ({ league = 'shl' }) => {
     };
 
     loadGame();
-  }, [league]);
+  }, [league, season]);
 
   if (loading) {
     return (

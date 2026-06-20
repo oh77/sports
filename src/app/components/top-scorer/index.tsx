@@ -2,6 +2,8 @@
 
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { withSeason } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import type {
   PlayerStats,
   PlayerStatsData,
@@ -19,6 +21,7 @@ export const TopScorer: React.FC<TopScorerProps> = ({
   teamCode2,
   league,
 }) => {
+  const season = useSeason();
   const [team1Players, setTeam1Players] = useState<PlayerStats[]>([]);
   const [team2Players, setTeam2Players] = useState<PlayerStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,8 +34,12 @@ export const TopScorer: React.FC<TopScorerProps> = ({
 
         // Fetch players for both teams
         const [team1Response, team2Response] = await Promise.all([
-          fetch(`/api/${league}-players?teamCode=${teamCode1}`),
-          fetch(`/api/${league}-players?teamCode=${teamCode2}`),
+          fetch(
+            withSeason(`/api/${league}-players?teamCode=${teamCode1}`, season),
+          ),
+          fetch(
+            withSeason(`/api/${league}-players?teamCode=${teamCode2}`, season),
+          ),
         ]);
 
         if (!team1Response.ok || !team2Response.ok) {
@@ -65,7 +72,7 @@ export const TopScorer: React.FC<TopScorerProps> = ({
     };
 
     fetchTopPlayers();
-  }, [teamCode1, teamCode2, league]);
+  }, [teamCode1, teamCode2, league, season]);
 
   if (loading) {
     return (

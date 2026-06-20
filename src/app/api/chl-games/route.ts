@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { resolveChlSeason } from '../../config/chl';
 import {
   getAllGames,
   getAllRecentGames,
@@ -16,10 +17,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'upcoming';
     const date = searchParams.get('date');
+    const season = resolveChlSeason(searchParams.get('season'));
+    const seasonId = season.seasonId;
 
     // Generate cache key with parameters
     const cacheKey = generateCacheKey('chl-games', {
       type,
+      season: season.key,
       ...(date && { date }),
     });
 
@@ -29,28 +33,28 @@ export async function GET(request: NextRequest) {
 
       switch (type) {
         case 'upcoming':
-          games = await getUpcomingGames();
+          games = await getUpcomingGames(seasonId);
           break;
         case 'recent':
-          games = await getRecentGames();
+          games = await getRecentGames(seasonId);
           break;
         case 'all-upcoming':
-          games = await getAllUpcomingGames();
+          games = await getAllUpcomingGames(seasonId);
           break;
         case 'all-recent':
-          games = await getAllRecentGames();
+          games = await getAllRecentGames(seasonId);
           break;
         case 'all':
-          games = await getAllGames();
+          games = await getAllGames(seasonId);
           break;
         case 'date':
           if (!date) {
             throw new Error('Date parameter is required for date type');
           }
-          games = await getGamesByDate(date);
+          games = await getGamesByDate(date, seasonId);
           break;
         default:
-          games = await getUpcomingGames();
+          games = await getUpcomingGames(seasonId);
       }
 
       // Translate CHL games to domain models

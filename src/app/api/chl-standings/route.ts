@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { chlResourceUrl, resolveChlSeason } from '../../config/chl';
 import type { CHLStandingsApiResponse } from '../../types/chl/standings';
 import type {
   DataColumn,
@@ -7,17 +8,19 @@ import type {
 } from '../../types/domain/standings';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
 
-const CHL_STANDINGS_URL =
-  'https://www.chl.hockey/api/s3/live?q=standings-groups-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json';
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const cacheKey = generateCacheKey('chl-standings');
+    const season = resolveChlSeason(
+      new URL(request.url).searchParams.get('season'),
+    );
+    const cacheKey = generateCacheKey('chl-standings', { season: season.key });
 
     const domainData = await getCachedData(
       cacheKey,
       async (): Promise<StandingsData> => {
-        const response = await fetch(CHL_STANDINGS_URL);
+        const response = await fetch(
+          chlResourceUrl('standings-groups', season.seasonId, { live: true }),
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

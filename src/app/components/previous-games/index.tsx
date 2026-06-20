@@ -1,8 +1,12 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type React from 'react';
 import { ScoreOrStatus } from '@/app/components/previous-games/scoreOrStatus';
 import type { League } from '@/app/types/domain/league';
+import { teamPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import type { GameInfo, GameTeamInfo } from '../../types/domain/game';
 
 interface PreviousGamesProps {
@@ -16,6 +20,7 @@ const PreviousGames: React.FC<PreviousGamesProps> = ({
   currentTeamCode,
   league,
 }) => {
+  const season = useSeason();
   const getTeamCode = (teamInfo: GameTeamInfo): string => {
     return teamInfo.teamInfo.code;
   };
@@ -55,7 +60,7 @@ const PreviousGames: React.FC<PreviousGamesProps> = ({
                     )}
                   </div>
                   <Link
-                    href={`/${league}/${encodeURIComponent(getTeamCode(opponentInfo))}`}
+                    href={teamPath(league, season, getTeamCode(opponentInfo))}
                     className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
                   >
                     {opponentInfo.teamInfo.short} ({isHomeTeam ? 'H' : 'A'})

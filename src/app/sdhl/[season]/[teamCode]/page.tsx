@@ -4,25 +4,26 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import GameStatsContainer from '@/app/components/gamestats-container';
-import { HeadToHead } from '../../../../components/head-to-head';
-import LeagueFooter from '../../../../components/league-footer';
-import NextGame from '../../../../components/next-game';
-import PreviousGames from '../../../../components/previous-games';
-import { CompactStandings } from '../../../../components/standings/compact-standings';
-import { TopPlayers } from '../../../../components/top-players';
-import UpcomingGames from '../../../../components/upcoming-games';
-import { StatnetService } from '../../../../services/statnetService';
-import type { GameInfo, GameTeamInfo } from '../../../../types/domain/game';
-import type { StandingsData } from '../../../../types/domain/standings';
+import { HeadToHead } from '../../../components/head-to-head';
+import LeagueFooter from '../../../components/league-footer';
+import NextGame from '../../../components/next-game';
+import PreviousGames from '../../../components/previous-games';
+import { CompactStandings } from '../../../components/standings/compact-standings';
+import { TopPlayers } from '../../../components/top-players';
+import UpcomingGames from '../../../components/upcoming-games';
+import { StatnetService } from '../../../services/statnetService';
+import type { GameInfo, GameTeamInfo } from '../../../types/domain/game';
+import type { StandingsData } from '../../../types/domain/standings';
+import { leagueBasePath, withSeason } from '../../../utils/leaguePaths';
 
 export default function SDHLTeamPage({
   params,
 }: {
-  params: Promise<{ teamCode: string; opponentTeamCode: string }>;
+  params: Promise<{ season: string; teamCode: string }>;
 }) {
   const resolvedParams = React.use(params);
+  const season = resolvedParams.season;
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
-  const opponentTeamCode = decodeURIComponent(resolvedParams.opponentTeamCode);
   const [teamInfo, setTeamInfo] = useState<GameTeamInfo | null>(null);
   const [game, setGame] = useState<GameInfo | null>(null);
   const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
@@ -36,7 +37,7 @@ export default function SDHLTeamPage({
     const loadTeamData = async () => {
       try {
         setLoading(true);
-        const leagueService = new StatnetService('sdhl');
+        const leagueService = new StatnetService('sdhl', season);
 
         // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
@@ -47,72 +48,39 @@ export default function SDHLTeamPage({
           return;
         }
 
-        // Find next game between the two specific teams
-        const today = new Date();
-        const teamGames = games.filter(
-          (game: GameInfo) =>
-            (game.homeTeamInfo.teamInfo.code === teamCode &&
-              game.awayTeamInfo.teamInfo.code === opponentTeamCode) ||
-            (game.homeTeamInfo.teamInfo.code === opponentTeamCode &&
-              game.awayTeamInfo.teamInfo.code === teamCode),
-        );
-
-        const nextGame = teamGames
-          .filter((game: GameInfo) => new Date(game.startDateTime) >= today)
-          .sort(
-            (a: GameInfo, b: GameInfo) =>
-              new Date(a.startDateTime).getTime() -
-              new Date(b.startDateTime).getTime(),
-          )[0];
-
-        // Set the game (even if null to show empty game box)
-        setGame(nextGame || null);
-
-        // Set team info - find from any game involving the team
-        const teamGameForInfo = games.find(
+        // Find team info from any game
+        const teamGame = games.find(
           (game) =>
             game.homeTeamInfo.teamInfo.code === teamCode ||
             game.awayTeamInfo.teamInfo.code === teamCode,
         );
 
-        if (!teamGameForInfo) {
+        if (!teamGame) {
           setError('Lag inte hittat');
           return;
         }
 
         // Set team info
-        const isHomeTeam = teamGameForInfo.homeTeamInfo.teamInfo.code === teamCode;
-        const team = isHomeTeam ? teamGameForInfo.homeTeamInfo : teamGameForInfo.awayTeamInfo;
+        const isHomeTeam = teamGame.homeTeamInfo.teamInfo.code === teamCode;
+        const team = isHomeTeam ? teamGame.homeTeamInfo : teamGame.awayTeamInfo;
         setTeamInfo(team);
 
-        // Get previous and upcoming games between these two teams
-        const prev = teamGames
-          .filter((game: GameInfo) => new Date(game.startDateTime) < today)
-          .sort(
-            (a: GameInfo, b: GameInfo) =>
-              new Date(b.startDateTime).getTime() -
-              new Date(a.startDateTime).getTime(),
-          )
-          .slice(0, 3);
+        // Get next game
+        const next = leagueService.getNextGameForTeam(teamCode);
+        setGame(next);
 
-        const upcoming = teamGames
-          .filter((game: GameInfo) => {
-            const gameDate = new Date(game.startDateTime);
-            return gameDate >= today && game.uuid !== nextGame?.uuid;
-          })
-          .sort(
-            (a: GameInfo, b: GameInfo) =>
-              new Date(a.startDateTime).getTime() -
-              new Date(b.startDateTime).getTime(),
-          )
-          .slice(0, 3);
+        // Get previous and upcoming games
+        const prev = leagueService.getPreviousGamesForTeam(teamCode, 3);
+        const upcoming = leagueService.getUpcomingGamesForTeam(teamCode, 3);
 
         setPreviousGames(prev);
         setUpcomingGames(upcoming);
 
         // Load standings data
         try {
-          const standingsResponse = await fetch('/api/sdhl-standings');
+          const standingsResponse = await fetch(
+            withSeason('/api/sdhl-standings', season),
+          );
           if (standingsResponse.ok) {
             const standingsData = await standingsResponse.json();
             setStandings(standingsData);
@@ -129,7 +97,7 @@ export default function SDHLTeamPage({
     };
 
     loadTeamData();
-  }, [teamCode, opponentTeamCode]);
+  }, [teamCode, season]);
 
   if (loading) {
     return (
@@ -172,7 +140,7 @@ export default function SDHLTeamPage({
               {error || `Lag "${teamCode}" kunde inte hittas`}
             </p>
             <Link
-              href="/sdhl"
+              href={leagueBasePath('sdhl', season)}
               className="bg-blue-500 hover:bg-blue-600 text-gray-800 px-6 py-3 rounded-lg transition-colors"
             >
               Tillbaka till SDHL
@@ -234,11 +202,13 @@ export default function SDHLTeamPage({
         />
 
         {/* Head to Head */}
-        <HeadToHead
-          games={allGames}
-          teamCode1={teamCode}
-          teamCode2={opponentTeamCode}
-        />
+        {game && (
+          <HeadToHead
+            games={allGames}
+            teamCode1={game.homeTeamInfo.teamInfo.code}
+            teamCode2={game.awayTeamInfo.teamInfo.code}
+          />
+        )}
 
         {game && (
           <div className="max-w-6xl mx-auto mb-8">
@@ -247,11 +217,13 @@ export default function SDHLTeamPage({
         )}
 
         {/* Top Players */}
-        <TopPlayers
-          teamCode1={teamCode}
-          teamCode2={opponentTeamCode}
-          league="sdhl"
-        />
+        {game && (
+          <TopPlayers
+            teamCode1={game.homeTeamInfo.teamInfo.code}
+            teamCode2={game.awayTeamInfo.teamInfo.code}
+            league="sdhl"
+          />
+        )}
 
         {/* Compact Standings */}
         {standings && (
@@ -260,7 +232,13 @@ export default function SDHLTeamPage({
               standings={standings}
               league="sdhl"
               teamCode={teamCode}
-              opponentTeamCode={opponentTeamCode}
+              opponentTeamCode={
+                game
+                  ? game.homeTeamInfo.teamInfo.code === teamCode
+                    ? game.awayTeamInfo.teamInfo.code
+                    : game.homeTeamInfo.teamInfo.code
+                  : undefined
+              }
             />
           </div>
         )}

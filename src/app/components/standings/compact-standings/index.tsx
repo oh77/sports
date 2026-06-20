@@ -10,6 +10,8 @@ import {
   getTeamName,
 } from '@/app/components/standings/standingsUtils';
 import type { League } from '@/app/types/domain/league';
+import { teamPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import type { StandingsData, TeamStats } from '../../../types/domain/standings';
 
 interface CompactStandingsProps {
@@ -25,6 +27,7 @@ export function CompactStandings({
   teamCode,
   opponentTeamCode,
 }: CompactStandingsProps) {
+  const season = useSeason();
   const getTeams = () => {
     return standings.stats || [];
   };
@@ -208,7 +211,7 @@ export function CompactStandings({
                   {/* Team */}
                   <td className="px-3 py-3 whitespace-nowrap">
                     <Link
-                      href={`/${league}/${encodeURIComponent(teamCode)}`}
+                      href={teamPath(league, season, teamCode)}
                       className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
                     >
                       <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">

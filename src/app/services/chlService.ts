@@ -1,3 +1,4 @@
+import { CURRENT_CHL_SEASON, chlResourceUrl } from '../config/chl';
 import type {
   CHLApiResponse,
   CHLGame,
@@ -6,12 +7,12 @@ import type {
   CHLTeamsApiResponse,
 } from '../types/chl/game';
 
-const CHL_SCHEDULE_URL =
-  'https://www.chl.hockey/api/s3?q=schedule-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json';
+/** Season id used when a caller does not specify one (the current season). */
+const DEFAULT_SEASON_ID = CURRENT_CHL_SEASON.seasonId;
 
-async function fetchCHLData(): Promise<CHLApiResponse> {
+async function fetchCHLData(seasonId: string): Promise<CHLApiResponse> {
   try {
-    const response = await fetch(CHL_SCHEDULE_URL);
+    const response = await fetch(chlResourceUrl('schedule', seasonId));
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -22,11 +23,9 @@ async function fetchCHLData(): Promise<CHLApiResponse> {
   }
 }
 
-async function fetchCHLTeams(): Promise<CHLTeamsApiResponse> {
+async function fetchCHLTeams(seasonId: string): Promise<CHLTeamsApiResponse> {
   try {
-    const response = await fetch(
-      'https://www.chl.hockey/api/s3?q=teams-21ec9dad81abe2e0240460d0-3c5f99fa605394cc65733fc9.json',
-    );
+    const response = await fetch(chlResourceUrl('teams', seasonId));
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -74,11 +73,13 @@ function transformMatchToGame(
   };
 }
 
-export async function getUpcomingGames(): Promise<CHLGame[]> {
+export async function getUpcomingGames(
+  seasonId: string = DEFAULT_SEASON_ID,
+): Promise<CHLGame[]> {
   try {
     const [data, teamsData] = await Promise.all([
-      fetchCHLData(),
-      fetchCHLTeams(),
+      fetchCHLData(seasonId),
+      fetchCHLTeams(seasonId),
     ]);
 
     // Create teams map for quick lookup
@@ -111,11 +112,14 @@ export async function getUpcomingGames(): Promise<CHLGame[]> {
   }
 }
 
-export async function getGamesByDate(date: string): Promise<CHLGame[]> {
+export async function getGamesByDate(
+  date: string,
+  seasonId: string = DEFAULT_SEASON_ID,
+): Promise<CHLGame[]> {
   try {
     const [data, teamsData] = await Promise.all([
-      fetchCHLData(),
-      fetchCHLTeams(),
+      fetchCHLData(seasonId),
+      fetchCHLTeams(seasonId),
     ]);
 
     // Create teams map for quick lookup
@@ -145,11 +149,13 @@ export async function getGamesByDate(date: string): Promise<CHLGame[]> {
   }
 }
 
-export async function getRecentGames(): Promise<CHLGame[]> {
+export async function getRecentGames(
+  seasonId: string = DEFAULT_SEASON_ID,
+): Promise<CHLGame[]> {
   try {
     const [data, teamsData] = await Promise.all([
-      fetchCHLData(),
-      fetchCHLTeams(),
+      fetchCHLData(seasonId),
+      fetchCHLTeams(seasonId),
     ]);
 
     // Create teams map for quick lookup
@@ -179,9 +185,11 @@ export async function getRecentGames(): Promise<CHLGame[]> {
   }
 }
 
-export async function getAllTeams(): Promise<CHLTeamInfo[]> {
+export async function getAllTeams(
+  seasonId: string = DEFAULT_SEASON_ID,
+): Promise<CHLTeamInfo[]> {
   try {
-    const teamsData = await fetchCHLTeams();
+    const teamsData = await fetchCHLTeams(seasonId);
     return teamsData.data;
   } catch (error) {
     console.error('Error getting CHL teams:', error);
@@ -189,11 +197,13 @@ export async function getAllTeams(): Promise<CHLTeamInfo[]> {
   }
 }
 
-export async function getAllGames(): Promise<CHLGame[]> {
+export async function getAllGames(
+  seasonId: string = DEFAULT_SEASON_ID,
+): Promise<CHLGame[]> {
   try {
     const [data, teamsData] = await Promise.all([
-      fetchCHLData(),
-      fetchCHLTeams(),
+      fetchCHLData(seasonId),
+      fetchCHLTeams(seasonId),
     ]);
 
     // Create teams map for quick lookup
@@ -210,11 +220,13 @@ export async function getAllGames(): Promise<CHLGame[]> {
   }
 }
 
-export async function getAllUpcomingGames(): Promise<CHLGame[]> {
+export async function getAllUpcomingGames(
+  seasonId: string = DEFAULT_SEASON_ID,
+): Promise<CHLGame[]> {
   try {
     const [data, teamsData] = await Promise.all([
-      fetchCHLData(),
-      fetchCHLTeams(),
+      fetchCHLData(seasonId),
+      fetchCHLTeams(seasonId),
     ]);
 
     // Create teams map for quick lookup
@@ -247,11 +259,13 @@ export async function getAllUpcomingGames(): Promise<CHLGame[]> {
   }
 }
 
-export async function getAllRecentGames(): Promise<CHLGame[]> {
+export async function getAllRecentGames(
+  seasonId: string = DEFAULT_SEASON_ID,
+): Promise<CHLGame[]> {
   try {
     const [data, teamsData] = await Promise.all([
-      fetchCHLData(),
-      fetchCHLTeams(),
+      fetchCHLData(seasonId),
+      fetchCHLTeams(seasonId),
     ]);
 
     // Create teams map for quick lookup

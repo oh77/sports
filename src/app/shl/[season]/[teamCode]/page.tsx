@@ -4,24 +4,26 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import GameStatsContainer from '@/app/components/gamestats-container';
-import { HeadToHead } from '../../components/head-to-head';
-import LeagueFooter from '../../components/league-footer';
-import NextGame from '../../components/next-game';
-import PreviousGames from '../../components/previous-games';
-import { CompactStandings } from '../../components/standings/compact-standings';
-import { TopPlayers } from '../../components/top-players';
-import UpcomingGames from '../../components/upcoming-games';
-import { StatnetService } from '../../services/statnetService';
-import type { GameInfo } from '../../types/domain/game';
-import type { StandingsData } from '../../types/domain/standings';
-import type { TeamInfo } from '../../types/domain/team';
+import { HeadToHead } from '../../../components/head-to-head';
+import LeagueFooter from '../../../components/league-footer';
+import NextGame from '../../../components/next-game';
+import PreviousGames from '../../../components/previous-games';
+import { CompactStandings } from '../../../components/standings/compact-standings';
+import { TopPlayers } from '../../../components/top-players';
+import UpcomingGames from '../../../components/upcoming-games';
+import { StatnetService } from '../../../services/statnetService';
+import type { GameInfo } from '../../../types/domain/game';
+import type { StandingsData } from '../../../types/domain/standings';
+import type { TeamInfo } from '../../../types/domain/team';
+import { leagueBasePath, withSeason } from '../../../utils/leaguePaths';
 
 export default function TeamPage({
   params,
 }: {
-  params: Promise<{ teamCode: string }>;
+  params: Promise<{ season: string; teamCode: string }>;
 }) {
   const resolvedParams = React.use(params);
+  const season = resolvedParams.season;
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
   const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +38,7 @@ export default function TeamPage({
     const loadTeamGame = async () => {
       try {
         setLoading(true);
-        const leagueService = new StatnetService('shl');
+        const leagueService = new StatnetService('shl', season);
 
         // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
@@ -62,7 +64,9 @@ export default function TeamPage({
 
           // Load standings data
           try {
-            const standingsResponse = await fetch('/api/shl-standings');
+            const standingsResponse = await fetch(
+              withSeason('/api/shl-standings', season),
+            );
             if (standingsResponse.ok) {
               const standingsData = await standingsResponse.json();
               setStandings(standingsData);
@@ -84,7 +88,7 @@ export default function TeamPage({
     if (teamCode) {
       loadTeamGame();
     }
-  }, [teamCode]);
+  }, [teamCode, season]);
 
   if (loading) {
     return (
@@ -114,7 +118,7 @@ export default function TeamPage({
                 `Inga kommande matcher hittades för lagkod: ${teamCode}`}
             </p>
             <Link
-              href="/shl"
+              href={leagueBasePath('shl', season)}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
               Tillbaka till SHL

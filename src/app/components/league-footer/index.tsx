@@ -1,8 +1,12 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import type { League } from '@/app/types/domain/league';
+import { leagueBasePath, teamPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import { StatnetService } from '../../services/statnetService';
 import type { TeamInfo } from '../../types/domain/team';
 
@@ -15,6 +19,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
   league,
   currentTeamCode,
 }) => {
+  const season = useSeason();
   const [teams, setTeams] = useState<TeamInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +29,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
         setLoading(true);
 
         // Use LeagueService to handle API call and transformation
-        const leagueService = new StatnetService(league);
+        const leagueService = new StatnetService(league, season);
         const teamList = await leagueService.fetchTeams();
 
         setTeams(teamList);
@@ -36,7 +41,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
     };
 
     loadTeams();
-  }, [league]);
+  }, [league, season]);
 
   const getLeagueLogo = () => {
     if (league === 'shl') {
@@ -82,7 +87,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
             // League logo as first item
             {
               key: `league-${league}`,
-              href: `/${league}`,
+              href: leagueBasePath(league, season),
               logo: getLeagueLogo(),
               alt: `${getLeagueName()} Logo`,
               tooltip: getLeagueName(),
@@ -93,7 +98,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
               .sort((a, b) => (a.full > b.full ? 1 : -1))
               .map((team, index) => ({
                 key: `team-${team.code}-${index}`,
-                href: `/${league}/${encodeURIComponent(team.code)}`,
+                href: teamPath(league, season, team.code),
                 logo: team.logo,
                 alt: team.full,
                 tooltip: team.full,

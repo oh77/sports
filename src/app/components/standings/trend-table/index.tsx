@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { GameInfo } from '@/app/types/domain/game';
 import type { League } from '@/app/types/domain/league';
+import { teamPath } from '@/app/utils/leaguePaths';
+import { useSeason } from '@/app/utils/useSeason';
 import { calculateStreaks, type TeamStreak } from '../streakUtils';
 
 interface TrendTableProps {
@@ -13,6 +15,7 @@ interface TrendTableProps {
 }
 
 export function TrendTable({ league, games }: TrendTableProps) {
+  const season = useSeason();
   const [streaks, setStreaks] = useState<TeamStreak[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -101,7 +104,7 @@ export function TrendTable({ league, games }: TrendTableProps) {
                   {/* Team */}
                   <td className="px-4 py-4 whitespace-nowrap">
                     <Link
-                      href={`/${league}/${encodeURIComponent(team.teamCode)}`}
+                      href={teamPath(league, season, team.teamCode)}
                       className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
                     >
                       <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
