@@ -1,72 +1,65 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { UpcomingAllLeagues } from './components/upcoming-all-leagues';
+
+const LEAGUES = [
+  {
+    href: '/shl',
+    bg: 'rgba(24,29,38,1)',
+    logo: 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg',
+    name: 'SHL',
+  },
+  {
+    href: '/sdhl',
+    bg: 'rgba(50,0,208,1)',
+    logo: 'https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg',
+    name: 'SDHL',
+  },
+  {
+    href: '/ha',
+    bg: 'rgba(30,41,59,1)',
+    logo: 'https://sportality.cdn.s8y.se/team-logos/ha1_ha.svg',
+    name: 'Hockeyallsvenskan',
+  },
+  {
+    href: '/chl',
+    bg: '#20001c',
+    logo: 'https://www.chl.hockey/static/img/logo.png',
+    name: 'CHL',
+  },
+];
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <h1 className="sr-only">Gameday – välj liga</h1>
-      <div className="text-center">
-        <div className="flex flex-col md:flex-row gap-4 md:gap-8">
-          <Link href="/shl" className="inline-block">
-            <div
-              className="w-48 h-48 md:w-80 md:h-80 p-4 md:p-6 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(24,29,38,1)' }}
-            >
-              <Image
-                src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-                alt="SHL Logo"
-                width={300}
-                height={300}
-                className="w-full h-full object-contain"
-              />
-            </div>
-          </Link>
+    <main className="min-h-screen bg-gray-100 px-4 py-10">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="sr-only">Gameday – välj liga</h1>
 
-          <Link href="/sdhl" className="inline-block">
-            <div
-              className="w-48 h-48 md:w-80 md:h-80 p-4 md:p-6 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(50,0,208,1)' }}
-            >
-              <Image
-                src="https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg"
-                alt="SDHL Logo"
-                width={300}
-                height={300}
-                className="w-full h-full object-contain"
-              />
-            </div>
-          </Link>
-
-          <Link href="/ha" className="inline-block">
-            <div
-              className="w-48 h-48 md:w-80 md:h-80 p-4 md:p-6 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(30,41,59,1)' }}
-            >
-              <Image
-                src="https://sportality.cdn.s8y.se/team-logos/ha1_ha.svg"
-                alt="Hockeyallsvenskan Logo"
-                width={300}
-                height={300}
-                className="w-full h-full object-contain"
-              />
-            </div>
-          </Link>
-
-          <Link href="/chl" className="inline-block">
-            <div
-              className="w-48 h-48 md:w-80 md:h-80 p-4 md:p-6 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center"
-              style={{ backgroundColor: '#20001c' }}
-            >
-              <Image
-                src="https://www.chl.hockey/static/img/logo.png"
-                alt="CHL Logo"
-                width={300}
-                height={300}
-                className="w-full h-full object-contain"
-              />
-            </div>
-          </Link>
+        <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+          {LEAGUES.map((league) => (
+            <Link key={league.href} href={league.href} className="inline-block">
+              <div
+                className="flex h-36 w-36 items-center justify-center rounded-lg p-4 transition-opacity hover:opacity-80 md:h-44 md:w-44"
+                style={{ backgroundColor: league.bg }}
+              >
+                <Image
+                  src={league.logo}
+                  alt={`${league.name} Logo`}
+                  width={300}
+                  height={300}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            </Link>
+          ))}
         </div>
+
+        <section className="mx-auto mt-10 max-w-2xl">
+          <h2 className="mb-3 text-center text-sm font-semibold uppercase tracking-wider text-gray-500">
+            Kommande matcher
+          </h2>
+          <UpcomingAllLeagues limit={10} />
+        </section>
       </div>
     </main>
   );
