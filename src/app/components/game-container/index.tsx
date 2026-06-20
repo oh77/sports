@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import type React from 'react';
 import ClickableTeamLogo from '@/app/components/game-container/ClickableTeamLogo';
+import { StadiumIcon } from '@/app/components/icons/stadium-icon';
 import type { League } from '@/app/types/domain/league';
 import { isDateTimePassed } from '@/app/utils/dateUtils';
 import type { GameInfo } from '../../types/domain/game';
@@ -16,12 +16,6 @@ export const GameContainer: React.FC<GameContainerProps> = ({
   league,
   compact = false,
 }) => {
-  const getStadiumIcon = () => {
-    return league === 'shl'
-      ? 'https://www.shl.se/assets/stadium-460843bd.svg'
-      : 'https://www.sdhl.se/assets/stadium-460843bd.svg';
-  };
-
   const isGameLive = (game: GameInfo) => {
     return (
       game.state === 'live' ||
@@ -49,13 +43,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         </div>
 
         <div className="text-center w-40 shrink-0">
-          <Image
-            src={getStadiumIcon()}
-            alt="Arena"
-            width={40}
-            height={40}
-            className="mx-auto mb-2 brightness-0"
-          />
+          <StadiumIcon className="mx-auto mb-2 h-10 w-auto text-gray-600" />
           <p className="text-sm text-gray-500 mt-1 truncate">
             {game.venueInfo.name}
           </p>

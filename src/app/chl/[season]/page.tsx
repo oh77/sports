@@ -12,6 +12,7 @@ import type { TeamInfo } from '../../types/domain/team';
 import { standingsPath, withSeason } from '../../utils/leaguePaths';
 import {
   buildPreviousGameDays,
+  buildUpcomingGameDays,
   type GameDayGroup,
   getGameWinner,
   getLastFinishedGame,
@@ -20,7 +21,7 @@ import { useSeason } from '../../utils/useSeason';
 
 export default function CHLPage() {
   const season = useSeason();
-  const [todaysGames, setTodaysGames] = useState<GameInfo[]>([]);
+  const [gameDays, setGameDays] = useState<GameDayGroup[]>([]);
   const [previousGameDays, setPreviousGameDays] = useState<GameDayGroup[]>([]);
   const [champion, setChampion] = useState<{
     team: TeamInfo;
@@ -28,95 +29,41 @@ export default function CHLPage() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [gameDate, setGameDate] = useState<string>('');
 
   useEffect(() => {
-    const fetchNextGameDay = async () => {
+    const loadGames = async () => {
       try {
-        const today = new Date().toISOString().split('T')[0];
-
-        // First check if there are any games today (including started ones)
-        const todayResponse = await fetch(
-          withSeason(`/api/chl-games?type=date&date=${today}`, season),
+        setLoading(true);
+        const response = await fetch(
+          withSeason('/api/chl-games?type=all', season),
         );
-        if (!todayResponse.ok) {
-          throw new Error("Failed to fetch today's games");
+        if (!response.ok) {
+          throw new Error('Failed to fetch games');
         }
-        const todayData: LeagueResponse = await todayResponse.json();
+        const data: LeagueResponse = await response.json();
+        const allGames = data.gameInfo || [];
 
-        if (todayData.gameInfo && todayData.gameInfo.length > 0) {
-          // Show all games from today, including started ones
-          setTodaysGames(todayData.gameInfo);
-          const displayDate = new Date(todayData.gameInfo[0].startDateTime);
-          setGameDate(
-            displayDate.toLocaleDateString('sv-SE', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            }),
+        // Show the next game day(s) — keep adding whole dates until at least
+        // 3 games are displayed.
+        const upcoming = buildUpcomingGameDays(allGames, { minGames: 3 });
+
+        if (upcoming.length > 0) {
+          setGameDays(upcoming);
+          const firstDate = new Date(upcoming[0].games[0].startDateTime);
+          setPreviousGameDays(
+            buildPreviousGameDays(allGames, { before: firstDate, limit: 2 }),
           );
-        } else {
-          // No games today, find the next upcoming game date
-          const upcomingResponse = await fetch(
-            withSeason('/api/chl-games?type=upcoming', season),
-          );
-          if (!upcomingResponse.ok) {
-            throw new Error('Failed to fetch upcoming games');
-          }
-          const upcomingData = await upcomingResponse.json();
+          return;
+        }
 
-          if (upcomingData.gameInfo && upcomingData.gameInfo.length > 0) {
-            // Get the date of the first upcoming game
-            const firstUpcomingGame = upcomingData.gameInfo[0];
-            const nextGameDate = new Date(firstUpcomingGame.startDateTime);
-            const nextGameDateString = nextGameDate.toISOString().split('T')[0];
-
-            // Fetch games for the target date
-            const dateResponse = await fetch(
-              withSeason(
-                `/api/chl-games?type=date&date=${nextGameDateString}`,
-                season,
-              ),
-            );
-            if (!dateResponse.ok) {
-              throw new Error('Failed to fetch games for date');
-            }
-            const dateData: LeagueResponse = await dateResponse.json();
-
-            if (dateData.gameInfo && dateData.gameInfo.length > 0) {
-              setTodaysGames(dateData.gameInfo);
-              setGameDate(
-                nextGameDate.toLocaleDateString('sv-SE', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                }),
-              );
-            } else {
-              setTodaysGames([]);
-            }
-          } else {
-            // No upcoming games — show the winner of the last game
-            // (most likely the champion) plus the recent game days.
-            const allResponse = await fetch(
-              withSeason('/api/chl-games?type=all', season),
-            );
-            if (allResponse.ok) {
-              const allData: LeagueResponse = await allResponse.json();
-              const allGames = allData.gameInfo || [];
-              const lastGame = getLastFinishedGame(allGames);
-              const winner = lastGame ? getGameWinner(lastGame) : null;
-              if (lastGame && winner) {
-                setChampion({ team: winner, game: lastGame });
-                setPreviousGameDays(
-                  buildPreviousGameDays(allGames, { limit: 2 }),
-                );
-              }
-            }
-            setTodaysGames([]);
-          }
+        // No current/upcoming games — the season is over, so surface the
+        // winner of the last game (most likely the champion) plus the recent
+        // game days.
+        const lastGame = getLastFinishedGame(allGames);
+        const winner = lastGame ? getGameWinner(lastGame) : null;
+        if (lastGame && winner) {
+          setChampion({ team: winner, game: lastGame });
+          setPreviousGameDays(buildPreviousGameDays(allGames, { limit: 2 }));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -125,7 +72,7 @@ export default function CHLPage() {
       }
     };
 
-    fetchNextGameDay();
+    loadGames();
   }, [season]);
 
   const formatGameTime = (startDate: string) => {
@@ -207,28 +154,42 @@ export default function CHLPage() {
       <div className="relative z-10 container mx-auto px-4">
         <LeagueHeader
           league="chl"
-          gameDate={gameDate || (champion ? '' : 'Inga matcher tillgängliga')}
+          gameDate={
+            gameDays.length === 0 && !champion
+              ? 'Inga matcher tillgängliga'
+              : ''
+          }
           logoUrl="https://www.chl.hockey/static/img/logo.png"
           backgroundColor="#20001c"
           standingsPath={standingsPath('chl', season)}
         />
 
-        {/* Games List */}
-        {todaysGames.length > 0 && (
+        {/* Upcoming game day(s) — enough dates to show at least 3 games */}
+        {gameDays.length > 0 && (
           <div className="max-w-4xl mx-auto">
-            {groupGamesByTime(todaysGames).map((group) => (
-              <GameGroup
-                key={group.time}
-                time={group.time}
-                games={group.games}
-                league="chl"
-              />
+            {gameDays.map((day) => (
+              <div key={day.date} className="mb-10">
+                <div className="text-center mb-6">
+                  <h1 className="text-2xl md:text-4xl font-bold text-white">
+                    {day.date}
+                  </h1>
+                </div>
+
+                {groupGamesByTime(day.games).map((group) => (
+                  <GameGroup
+                    key={group.time}
+                    time={group.time}
+                    games={group.games}
+                    league="chl"
+                  />
+                ))}
+              </div>
             ))}
           </div>
         )}
 
         {/* Season has no upcoming games: highlight the last game's winner */}
-        {todaysGames.length === 0 && champion && (
+        {gameDays.length === 0 && champion && (
           <div className="max-w-4xl mx-auto">
             <SeasonChampion team={champion.team} game={champion.game} />
 
@@ -242,7 +203,7 @@ export default function CHLPage() {
         )}
 
         {/* No Games Message */}
-        {todaysGames.length === 0 && !champion && (
+        {gameDays.length === 0 && !champion && (
           <div className="px-6">
             <div className="text-center text-white text-xl">
               Inga matcher idag

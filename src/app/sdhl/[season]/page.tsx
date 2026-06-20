@@ -14,32 +14,26 @@ import type { TeamInfo } from '../../types/domain/team';
 import { standingsPath } from '../../utils/leaguePaths';
 import {
   buildPreviousGameDays,
+  buildUpcomingGameDays,
+  type GameDayGroup,
   getGameWinner,
   getLastFinishedGame,
 } from '../../utils/seasonEnd';
 import { useSeason } from '../../utils/useSeason';
 
-interface PreviousGameDayData {
-  date: string;
-  games: GameInfo[];
-}
-
 export default function SDHLPage() {
   const season = useSeason();
-  const [games, setGames] = useState<GameInfo[]>([]);
-  const [previousGameDays, setPreviousGameDays] = useState<
-    PreviousGameDayData[]
-  >([]);
+  const [gameDays, setGameDays] = useState<GameDayGroup[]>([]);
+  const [previousGameDays, setPreviousGameDays] = useState<GameDayGroup[]>([]);
   const [champion, setChampion] = useState<{
     team: TeamInfo;
     game: GameInfo;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [gameDate, setGameDate] = useState<string>('');
 
   useEffect(() => {
-    const loadNextGameDay = async () => {
+    const loadGames = async () => {
       try {
         setLoading(true);
         const leagueService = new StatnetService('sdhl', season);
@@ -47,82 +41,36 @@ export default function SDHLPage() {
         // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
 
-        if (games.length > 0) {
-          const today = new Date();
-          const todayString = today.toDateString();
+        // Show the next game day(s) — keep adding whole dates until at least
+        // 3 games are displayed.
+        const upcoming = buildUpcomingGameDays(games, { minGames: 3 });
 
-          // Check if there are any games today (regardless of whether they've started)
-          const todaysGames = games.filter((game) => {
-            const gameDate = new Date(game.startDateTime);
-            return gameDate.toDateString() === todayString;
-          });
+        if (upcoming.length > 0) {
+          setGameDays(upcoming);
+          const firstDate = new Date(upcoming[0].games[0].startDateTime);
+          setPreviousGameDays(
+            buildPreviousGameDays(games, { before: firstDate, limit: 2 }),
+          );
+          return;
+        }
 
-          let targetDateString: string;
-          let targetGames: GameInfo[];
-
-          if (todaysGames.length > 0) {
-            // Show all games from today, including started ones
-            targetDateString = todayString;
-            targetGames = todaysGames;
-          } else {
-            // No games today, find the next upcoming game date
-            const now = new Date();
-            const futureGames = games.filter(
-              (game) => new Date(game.startDateTime) >= now,
-            );
-
-            if (futureGames.length > 0) {
-              const firstGameDate = new Date(futureGames[0].startDateTime);
-              targetDateString = firstGameDate.toDateString();
-
-              // Get all games for the target date
-              targetGames = games.filter((game) => {
-                const gameDate = new Date(game.startDateTime);
-                return gameDate.toDateString() === targetDateString;
-              });
-            } else {
-              // No upcoming regular-season games — the season is over, so
-              // surface the playoff champion (winner of the last playoff game)
-              // and the recent playoff game days. Fall back to the regular
-              // season if there are no playoff games.
-              const playoffGames = await leagueService.fetchGames('playoffs');
-              const endGames = playoffGames.length > 0 ? playoffGames : games;
-              const lastGame = getLastFinishedGame(endGames);
-              const winner = lastGame ? getGameWinner(lastGame) : null;
-              if (lastGame && winner) {
-                setChampion({ team: winner, game: lastGame });
-                setPreviousGameDays(
-                  buildPreviousGameDays(endGames, { limit: 2 }),
-                );
-              } else {
-                setError('Inga kommande matcher hittades');
-              }
-              return;
-            }
-          }
-
-          if (targetGames.length > 0) {
-            setGames(targetGames);
-            const displayDate = new Date(targetGames[0].startDateTime);
-            setGameDate(
-              displayDate.toLocaleDateString('sv-SE', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              }),
-            );
-
-            // Find the two most recent finished game days before the target.
-            const targetDate = new Date(targetGames[0].startDateTime);
-            setPreviousGameDays(
-              buildPreviousGameDays(games, { before: targetDate, limit: 2 }),
-            );
-          } else {
-            setError('Inga matcher hittades');
-          }
+        // No current/upcoming regular-season games — the season is over, so
+        // surface the playoff champion (winner of the last playoff game) and
+        // the recent playoff game days. Fall back to the regular season if
+        // there are no playoff games.
+        const playoffGames = await leagueService.fetchGames('playoffs');
+        const endGames = playoffGames.length > 0 ? playoffGames : games;
+        const lastGame = getLastFinishedGame(endGames);
+        const winner = lastGame ? getGameWinner(lastGame) : null;
+        if (lastGame && winner) {
+          setChampion({ team: winner, game: lastGame });
+          setPreviousGameDays(buildPreviousGameDays(endGames, { limit: 2 }));
         } else {
-          setError('Ingen matchdata tillgänglig');
+          setError(
+            games.length > 0
+              ? 'Inga kommande matcher hittades'
+              : 'Ingen matchdata tillgänglig',
+          );
         }
       } catch (err) {
         setError('Misslyckades att ladda matchdata');
@@ -132,7 +80,7 @@ export default function SDHLPage() {
       }
     };
 
-    loadNextGameDay();
+    loadGames();
   }, [season]);
 
   const formatGameTime = (startDateTime: string) => {
@@ -252,7 +200,7 @@ export default function SDHLPage() {
     );
   }
 
-  if (error || games.length === 0) {
+  if (error || gameDays.length === 0) {
     return (
       <main className="min-h-screen bg-gray-100 py-12 relative">
         {/* Sticky Background SDHL Logo */}
@@ -326,21 +274,24 @@ export default function SDHLPage() {
             />
           )}
 
-          {/* Current Game Day Date Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
-              {gameDate}
-            </h1>
-          </div>
+          {/* Upcoming game day(s) — enough dates to show at least 3 games */}
+          {gameDays.map((day) => (
+            <div key={day.date} className="mb-10">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
+                  {day.date}
+                </h1>
+              </div>
 
-          {/* Current Game Day */}
-          {groupGamesByTime(games).map((group) => (
-            <GameGroup
-              key={group.time}
-              time={group.time}
-              games={group.games}
-              league="sdhl"
-            />
+              {groupGamesByTime(day.games).map((group) => (
+                <GameGroup
+                  key={group.time}
+                  time={group.time}
+                  games={group.games}
+                  league="sdhl"
+                />
+              ))}
+            </div>
           ))}
         </div>
 

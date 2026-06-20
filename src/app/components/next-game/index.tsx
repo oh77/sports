@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type React from 'react';
+import { StadiumIcon } from '@/app/components/icons/stadium-icon';
 import type { League } from '@/app/types/domain/league';
 import { formatTimeFromDate } from '@/app/utils/dateUtils';
 import type { GameInfo } from '../../types/domain/game';
@@ -15,7 +16,6 @@ interface NextGameProps {
 const NextGame: React.FC<NextGameProps> = ({
   game,
   currentTeamCode,
-  league,
   allGames = [],
 }) => {
   const formatTime = (dateTimeStr: string) => {
@@ -48,13 +48,6 @@ const NextGame: React.FC<NextGameProps> = ({
   const isHomeTeam = game.homeTeamInfo.teamInfo.code === currentTeamCode;
   const opponentInfo = isHomeTeam ? game.awayTeamInfo : game.homeTeamInfo;
   const homeOrAway = isHomeTeam ? 'H' : 'B';
-
-  const stadiumIconUrl =
-    league === 'sdhl'
-      ? 'https://www.sdhl.se/assets/stadium-460843bd.svg'
-      : league === 'chl'
-        ? 'https://www.shl.se/assets/stadium-460843bd.svg' // Use SHL stadium icon for CHL
-        : 'https://www.shl.se/assets/stadium-460843bd.svg';
 
   return (
     <div className="max-w-6xl mx-auto mb-8">
@@ -116,13 +109,7 @@ const NextGame: React.FC<NextGameProps> = ({
             </div>
 
             <div className="text-center">
-              <Image
-                src={stadiumIconUrl}
-                alt="Arena"
-                width={40}
-                height={40}
-                className="mx-auto mb-2 brightness-0"
-              />
+              <StadiumIcon className="mx-auto mb-2 h-10 w-auto text-gray-600" />
               <p className="text-sm text-gray-500 mt-1">
                 {game.venueInfo.name}
               </p>
