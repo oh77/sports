@@ -48,6 +48,8 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
       return 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg';
     } else if (league === 'sdhl') {
       return 'https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg';
+    } else if (league === 'ha') {
+      return 'https://sportality.cdn.s8y.se/team-logos/ha1_ha.svg';
     } else if (league === 'chl') {
       return 'https://www.chl.hockey/static/img/logo.png';
     }
@@ -57,6 +59,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
   const getLeagueName = () => {
     if (league === 'shl') return 'SHL';
     if (league === 'sdhl') return 'SDHL';
+    if (league === 'ha') return 'HA';
     if (league === 'chl') return 'CHL';
     return '';
   };

@@ -19,6 +19,7 @@ interface StandingsHeaderProps {
 const LEAGUES: { id: League; name: string }[] = [
   { id: 'shl', name: 'SHL' },
   { id: 'sdhl', name: 'SDHL' },
+  { id: 'ha', name: 'HA' },
   { id: 'chl', name: 'CHL' },
 ];
 
@@ -35,7 +36,7 @@ export function StandingsHeader({
   const leagueHref = (id: League) => standingsPath(id, season);
 
   // Use darker backgrounds for SHL/SDHL (light page background), lighter for CHL (dark page background)
-  const isLightPage = league === 'shl' || league === 'sdhl';
+  const isLightPage = league === 'shl' || league === 'sdhl' || league === 'ha';
   const circleClasses = isLightPage
     ? 'w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-800/80 hover:bg-gray-800 transition-all hover:scale-105 flex items-center justify-center overflow-hidden'
     : 'w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-105 flex items-center justify-center overflow-hidden';

@@ -1,1 +1,1 @@
-export type League = 'chl' | 'shl' | 'sdhl';
+export type League = 'chl' | 'shl' | 'sdhl' | 'ha';

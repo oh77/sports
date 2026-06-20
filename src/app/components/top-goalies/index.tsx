@@ -32,7 +32,7 @@ export const TopGoalies: React.FC<TopGoaliesProps> = ({
       try {
         setLoading(true);
 
-        if (league !== 'shl' && league !== 'sdhl') {
+        if (league !== 'shl' && league !== 'sdhl' && league !== 'ha') {
           throw new Error(`Unsupported league: ${league}`);
         }
 

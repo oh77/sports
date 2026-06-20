@@ -37,6 +37,21 @@ export default function Home() {
             </div>
           </Link>
 
+          <Link href="/ha" className="inline-block">
+            <div
+              className="w-48 h-48 md:w-80 md:h-80 p-4 md:p-6 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(30,41,59,1)' }}
+            >
+              <Image
+                src="https://sportality.cdn.s8y.se/team-logos/ha1_ha.svg"
+                alt="Hockeyallsvenskan Logo"
+                width={300}
+                height={300}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </Link>
+
           <Link href="/chl" className="inline-block">
             <div
               className="w-48 h-48 md:w-80 md:h-80 p-4 md:p-6 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center"

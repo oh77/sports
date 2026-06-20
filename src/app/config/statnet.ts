@@ -3,7 +3,7 @@ import type { League } from '../types/domain/league';
 /**
  * Statnet-backed leagues (CHL uses a separate API and is not configured here).
  */
-export type StatnetLeague = Extract<League, 'shl' | 'sdhl'>;
+export type StatnetLeague = Extract<League, 'shl' | 'sdhl' | 'ha'>;
 
 /** Schedule game types. Regular season + playoffs are shared across leagues. */
 export type GameType = 'regular' | 'playoffs' | 'qualifying';
@@ -43,6 +43,17 @@ export const STATNET_LEAGUES: Record<
       qualifying: 'qRe-AJog2gISz',
     },
   },
+  // Hockeyallsvenskan shares the SHL provider and game-type ids.
+  ha: {
+    host: 'www.hockeyallsvenskan.se',
+    seriesUuid: 'qQ9-594cW8OWD',
+    provider: 'statnet',
+    gameTypes: {
+      regular: 'qQ9-af37Ti40B',
+      playoffs: 'qQ9-7debq38kX',
+      qualifying: 'qRf-347BaDIOc',
+    },
+  },
 };
 
 /**
@@ -67,12 +78,12 @@ export const STATNET_SEASONS: SeasonConfig[] = [
     key: '26-27',
     current: true,
     seasonUuid: 'ndcf81nlb3',
-    ssgtUuid: { shl: 'qa98unlbd6', sdhl: 'mgmsaolpsm' },
+    ssgtUuid: { shl: 'qa98unlbd6', sdhl: 'mgmsaolpsm', ha: 'h0st0pvci0' },
   },
   {
     key: '25-26',
     seasonUuid: 'xs4m9qupsi',
-    ssgtUuid: { shl: 'iuzqg7dqk9', sdhl: 'n5mqrxbg0g' },
+    ssgtUuid: { shl: 'iuzqg7dqk9', sdhl: 'n5mqrxbg0g', ha: 'uy2zvu6xaa' },
   },
 ];
 
