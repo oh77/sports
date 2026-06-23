@@ -51,10 +51,7 @@ const NextGame: React.FC<NextGameProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto mb-8">
-      <div
-        className="rounded-lg shadow-lg overflow-hidden relative"
-        style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
-      >
+      <div className="rounded-lg overflow-hidden relative bg-surface border border-line">
         {/* Container for content with logos (excludes trend markers) */}
         <div className="relative py-8" style={{ minHeight: '250px' }}>
           {/* Home Team Logo - Left side, mobile: 70% hidden, desktop: 35% hidden */}
@@ -69,7 +66,7 @@ const NextGame: React.FC<NextGameProps> = ({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <span className="text-gray-400 text-8xl">🏒</span>
+                <span className="text-mute text-8xl">🏒</span>
               </div>
             )}
           </div>
@@ -86,7 +83,7 @@ const NextGame: React.FC<NextGameProps> = ({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <span className="text-gray-400 text-8xl">🏒</span>
+                <span className="text-mute text-8xl">🏒</span>
               </div>
             )}
           </div>
@@ -94,25 +91,23 @@ const NextGame: React.FC<NextGameProps> = ({
           {/* Content - centered with higher z-index */}
           <div className="relative z-10 flex flex-col items-center justify-center h-full">
             <div className="text-center mb-8">
-              <p className="text-xl font-medium text-gray-800">
+              <p className="display num text-xl font-medium text-ink tracking-[0.04em]">
                 {formatTime(game.startDateTime)}
               </p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-dim mt-1">
                 {formatDate(game.startDateTime)}
               </p>
             </div>
 
             <div className="text-center mb-8">
-              <p className="text-2xl font-bold text-gray-800">
+              <p className="display text-2xl font-bold text-ink uppercase tracking-[0.04em]">
                 {opponentInfo.teamInfo.full} ({homeOrAway})
               </p>
             </div>
 
             <div className="text-center">
-              <StadiumIcon className="mx-auto mb-2 h-10 w-auto text-gray-600" />
-              <p className="text-sm text-gray-500 mt-1">
-                {game.venueInfo.name}
-              </p>
+              <StadiumIcon className="mx-auto mb-2 h-[1.875rem] w-auto text-dim" />
+              <p className="text-sm text-mute mt-1">{game.venueInfo.name}</p>
             </div>
           </div>
         </div>

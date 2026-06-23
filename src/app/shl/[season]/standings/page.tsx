@@ -1,13 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import type { StandingsFilter } from '@/app/types/domain/standingsFilter';
 import { FullStandings } from '../../../components/standings/full-standings';
 import { GoalDistributionTable } from '../../../components/standings/goal-distribution-table';
 import { MatchesTable } from '../../../components/standings/matches-table';
-import { StandingsHeader } from '../../../components/standings/standings-header';
 import {
   calculateStandingsForMonth,
   calculateStandingsFromGames,
@@ -22,7 +20,7 @@ import { Tabs } from '../../../components/tabs';
 import type { GameInfo } from '../../../types/domain/game';
 import type { StandingsData } from '../../../types/domain/standings';
 import type { StatnetLeagueResponse } from '../../../types/statnet/game';
-import { leagueBasePath, withSeason } from '../../../utils/leaguePaths';
+import { withSeason } from '../../../utils/leaguePaths';
 import { translateStatnetGameToDomain } from '../../../utils/translators/statnetToDomain';
 import { useSeason } from '../../../utils/useSeason';
 
@@ -113,29 +111,13 @@ function SHLStandingsContent() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
-        {/* Background SHL Logo */}
-        <div className="fixed top-0 right-0 z-0" aria-hidden="true">
-          <Image
-            src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-            alt=""
-            width={400}
-            height={400}
-            className="opacity-10 transform rotate-12"
-            role="presentation"
-          />
-        </div>
-
+      <main className="relative py-6 md:py-8">
         <div className="container mx-auto px-4 relative z-10">
-          <StandingsHeader
-            league="shl"
-            leagueName="SHL Ligatabell"
-            logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-            backPath={leagueBasePath('shl', season)}
-          />
-
+          <h1 className="display mb-6 text-3xl font-bold uppercase tracking-[0.02em] text-ink">
+            SHL · Tabell
+          </h1>
           <div className="animate-pulse">
-            <div className="h-96 bg-gray-300 rounded"></div>
+            <div className="h-96 bg-surface rounded-lg"></div>
           </div>
         </div>
       </main>
@@ -144,33 +126,17 @@ function SHLStandingsContent() {
 
   if (error || (!standings && filter === 'season')) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
-        {/* Background SHL Logo */}
-        <div className="fixed top-0 right-0 z-0" aria-hidden="true">
-          <Image
-            src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-            alt=""
-            width={400}
-            height={400}
-            className="opacity-10 transform rotate-12"
-            role="presentation"
-          />
-        </div>
-
+      <main className="relative py-6 md:py-8">
         <div className="container mx-auto px-4 relative z-10">
-          <StandingsHeader
-            league="shl"
-            leagueName="SHL Ligatabell"
-            logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-            backPath={leagueBasePath('shl', season)}
-          />
-
+          <h1 className="display mb-6 text-3xl font-bold uppercase tracking-[0.02em] text-ink">
+            SHL · Tabell
+          </h1>
           <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <div className="text-loss text-6xl mb-4">⚠️</div>
+            <h2 className="display text-3xl font-bold uppercase tracking-[0.02em] text-ink mb-4">
               {error || 'Ligatabell Inte Tillgänglig'}
             </h2>
-            <p className="text-gray-200 mb-6">
+            <p className="text-dim mb-6">
               {error || 'Kunde inte ladda ligatabell just nu'}
             </p>
           </div>
@@ -180,28 +146,12 @@ function SHLStandingsContent() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 py-12 relative">
-      {/* Background SHL Logo */}
-      <div className="fixed top-0 right-0 z-0" aria-hidden="true">
-        <Image
-          src="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-          alt=""
-          width={400}
-          height={400}
-          className="opacity-10 transform rotate-12"
-          role="presentation"
-        />
-      </div>
-
+    <main className="relative py-6 md:py-8">
       <div className="container mx-auto px-4 relative z-10">
-        <StandingsHeader
-          league="shl"
-          leagueName="SHL Ligatabell"
-          logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-          backPath={leagueBasePath('shl', season)}
-        />
-
         <div className="max-w-6xl mx-auto">
+          <h1 className="display mb-6 text-3xl font-bold uppercase tracking-[0.02em] text-ink">
+            SHL · Tabell
+          </h1>
           <Tabs
             tabs={[
               {
@@ -233,7 +183,7 @@ function SHLStandingsContent() {
                             },
                           );
                         }}
-                        className="md:hidden px-4 py-2 w-full border border-gray-300 rounded-lg bg-white text-gray-900 font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="md:hidden px-4 py-2 w-full border border-line rounded-lg bg-surface text-ink font-medium cursor-pointer hover:bg-surface-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                       >
                         <option value="season">Säsong</option>
                         <option disabled>Hemma/Borta</option>
@@ -269,10 +219,10 @@ function SHLStandingsContent() {
                               },
                             );
                           }}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          className={`display px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-[0.04em] transition-colors ${
                             filter === 'season'
-                              ? 'bg-blue-400 text-white'
-                              : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
+                              ? 'bg-accent text-white'
+                              : 'bg-surface-3 text-dim border border-line hover:text-ink'
                           }`}
                         >
                           TABELL
@@ -294,10 +244,10 @@ function SHLStandingsContent() {
                               },
                             );
                           }}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          className={`display px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-[0.04em] transition-colors ${
                             filter === 'home'
-                              ? 'bg-green-400 text-white'
-                              : 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+                              ? 'bg-accent text-white'
+                              : 'bg-surface-3 text-dim border border-line hover:text-ink'
                           }`}
                         >
                           H
@@ -317,10 +267,10 @@ function SHLStandingsContent() {
                               },
                             );
                           }}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          className={`display px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-[0.04em] transition-colors ${
                             filter === 'away'
-                              ? 'bg-green-400 text-white'
-                              : 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+                              ? 'bg-accent text-white'
+                              : 'bg-surface-3 text-dim border border-line hover:text-ink'
                           }`}
                         >
                           B
@@ -342,10 +292,10 @@ function SHLStandingsContent() {
                               },
                             );
                           }}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          className={`display px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-[0.04em] transition-colors ${
                             filter === 'last5'
-                              ? 'bg-purple-400 text-white'
-                              : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+                              ? 'bg-accent text-white'
+                              : 'bg-surface-3 text-dim border border-line hover:text-ink'
                           }`}
                         >
                           5
@@ -365,10 +315,10 @@ function SHLStandingsContent() {
                               },
                             );
                           }}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          className={`display px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-[0.04em] transition-colors ${
                             filter === 'last10'
-                              ? 'bg-purple-400 text-white'
-                              : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+                              ? 'bg-accent text-white'
+                              : 'bg-surface-3 text-dim border border-line hover:text-ink'
                           }`}
                         >
                           10
@@ -388,10 +338,10 @@ function SHLStandingsContent() {
                               },
                             );
                           }}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          className={`display px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-[0.04em] transition-colors ${
                             filter === 'last15'
-                              ? 'bg-purple-400 text-white'
-                              : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+                              ? 'bg-accent text-white'
+                              : 'bg-surface-3 text-dim border border-line hover:text-ink'
                           }`}
                         >
                           15
@@ -415,10 +365,10 @@ function SHLStandingsContent() {
                                 },
                               );
                             }}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                            className={`display px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-[0.04em] transition-colors ${
                               filter === monthKey
-                                ? 'bg-orange-400 text-white'
-                                : 'bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100'
+                                ? 'bg-accent text-white'
+                                : 'bg-surface-3 text-dim border border-line hover:text-ink'
                             }`}
                           >
                             {formatMonthShortLabel(monthKey)}
@@ -468,20 +418,16 @@ function SHLStandingsContent() {
 }
 
 export default function SHLStandingsPage() {
-  const season = useSeason();
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-gray-100 py-12 relative">
+        <main className="relative py-6 md:py-8">
           <div className="container mx-auto px-4 relative z-10">
-            <StandingsHeader
-              league="shl"
-              leagueName="SHL Ligatabell"
-              logoUrl="https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg"
-              backPath={leagueBasePath('shl', season)}
-            />
+            <h1 className="display mb-6 text-3xl font-bold uppercase tracking-[0.02em] text-ink">
+              SHL · Tabell
+            </h1>
             <div className="animate-pulse">
-              <div className="h-96 bg-gray-300 rounded"></div>
+              <div className="h-96 bg-surface rounded-lg"></div>
             </div>
           </div>
         </main>

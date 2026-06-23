@@ -5,7 +5,6 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import GameStatsContainer from '@/app/components/gamestats-container';
 import { HeadToHead } from '../../../../../components/head-to-head';
-import LeagueFooter from '../../../../../components/league-footer';
 import NextGame from '../../../../../components/next-game';
 import PreviousGames from '../../../../../components/previous-games';
 import { CompactStandings } from '../../../../../components/standings/compact-standings';
@@ -144,26 +143,12 @@ export default function SDHLTeamPage({
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
-        {/* Background Team Logo */}
-        <div className="absolute inset-0 flex items-center justify-center z-0 px-8">
-          <div className="w-full h-full bg-gray-300 rounded animate-pulse"></div>
-        </div>
-
+      <main className="relative py-6 md:py-8">
         <div className="container mx-auto px-4 relative z-10">
-          {/* Header */}
-          <div
-            className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg"
-            style={{ backgroundColor: 'rgba(24,29,38,1)' }}
-          >
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded animate-pulse"></div>
-            <div className="h-8 md:h-12 bg-gray-300 rounded w-48 animate-pulse"></div>
-          </div>
-
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-300 rounded"></div>
-            ))}
+          <div className="animate-pulse">
+            <div className="h-8 bg-surface-3 rounded mb-8 w-1/3 mx-auto"></div>
+            <div className="h-64 bg-surface rounded mb-4"></div>
+            <div className="h-4 bg-surface-3 rounded"></div>
           </div>
         </div>
       </main>
@@ -172,19 +157,19 @@ export default function SDHLTeamPage({
 
   if (error || !teamInfo) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
+      <main className="relative py-6 md:py-8">
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h1 className="text-4xl font-bold text-white mb-4">
+            <div className="text-loss text-6xl mb-4">⚠️</div>
+            <h1 className="display text-3xl font-bold uppercase tracking-[0.02em] text-ink mb-4">
               {error || 'Lag Inte Hittat'}
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-dim mb-6">
               {error || `Lag "${teamCode}" kunde inte hittas`}
             </p>
             <Link
               href={leagueBasePath('sdhl', season)}
-              className="bg-blue-500 hover:bg-blue-600 text-gray-800 px-6 py-3 rounded-lg transition-colors"
+              className="display inline-block rounded-lg bg-accent px-6 py-3 font-bold uppercase tracking-[0.04em] text-white transition-opacity hover:opacity-90"
             >
               Tillbaka till SDHL
             </Link>
@@ -195,7 +180,7 @@ export default function SDHLTeamPage({
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 py-12 relative">
+    <main className="relative py-6 md:py-8">
       {/* Background Team Logo */}
       {teamInfo.teamInfo.logo && (
         <div
@@ -207,32 +192,29 @@ export default function SDHLTeamPage({
             alt=""
             width={1200}
             height={1200}
-            className="opacity-10 w-full h-full object-contain"
+            className="opacity-[0.05] w-full h-full object-contain"
             role="presentation"
           />
         </div>
       )}
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Header */}
-        <div
-          className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6 rounded-lg"
-          style={{ backgroundColor: 'rgba(24,29,38,1)' }}
-        >
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full flex items-center justify-center">
-            {teamInfo.teamInfo.logo ? (
-              <Image
-                src={teamInfo.teamInfo.logo}
-                alt={teamInfo.teamInfo.short}
-                width={80}
-                height={80}
-                className="w-16 h-16 md:w-20 md:h-20 object-contain"
-              />
-            ) : (
-              <span className="text-gray-400 text-xl md:text-2xl">🏒</span>
-            )}
-          </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-white uppercase tracking-wider text-center md:text-left">
+        {/* Header Row */}
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6">
+          {teamInfo.teamInfo.logo ? (
+            <Image
+              src={teamInfo.teamInfo.logo}
+              alt={teamInfo.teamInfo.short}
+              width={80}
+              height={80}
+              className="w-16 h-16 md:w-20 md:h-20 object-contain"
+            />
+          ) : (
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-surface-3 rounded-full flex items-center justify-center">
+              <span className="text-mute text-2xl md:text-3xl">🏒</span>
+            </div>
+          )}
+          <h1 className="display text-3xl md:text-5xl font-bold text-ink uppercase tracking-[0.04em] text-center md:text-left">
             {teamInfo.teamInfo.full}
           </h1>
         </div>
@@ -290,7 +272,6 @@ export default function SDHLTeamPage({
           />
         </div>
 
-        <LeagueFooter league="sdhl" currentTeamCode={teamCode} />
       </div>
     </main>
   );

@@ -21,15 +21,15 @@ export const ScoreOrStatus: React.FC<ScoreOrStatusProps> = ({
 
     if (isDateTimePassed(new Date(gameInfo.startDateTime), threeHoursMs)) {
       return (
-        <span className="inline-flex items-center text-sm text-gray-500">
-          <span className="w-2 h-2 rounded-full bg-blue-600 inline-block mr-1"></span>
+        <span className="inline-flex items-center text-sm text-dim">
+          <span className="w-2 h-2 rounded-full bg-accent inline-block mr-1"></span>
           Saknas
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center text-sm text-gray-500">
-        <span className="w-2 h-2 rounded-full bg-orange-500 inline-block mr-1"></span>
+      <span className="inline-flex items-center text-sm text-dim">
+        <span className="w-2 h-2 rounded-full bg-otl inline-block mr-1"></span>
         Pågående
       </span>
     );
@@ -40,11 +40,11 @@ export const ScoreOrStatus: React.FC<ScoreOrStatusProps> = ({
 
   return (
     <>
-      <div className="text-sm font-bold text-gray-800">
+      <div className="display num text-sm font-bold text-ink">
         {currentTeamScore} - {opponentScore}
       </div>
       {(gameInfo.overtime || gameInfo.shootout) && (
-        <div className="text-xs text-orange-400 font-medium">
+        <div className="text-xs text-otl font-medium">
           {gameInfo.shootout ? 'Str' : 'ÖT'}
         </div>
       )}

@@ -102,13 +102,13 @@ export const TrendMarkers: React.FC<TrendMarkersProps> = ({
   const getResultColor = (result: GameResult): string => {
     switch (result) {
       case 'win':
-        return 'bg-green-500';
+        return 'bg-win';
       case 'win-ot':
-        return 'bg-green-300';
+        return 'bg-win/60';
       case 'loss':
-        return 'bg-red-500';
+        return 'bg-loss';
       case 'loss-ot':
-        return 'bg-red-300';
+        return 'bg-loss/60';
     }
   };
 
@@ -116,7 +116,7 @@ export const TrendMarkers: React.FC<TrendMarkersProps> = ({
     if (results.length === 0) {
       return (
         <div
-          className={`text-xs text-gray-400 ${align === 'left' ? 'text-left' : 'text-right'}`}
+          className={`text-xs text-mute ${align === 'left' ? 'text-left' : 'text-right'}`}
         >
           Inga matcher
         </div>
@@ -130,7 +130,7 @@ export const TrendMarkers: React.FC<TrendMarkersProps> = ({
         {results.map((gameResult) => (
           <div
             key={gameResult.uuid}
-            className={`w-3 h-3 rounded-full ${getResultColor(gameResult.result)}`}
+            className={`w-3 h-3 rounded-md ${getResultColor(gameResult.result)}`}
             title={`${gameResult.opponent} (${gameResult.location}) ${gameResult.teamScore}-${gameResult.opponentScore}`}
           />
         ))}

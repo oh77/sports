@@ -72,7 +72,7 @@ export function UpcomingAllLeagues({ limit = 10 }: { limit?: number }) {
     return (
       <div className="space-y-2" aria-busy="true">
         {Array.from({ length: 6 }, (_, i) => i).map((i) => (
-          <div key={i} className="h-12 rounded-lg bg-gray-200 animate-pulse" />
+          <div key={i} className="h-12 rounded-lg bg-surface-3 animate-pulse" />
         ))}
       </div>
     );
@@ -80,14 +80,14 @@ export function UpcomingAllLeagues({ limit = 10 }: { limit?: number }) {
 
   if (error || games.length === 0) {
     return (
-      <p className="text-center text-gray-500 text-sm py-4">
+      <p className="text-center text-dim text-sm py-4">
         Inga kommande matcher tillgängliga
       </p>
     );
   }
 
   return (
-    <ul className="divide-y divide-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+    <ul className="divide-y divide-line-soft rounded-lg border border-line bg-surface overflow-hidden">
       {games.map(({ league, game }) => {
         const chip = LEAGUE_CHIP[league];
         const home = game.homeTeamInfo.teamInfo;
@@ -95,7 +95,7 @@ export function UpcomingAllLeagues({ limit = 10 }: { limit?: number }) {
         return (
           <li
             key={`${league}-${game.uuid}`}
-            className="flex items-center gap-3 px-3 py-2.5"
+            className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.03]"
           >
             {/* League */}
             <div
@@ -113,14 +113,14 @@ export function UpcomingAllLeagues({ limit = 10 }: { limit?: number }) {
             </div>
 
             {/* Teams */}
-            <div className="flex min-w-0 flex-1 items-center gap-2 text-sm text-gray-800">
+            <div className="flex min-w-0 flex-1 items-center gap-2 text-sm text-ink">
               <TeamCell logo={home.logo} name={home.short} />
-              <span className="text-gray-400">–</span>
+              <span className="text-mute">–</span>
               <TeamCell logo={away.logo} name={away.short} alignRight />
             </div>
 
             {/* When */}
-            <div className="shrink-0 text-xs font-medium text-gray-500 tabular-nums">
+            <div className="num shrink-0 text-xs font-medium text-dim tabular-nums">
               {formatWhen(game.startDateTime)}
             </div>
           </li>

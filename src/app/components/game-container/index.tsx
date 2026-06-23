@@ -26,13 +26,12 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 
   const isGameFinished = (game: GameInfo) => game.state === 'finished';
 
-  const wrapperClass = compact ? 'px-4 py-3' : 'rounded-lg shadow-lg p-6';
-  const wrapperStyle = compact
-    ? undefined
-    : { backgroundColor: 'rgba(255, 255, 255, 0.8)' };
+  const wrapperClass = compact
+    ? 'px-4 py-3'
+    : 'rounded-lg border border-line bg-surface p-6';
 
   return (
-    <div className={wrapperClass} style={wrapperStyle}>
+    <div className={wrapperClass}>
       <div className="flex items-center">
         <div className="flex-1 flex justify-end pr-8">
           <ClickableTeamLogo
@@ -43,8 +42,8 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         </div>
 
         <div className="text-center w-40 shrink-0">
-          <StadiumIcon className="mx-auto mb-2 h-10 w-auto text-gray-600" />
-          <p className="text-sm text-gray-500 mt-1 truncate">
+          <StadiumIcon className="mx-auto mb-2 h-[1.875rem] w-auto text-dim" />
+          <p className="num text-sm text-dim mt-1 truncate">
             {game.venueInfo.name}
           </p>
         </div>
@@ -60,16 +59,16 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 
       {isGameLive(game) && (
         <div className="flex items-center">
-          <div className="inline-flex items-center text-sm text-gray-500 mx-auto">
-            <span className="w-2 h-2 rounded-full bg-orange-500 inline-block mr-1"></span>
+          <div className="display inline-flex items-center text-sm uppercase tracking-[0.04em] text-dim mx-auto">
+            <span className="w-2 h-2 rounded-full bg-otl inline-block mr-1"></span>
             Pågående
           </div>
         </div>
       )}
       {isGameFinished(game) && (
         <div className="flex items-center">
-          <div className="inline-flex items-center text-sm text-gray-500 mx-auto">
-            <span className="w-2 h-2 rounded-full bg-green-500 inline-block mr-1"></span>
+          <div className="display inline-flex items-center text-sm uppercase tracking-[0.04em] text-dim mx-auto">
+            <span className="w-2 h-2 rounded-full bg-win inline-block mr-1"></span>
             Slut
           </div>
         </div>

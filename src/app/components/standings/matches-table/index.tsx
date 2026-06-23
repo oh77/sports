@@ -50,10 +50,10 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="rounded-lg border border-line bg-surface overflow-hidden">
           <div className="animate-pulse p-8">
-            <div className="h-6 bg-gray-300 rounded mb-4"></div>
-            <div className="h-64 bg-gray-300 rounded"></div>
+            <div className="h-6 bg-surface-3 rounded mb-4"></div>
+            <div className="h-64 bg-surface-3 rounded"></div>
           </div>
         </div>
       </div>
@@ -68,8 +68,8 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
   ) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="p-8 text-center text-gray-500">
+        <div className="rounded-lg border border-line bg-surface overflow-hidden">
+          <div className="p-8 text-center text-dim">
             Ingen matchdata tillgänglig
           </div>
         </div>
@@ -81,7 +81,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
     <>
       {/* Home Team Logo */}
       <td className="px-4 py-3 whitespace-nowrap text-center">
-        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden mx-auto">
+        <div className="w-8 h-8 bg-surface-3 rounded-full flex items-center justify-center overflow-hidden mx-auto">
           {match.homeTeamLogo ? (
             <Image
               src={match.homeTeamLogo}
@@ -92,19 +92,17 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
               className="w-8 h-8 object-contain"
             />
           ) : (
-            <span className="text-gray-400 text-sm">🏒</span>
+            <span className="text-mute text-sm">🏒</span>
           )}
         </div>
       </td>
 
       {/* Dash */}
-      <td className="px-2 py-3 whitespace-nowrap text-center text-gray-500">
-        -
-      </td>
+      <td className="px-2 py-3 whitespace-nowrap text-center text-mute">-</td>
 
       {/* Away Team Logo */}
       <td className="px-4 py-3 whitespace-nowrap text-center">
-        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden mx-auto">
+        <div className="w-8 h-8 bg-surface-3 rounded-full flex items-center justify-center overflow-hidden mx-auto">
           {match.awayTeamLogo ? (
             <Image
               src={match.awayTeamLogo}
@@ -115,18 +113,18 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
               className="w-8 h-8 object-contain"
             />
           ) : (
-            <span className="text-gray-400 text-sm">🏒</span>
+            <span className="text-mute text-sm">🏒</span>
           )}
         </div>
       </td>
 
       {/* Result */}
-      <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
+      <td className="px-4 py-3 whitespace-nowrap text-sm num font-semibold text-ink">
         {match.homeScore} - {match.awayScore}
       </td>
 
       {/* Game Date */}
-      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+      <td className="px-4 py-3 whitespace-nowrap text-sm text-dim">
         {formatShortDateFromString(match.date)}
       </td>
     </>
@@ -136,25 +134,25 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
     <div className="max-w-6xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Home Wins Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="rounded-lg border border-line bg-surface overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-100">
+              <thead className="bg-surface-2 border-b border-line">
                 <tr>
                   <th
                     colSpan={5}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em]"
                   >
                     Största hemmavinster
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-line-soft">
                 {homeWins.length > 0 ? (
                   homeWins.map((match) => (
                     <tr
                       key={`home-${match.date}-${match.homeTeam}-${match.awayTeam}`}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-white/[0.03] transition-colors"
                     >
                       {renderMatchRow(match, true)}
                     </tr>
@@ -163,7 +161,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-4 py-3 text-sm text-gray-400 text-center"
+                      className="px-4 py-3 text-sm text-mute text-center"
                     >
                       Ingen data
                     </td>
@@ -175,25 +173,25 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
         </div>
 
         {/* Away Wins Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="rounded-lg border border-line bg-surface overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-100">
+              <thead className="bg-surface-2 border-b border-line">
                 <tr>
                   <th
                     colSpan={5}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em]"
                   >
                     Största bortavinster
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-line-soft">
                 {awayWins.length > 0 ? (
                   awayWins.map((match) => (
                     <tr
                       key={`away-${match.date}-${match.homeTeam}-${match.awayTeam}`}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-white/[0.03] transition-colors"
                     >
                       {renderMatchRow(match, false)}
                     </tr>
@@ -202,7 +200,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-4 py-3 text-sm text-gray-400 text-center"
+                      className="px-4 py-3 text-sm text-mute text-center"
                     >
                       Ingen data
                     </td>
@@ -214,25 +212,25 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
         </div>
 
         {/* Highest Scoring Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="rounded-lg border border-line bg-surface overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-100">
+              <thead className="bg-surface-2 border-b border-line">
                 <tr>
                   <th
                     colSpan={5}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em]"
                   >
                     Målrikaste
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-line-soft">
                 {highestScoring.length > 0 ? (
                   highestScoring.map((match) => (
                     <tr
                       key={`high-${match.date}-${match.homeTeam}-${match.awayTeam}`}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-white/[0.03] transition-colors"
                     >
                       {renderMatchRow(match, match.homeScore > match.awayScore)}
                     </tr>
@@ -241,7 +239,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-4 py-3 text-sm text-gray-400 text-center"
+                      className="px-4 py-3 text-sm text-mute text-center"
                     >
                       Ingen data
                     </td>
@@ -253,25 +251,25 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
         </div>
 
         {/* Lowest Scoring Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="rounded-lg border border-line bg-surface overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-100">
+              <thead className="bg-surface-2 border-b border-line">
                 <tr>
                   <th
                     colSpan={5}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em]"
                   >
                     Målsnålaste
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-line-soft">
                 {lowestScoring.length > 0 ? (
                   lowestScoring.map((match) => (
                     <tr
                       key={`low-${match.date}-${match.homeTeam}-${match.awayTeam}`}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-white/[0.03] transition-colors"
                     >
                       {renderMatchRow(match, match.homeScore > match.awayScore)}
                     </tr>
@@ -280,7 +278,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-4 py-3 text-sm text-gray-400 text-center"
+                      className="px-4 py-3 text-sm text-mute text-center"
                     >
                       Ingen data
                     </td>

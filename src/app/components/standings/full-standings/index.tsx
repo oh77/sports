@@ -46,45 +46,45 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="rounded-lg border border-line bg-surface overflow-hidden">
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-100">
+            <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em]">
                   #
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em]">
                   Lag
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   M
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   V
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   O
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   F
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   P
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   G
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   GA
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   GM
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-line-soft">
               {getTeams().length ? (
                 getTeams().map((team, index) => {
                   const teamCode = getTeamCode(team);
@@ -107,11 +107,11 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                   return (
                     <tr
                       key={teamCode}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-white/[0.03] transition-colors"
                     >
                       {/* Rank */}
                       <td
-                        className={`px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(league, index + 1, getTeams().length)}`}
+                        className={`px-4 py-4 whitespace-nowrap text-sm display text-ink ${getRankBorderClass(league, index + 1, getTeams().length)}`}
                       >
                         {getRankDisplay(actualRank)}
                       </td>
@@ -122,7 +122,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                           href={teamPath(league, season, teamCode)}
                           className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
                         >
-                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                          <div className="w-8 h-8 bg-surface-3 rounded-full flex items-center justify-center overflow-hidden">
                             {teamLogo ? (
                               <Image
                                 src={teamLogo}
@@ -132,14 +132,14 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                                 className="w-8 h-8 object-contain"
                               />
                             ) : (
-                              <span className="text-gray-400 text-sm">🏒</span>
+                              <span className="text-mute text-sm">🏒</span>
                             )}
                           </div>
                           <div>
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-ink">
                               {teamName}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-mute">
                               {fullTeamName}
                             </div>
                           </div>
@@ -147,48 +147,48 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                       </td>
 
                       {/* Games Played */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center">
                         {gamesPlayed}
                       </td>
 
                       {/* Wins */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center font-medium">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center font-medium">
                         {wins}
                       </td>
 
                       {/* Overtime wins */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center">
                         {tiesText}
                       </td>
 
                       {/* Losses */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center">
                         {losses}
                       </td>
 
                       {/* Points */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center">
+                      <td className="px-4 py-4 whitespace-nowrap display num font-bold text-ink text-lg text-center">
                         {points}
                       </td>
 
                       {/* Goals For */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center font-medium">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center font-medium">
                         {goalsFor}
                       </td>
 
                       {/* Goals Against */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center">
                         {goalsAgainst}
                       </td>
 
                       {/* Goal Difference */}
                       <td
-                        className={`px-4 py-4 whitespace-nowrap text-sm text-center font-medium ${
+                        className={`px-4 py-4 whitespace-nowrap text-sm num text-center font-medium ${
                           goalDifference > 0
-                            ? 'text-green-600'
+                            ? 'text-win'
                             : goalDifference < 0
-                              ? 'text-red-600'
-                              : 'text-gray-900'
+                              ? 'text-loss'
+                              : 'text-dim'
                         }`}
                       >
                         {goalDifference > 0 ? '+' : ''}
@@ -199,10 +199,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 })
               ) : (
                 <tr>
-                  <td
-                    colSpan={10}
-                    className="px-4 py-8 text-center text-gray-500"
-                  >
+                  <td colSpan={10} className="px-4 py-8 text-center text-dim">
                     Ingen ligatabell tillgänglig
                   </td>
                 </tr>
@@ -212,21 +209,21 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
         </div>
 
         {/* Legend */}
-        <div className="bg-gray-50 px-6 py-4 border-t">
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+        <div className="bg-surface-2 border-t border-line px-6 py-4">
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-dim">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-yellow-200 rounded"></div>
+              <div className="w-4 h-4 bg-win rounded"></div>
               <span>{league === 'chl' ? 'Playoff' : 'Slutspel'}</span>
             </div>
             {league === 'shl' && (
               <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-blue-200 rounded"></div>
+                <div className="w-4 h-4 bg-otl rounded"></div>
                 <span>Kval</span>
               </div>
             )}
             {league !== 'chl' && (
               <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-red-200 rounded"></div>
+                <div className="w-4 h-4 bg-loss rounded"></div>
                 <span>Kval</span>
               </div>
             )}

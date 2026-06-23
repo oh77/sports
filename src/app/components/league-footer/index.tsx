@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import type { League } from '@/app/types/domain/league';
@@ -15,13 +16,24 @@ interface LeagueFooterProps {
   currentTeamCode?: string;
 }
 
+// Path segments after the season that are sections, not team codes.
+const SECTION_SEGMENTS = new Set(['standings', 'stats', 'teams']);
+
 const LeagueFooter: React.FC<LeagueFooterProps> = ({
   league,
   currentTeamCode,
 }) => {
   const season = useSeason();
+  const pathname = usePathname();
   const [teams, setTeams] = useState<TeamInfo[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // When not given explicitly (e.g. rendered globally from the shell), derive
+  // the highlighted team from the URL: /<league>/<season>/<teamCode>.
+  const seg = pathname.split('/')[3] ?? '';
+  const activeTeamCode =
+    currentTeamCode ??
+    (seg && !SECTION_SEGMENTS.has(seg) ? decodeURIComponent(seg) : undefined);
 
   useEffect(() => {
     const loadTeams = async () => {
@@ -66,13 +78,13 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
 
   if (loading) {
     return (
-      <footer className="bg-gray-800 py-8 mt-12">
+      <footer className="bg-surface-2 border-t border-line py-8 mt-12">
         <div className="container mx-auto px-4">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded mb-4 w-32 mx-auto"></div>
+            <div className="h-8 bg-surface-3 rounded mb-4 w-32 mx-auto"></div>
             <div className="flex flex-wrap justify-center gap-4">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="w-12 h-12 bg-gray-300 rounded"></div>
+                <div key={i} className="w-12 h-12 bg-surface-3 rounded"></div>
               ))}
             </div>
           </div>
@@ -82,7 +94,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
   }
 
   return (
-    <footer className="bg-gray-800 py-8 mt-12">
+    <footer className="bg-surface-2 border-t border-line py-8 mt-12">
       <div className="container mx-auto px-4">
         {/* League Logo and Team Logos */}
         <div className="flex flex-wrap justify-center gap-4 max-w-6xl mx-auto">
@@ -105,7 +117,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
                 logo: team.logo,
                 alt: team.full,
                 tooltip: team.full,
-                isCurrentTeam: currentTeamCode === team.code,
+                isCurrentTeam: activeTeamCode === team.code,
                 isLeague: false,
               })),
           ].map((item) => (
@@ -114,12 +126,12 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
               href={item.href}
               className={`group relative transition-all duration-200 ${
                 'isCurrentTeam' in item && item.isCurrentTeam
-                  ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800'
+                  ? 'rounded-full ring-2 ring-accent ring-offset-2 ring-offset-[#0e1218]'
                   : 'hover:scale-110'
               }`}
             >
               <div
-                className={`w-12 h-12 ${item.isLeague ? 'bg-gray-800' : 'bg-gray-100'} rounded-full flex items-center justify-center overflow-hidden`}
+                className={`w-12 h-12 ${item.isLeague ? 'bg-surface' : 'bg-surface-3'} rounded-full flex items-center justify-center overflow-hidden`}
               >
                 {item.logo ? (
                   <Image

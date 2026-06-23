@@ -31,15 +31,20 @@ const LEAGUES = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-100 px-4 py-10">
+    <main className="min-h-screen bg-bg px-4 py-12">
       <div className="mx-auto max-w-4xl">
-        <h1 className="sr-only">Gameday – välj liga</h1>
+        <div className="mb-10 flex flex-col items-center gap-2">
+          <h1 className="display text-4xl font-bold uppercase tracking-[0.08em] text-ink md:text-5xl">
+            Gameday
+          </h1>
+          <p className="text-sm text-dim">Välj liga</p>
+        </div>
 
         <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           {LEAGUES.map((league) => (
             <Link key={league.href} href={league.href} className="inline-block">
               <div
-                className="flex h-36 w-36 items-center justify-center rounded-lg p-4 transition-opacity hover:opacity-80 md:h-44 md:w-44"
+                className="flex h-36 w-36 items-center justify-center rounded-xl border border-line p-4 transition-all hover:scale-[1.03] hover:border-line-strong md:h-44 md:w-44"
                 style={{ backgroundColor: league.bg }}
               >
                 <Image
@@ -54,8 +59,8 @@ export default function Home() {
           ))}
         </div>
 
-        <section className="mx-auto mt-10 max-w-2xl">
-          <h2 className="mb-3 text-center text-sm font-semibold uppercase tracking-wider text-gray-500">
+        <section className="mx-auto mt-12 max-w-2xl">
+          <h2 className="display mb-3 text-center text-sm font-bold uppercase tracking-[0.1em] text-mute">
             Kommande matcher
           </h2>
           <UpcomingAllLeagues limit={10} />

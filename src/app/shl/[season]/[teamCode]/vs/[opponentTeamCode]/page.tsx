@@ -5,7 +5,6 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import GameStatsContainer from '@/app/components/gamestats-container';
 import { HeadToHead } from '../../../../../components/head-to-head';
-import LeagueFooter from '../../../../../components/league-footer';
 import NextGame from '../../../../../components/next-game';
 import PreviousGames from '../../../../../components/previous-games';
 import { CompactStandings } from '../../../../../components/standings/compact-standings';
@@ -142,12 +141,12 @@ export default function TeamPage({
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
+      <main className="relative py-6 md:py-8">
         <div className="container mx-auto px-4 relative z-10">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded mb-8 w-1/3 mx-auto"></div>
-            <div className="h-64 bg-gray-300 rounded mb-4"></div>
-            <div className="h-4 bg-gray-300 rounded"></div>
+            <div className="h-8 bg-surface-3 rounded mb-8 w-1/3 mx-auto"></div>
+            <div className="h-64 bg-surface rounded mb-4"></div>
+            <div className="h-4 bg-surface-3 rounded"></div>
           </div>
         </div>
       </main>
@@ -156,20 +155,20 @@ export default function TeamPage({
 
   if (error || !teamInfo) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
+      <main className="relative py-6 md:py-8">
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">
+            <div className="text-loss text-6xl mb-4">⚠️</div>
+            <h1 className="display text-3xl font-bold uppercase tracking-[0.02em] text-ink mb-4">
               {error || 'Lag Inte Hittat'}
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-dim mb-6">
               {error ||
                 `Inga kommande matcher hittades för lagkod: ${teamCode}`}
             </p>
             <Link
               href={leagueBasePath('shl', season)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
+              className="display inline-block rounded-lg bg-accent px-6 py-3 font-bold uppercase tracking-[0.04em] text-white transition-opacity hover:opacity-90"
             >
               Tillbaka till SHL
             </Link>
@@ -180,7 +179,7 @@ export default function TeamPage({
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 py-12 relative">
+    <main className="relative py-6 md:py-8">
       {/* Background Team Logo */}
       {teamInfo.logo && (
         <div
@@ -192,7 +191,7 @@ export default function TeamPage({
             alt=""
             width={1200}
             height={1200}
-            className="opacity-10 w-full h-full object-contain"
+            className="opacity-[0.05] w-full h-full object-contain"
             role="presentation"
           />
         </div>
@@ -210,11 +209,11 @@ export default function TeamPage({
               className="w-16 h-16 md:w-20 md:h-20 object-contain"
             />
           ) : (
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-500 text-2xl md:text-3xl">🏒</span>
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-surface-3 rounded-full flex items-center justify-center">
+              <span className="text-mute text-2xl md:text-3xl">🏒</span>
             </div>
           )}
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-800 uppercase tracking-wider text-center md:text-left">
+          <h1 className="display text-3xl md:text-5xl font-bold text-ink uppercase tracking-[0.04em] text-center md:text-left">
             {teamInfo.full}
           </h1>
         </div>
@@ -275,7 +274,6 @@ export default function TeamPage({
           </div>
         </div>
 
-        <LeagueFooter league="shl" currentTeamCode={teamCode} />
       </div>
     </main>
   );

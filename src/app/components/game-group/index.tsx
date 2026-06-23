@@ -15,18 +15,15 @@ export const GameGroup: React.FC<GameGroupProps> = ({
   league,
 }) => (
   <div className="mb-6">
-    <div className="text-center mb-3">
-      <h2
-        className={`text-xl font-bold ${league === 'chl' ? 'text-white' : 'text-gray-800'}`}
-      >
+    <div className="mb-3 flex items-center gap-3">
+      <span className="h-px flex-1 bg-line" aria-hidden="true" />
+      <h2 className="display num text-sm font-bold uppercase tracking-[0.08em] text-dim">
         {time}
       </h2>
+      <span className="h-px flex-1 bg-line" aria-hidden="true" />
     </div>
 
-    <div
-      className="rounded-lg shadow-lg divide-y divide-gray-200"
-      style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
-    >
+    <div className="rounded-lg border border-line bg-surface divide-y divide-line-soft">
       {games.map((game, index) => (
         <GameContainer
           key={game.uuid || index}

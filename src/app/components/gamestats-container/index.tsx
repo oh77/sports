@@ -74,16 +74,13 @@ export const GameStatsContainer: React.FC<HomeAwayContainerProps> = ({
   }, [finishedGames, awayTeamCode]);
 
   return (
-    <div
-      className="rounded-lg shadow p-3"
-      style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
-    >
+    <div className="rounded-lg p-3 bg-surface border border-line">
       <div className="grid grid-cols-12">
         <div className="col-span-5">
           <GameStats games={homeOnlyGames} teamCode={homeTeamCode} />
         </div>
         <div className="col-span-2 mt-3.5">
-          <div className="text-xs text-gray-700 mb-1 ml-1 text-center">
+          <div className="text-xs text-dim mb-1 ml-1 text-center">
             Hemma / Borta
           </div>
         </div>
@@ -96,7 +93,7 @@ export const GameStatsContainer: React.FC<HomeAwayContainerProps> = ({
           <GameStats games={homeLastFiveGames} teamCode={homeTeamCode} />
         </div>
         <div className="col-span-2 mt-3.5">
-          <div className="text-xs text-gray-700 mb-1 ml-1 text-center">
+          <div className="text-xs text-dim mb-1 ml-1 text-center">
             5 senaste
           </div>
         </div>

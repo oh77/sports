@@ -23,7 +23,6 @@ export function Tabs({
   defaultTab,
   className = '',
   queryParam = 'tab',
-  variant = 'light',
 }: TabsProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -72,29 +71,19 @@ export function Tabs({
 
   const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content;
 
-  const isDark = variant === 'dark';
-
   return (
     <div className={className}>
       {/* Tab Headers */}
-      <div
-        className={`flex border-b ${
-          isDark ? 'border-gray-600' : 'border-gray-300'
-        }`}
-      >
+      <div className="flex border-b border-line overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => handleTabClick(tab.id)}
-            className={`px-6 py-3 font-medium text-sm transition-colors cursor-pointer ${
+            className={`display px-5 py-3 text-sm font-bold uppercase tracking-[0.06em] whitespace-nowrap transition-colors cursor-pointer border-b-[3px] -mb-px ${
               activeTab === tab.id
-                ? isDark
-                  ? 'text-white border-b-2 border-white'
-                  : 'text-gray-900 border-b-2 border-gray-900'
-                : isDark
-                  ? 'text-gray-400 hover:text-gray-200'
-                  : 'text-gray-600 hover:text-gray-900'
+                ? 'text-ink border-accent'
+                : 'text-mute border-transparent hover:text-soft'
             }`}
           >
             {tab.label}

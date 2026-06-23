@@ -93,6 +93,7 @@ export const TopPlayer: React.FC<TopPlayerProps> = ({ league, teamCode }) => {
         secondaryValue={`${topPlayer.G} + ${topPlayer.A}`}
         rank={topPlayer.Rank}
         nationality={topPlayer.info.nationality}
+        club={topPlayer.info.team.name}
       />
     </div>
   );

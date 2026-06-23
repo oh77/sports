@@ -54,10 +54,10 @@ export const HeadToHeadCircle: React.FC<HeadToHeadCircleProps> = ({ game }) => {
     new Date(gameDate).toDateString() === new Date().toDateString();
   return (
     <div
-      className={`w-12 h-12 rounded-full border-2 border-gray-500 flex items-center justify-center overflow-hidden ${winnerLogo ? 'bg-white' : 'bg-white/50'}`}
+      className={`w-12 h-12 rounded-full border-2 border-line flex items-center justify-center overflow-hidden ${winnerLogo ? 'bg-surface-3' : 'bg-surface-3'}`}
       title={getTitle(game, gameDate)}
     >
-      <div className="text-center text-xs text-gray-500 leading-tight font-bold">
+      <div className="num text-center text-xs text-dim leading-tight font-bold">
         {isToday ? (
           <div>{formatTimeFromDate(gameDate)}</div>
         ) : (

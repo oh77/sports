@@ -78,12 +78,12 @@ export const TopScorer: React.FC<TopScorerProps> = ({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {[1, 2].map((i) => (
-          <div key={i} className="bg-white rounded-lg shadow-lg p-6">
+          <div key={i} className="rounded-lg border border-line bg-surface p-6">
             <div className="animate-pulse">
-              <div className="h-6 bg-gray-300 rounded mb-4"></div>
+              <div className="h-6 bg-surface-3 rounded mb-4"></div>
               <div className="space-y-3">
                 {[1, 2, 3].map((j) => (
-                  <div key={j} className="h-20 bg-gray-300 rounded"></div>
+                  <div key={j} className="h-20 bg-surface-3 rounded"></div>
                 ))}
               </div>
             </div>
@@ -95,8 +95,8 @@ export const TopScorer: React.FC<TopScorerProps> = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-        <p className="text-red-600">{error}</p>
+      <div className="bg-loss/10 border border-loss/30 rounded-lg p-4 text-center">
+        <p className="text-loss">{error}</p>
       </div>
     );
   }
@@ -118,6 +118,7 @@ export const TopScorer: React.FC<TopScorerProps> = ({
             secondaryValue={`${player.G} + ${player.A}`}
             rank={player.Rank}
             nationality={player.info.nationality}
+            club={player.info.team.name}
           />
         ))}
       </div>
@@ -133,6 +134,7 @@ export const TopScorer: React.FC<TopScorerProps> = ({
             secondaryValue={`${player.G} + ${player.A}`}
             rank={player.Rank}
             nationality={player.info.nationality}
+            club={player.info.team.name}
           />
         ))}
       </div>

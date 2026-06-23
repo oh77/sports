@@ -25,12 +25,12 @@ export const PreviousGameDays: React.FC<PreviousGameDaysProps> = ({
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full focus:outline-none mb-4"
       >
-        <div className="flex flex-col items-center py-2 border-b border-gray-300">
-          <span className="text-sm font-medium text-gray-700 mb-1">
+        <div className="flex flex-col items-center py-2 border-b border-line">
+          <span className="display text-sm font-medium uppercase tracking-[0.04em] text-soft mb-1">
             Tidigare matcher
           </span>
           <svg
-            className={`w-4 h-4 text-gray-600 transition-transform ${
+            className={`w-4 h-4 text-dim transition-transform ${
               isExpanded ? 'transform rotate-180' : ''
             }`}
             fill="none"

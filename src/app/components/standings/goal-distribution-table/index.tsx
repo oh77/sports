@@ -96,8 +96,8 @@ export function GoalDistributionTable({
   if (teams.length === 0) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="p-8 text-center text-gray-500">
+        <div className="rounded-lg border border-line bg-surface overflow-hidden">
+          <div className="p-8 text-center text-dim">
             Ingen matchdata tillgänglig
           </div>
         </div>
@@ -107,18 +107,18 @@ export function GoalDistributionTable({
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="rounded-lg border border-line bg-surface overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-100">
+            <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
+                <th className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em] w-28">
                   Mål
                 </th>
                 {GOAL_COLUMNS.map((col) => (
                   <th
                     key={col}
-                    className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-3 py-3 text-center text-xs num text-mute display uppercase tracking-[0.06em]"
                   >
                     {col === 9 ? '9+' : col}
                   </th>
@@ -129,7 +129,7 @@ export function GoalDistributionTable({
               {distributions.map(({ team, scored, conceded }) => (
                 <React.Fragment key={team.code}>
                   {/* Team divider row */}
-                  <tr className="bg-gray-50 border-t-2 border-gray-300">
+                  <tr className="bg-surface-2 border-t-2 border-line-strong">
                     <td colSpan={11} className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         {team.logo && (
@@ -141,24 +141,22 @@ export function GoalDistributionTable({
                             className="w-6 h-6 object-contain"
                           />
                         )}
-                        <span className="text-sm font-semibold text-gray-800">
+                        <span className="text-sm font-semibold text-ink">
                           {team.long}
                         </span>
                       </div>
                     </td>
                   </tr>
                   {/* Scored row */}
-                  <tr className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                  <tr className="hover:bg-white/[0.03] transition-colors">
+                    <td className="px-4 py-2 text-sm font-medium text-soft">
                       Gjorda
                     </td>
                     {scored.map((count, idx) => (
                       <td
-                        key={idx}
-                        className={`px-3 py-2 text-center text-sm ${
-                          count > 0
-                            ? 'font-semibold text-gray-900'
-                            : 'text-gray-300'
+                        key={`scored-${GOAL_COLUMNS[idx]}`}
+                        className={`px-3 py-2 text-center text-sm num ${
+                          count > 0 ? 'font-semibold text-ink' : 'text-mute'
                         }`}
                         style={heatmapStyle(count, maxScored, 'scored')}
                       >
@@ -167,17 +165,15 @@ export function GoalDistributionTable({
                     ))}
                   </tr>
                   {/* Conceded row */}
-                  <tr className="hover:bg-gray-50 transition-colors border-b border-gray-200">
-                    <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                  <tr className="hover:bg-white/[0.03] transition-colors border-b border-line-soft">
+                    <td className="px-4 py-2 text-sm font-medium text-soft">
                       Insläppta
                     </td>
                     {conceded.map((count, idx) => (
                       <td
-                        key={idx}
-                        className={`px-3 py-2 text-center text-sm ${
-                          count > 0
-                            ? 'font-semibold text-gray-900'
-                            : 'text-gray-300'
+                        key={`conceded-${GOAL_COLUMNS[idx]}`}
+                        className={`px-3 py-2 text-center text-sm num ${
+                          count > 0 ? 'font-semibold text-ink' : 'text-mute'
                         }`}
                         style={heatmapStyle(count, maxConceded, 'conceded')}
                       >

@@ -9,43 +9,40 @@ interface PlayerCardProps {
   secondaryValue: string;
   rank: number | null;
   nationality: string;
+  club?: string;
 }
 
-const getCountryFlag = (nationality: string): string => {
-  const countryMap: Record<string, string> = {
-    FI: '🇫🇮', // Finland
-    SE: '🇸🇪', // Sweden
-    CA: '🇨🇦', // Canada
-    US: '🇺🇸', // United States
-    CZ: '🇨🇿', // Czech Republic
-    SK: '🇸🇰', // Slovakia
-    NO: '🇳🇴', // Norway
-    NOR: '🇳🇴', // Norway
-    DK: '🇩🇰', // Denmark
-    DE: '🇩🇪', // Germany
-    CH: '🇨🇭', // Switzerland
-    AT: '🇦🇹', // Austria
-    FR: '🇫🇷', // France
-    RU: '🇷🇺', // Russia
-    LV: '🇱🇻', // Latvia
-    EE: '🇪🇪', // Estonia
-    LT: '🇱🇹', // Lithuania
-    PL: '🇵🇱', // Poland
-    BE: '🇧🇪', // Belgium
-    NL: '🇳🇱', // Netherlands
-    GB: '🇬🇧', // Great Britain
-    IE: '🇮🇪', // Ireland
-    IT: '🇮🇹', // Italy
-    ES: '🇪🇸', // Spain
-    AU: '🇦🇺', // Australia
-    JP: '🇯🇵', // Japan
-    KR: '🇰🇷', // South Korea
-    CN: '🇨🇳', // China
-  };
+/**
+ * Country flag from the ISO 3166-1 alpha-2 nationality code, via flag-icons.
+ * Falls back to a text badge for anything that isn't a two-letter code.
+ */
+const NationalityFlag: React.FC<{ nationality: string }> = ({
+  nationality,
+}) => {
+  const code = nationality.trim().toLowerCase();
+  if (!/^[a-z]{2}$/.test(code)) {
+    return (
+      <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.04em] text-soft">
+        {nationality}
+      </span>
+    );
+  }
+  return (
+    <span
+      className={`fi fi-${code} h-4 w-[22px] rounded-[3px] ring-1 ring-line/60`}
+      role="img"
+      aria-label={nationality.toUpperCase()}
+      title={nationality.toUpperCase()}
+    />
+  );
+};
 
-  // Try to match the nationality string (could be code like "FI" or full name)
-  const code = nationality.toUpperCase().trim();
-  return countryMap[code] || '';
+/** Medal accent for the top three ranks, transparent otherwise. */
+const rankAccent = (rank: number | null): string => {
+  if (rank === 1) return '#d8a400'; // gold
+  if (rank === 2) return '#aab2bd'; // silver
+  if (rank === 3) return '#c8803f'; // bronze
+  return 'transparent';
 };
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({
@@ -55,54 +52,43 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   secondaryValue,
   rank,
   nationality,
-}) => {
-  const flagEmoji = getCountryFlag(nationality);
+  club,
+}) => (
+  <div className="flex items-center gap-3 rounded-lg border border-line bg-surface px-3 py-2.5 transition-colors hover:border-line-strong">
+    {/* Rank with medal accent bar */}
+    <span className="flex w-9 items-center gap-2">
+      <span
+        className="inline-block h-[18px] w-[3px] rounded-sm"
+        style={{ background: rankAccent(rank) }}
+        aria-hidden="true"
+      />
+      {rank != null && (
+        <span className="display num text-base font-bold text-ink">{rank}</span>
+      )}
+    </span>
 
-  return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-      <div className="p-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Left side: Number, Name */}
-          <div className="flex items-center gap-3">
-            {/* Player Number with Flag Background */}
-            <div className="relative inline-flex items-center justify-center">
-              {/* Flag emoji as background */}
-              <span
-                className="absolute text-8xl opacity-30 -rotate-[30deg] pointer-events-none"
-                title={nationality}
-                aria-hidden="true"
-              >
-                {flagEmoji}
-              </span>
-              {/* Player Number */}
-              <span className="relative text-sm font-semibold text-gray-600 z-10">
-                #{playerNumber}
-              </span>
-            </div>
-            <h3 className="text-lg font-bold text-gray-900">{playerName}</h3>
-          </div>
+    {/* Jersey number badge */}
+    <span className="display num inline-flex h-[26px] min-w-[34px] items-center justify-center rounded-md bg-surface-3 px-1.5 text-[13px] font-bold text-soft">
+      #{playerNumber}
+    </span>
 
-          {/* Right side: Primary, Secondary, Rank */}
-          <div className="flex items-center gap-3">
-            {/* Primary Value - Standout */}
-            <span className="text-2xl font-bold text-blue-600">
-              {primaryValue}
-            </span>
-
-            {/* Secondary Value with spacing inside brackets */}
-            <span className="text-base font-semibold text-gray-500">
-              [ {secondaryValue} ]
-            </span>
-
-            {/* Rank */}
-            {rank && (
-              <span className="text-sm font-semibold text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
-                #{rank}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+    {/* Name + club */}
+    <div className="min-w-0 flex-1">
+      <h3 className="truncate text-[15px] font-semibold leading-tight text-ink">
+        {playerName}
+      </h3>
+      {club && <p className="truncate text-xs text-dim">{club}</p>}
     </div>
-  );
-};
+
+    {/* Nationality flag */}
+    {nationality && <NationalityFlag nationality={nationality} />}
+
+    {/* Stats: primary value with the secondary on a second line */}
+    <div className="min-w-[44px] text-right leading-tight">
+      <span className="display num block text-xl font-bold text-ink">
+        {primaryValue}
+      </span>
+      <span className="num block text-xs text-dim">{secondaryValue}</span>
+    </div>
+  </div>
+);

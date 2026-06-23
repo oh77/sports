@@ -29,10 +29,10 @@ const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
     <Link
       href={teamPath(league, season, teamInfo.code)}
       title={teamInfo.full}
-      className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
+      className="text-lg font-medium text-accent hover:text-ink hover:underline"
     >
       <div
-        className={`${containerSize} mx-auto ${marginBottom} bg-gray-100 rounded-full flex items-center justify-center`}
+        className={`${containerSize} mx-auto ${marginBottom} bg-surface-3 rounded-full flex items-center justify-center`}
       >
         {teamInfo.logo ? (
           <Image
@@ -43,7 +43,9 @@ const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
             className={`object-contain ${logoSize}`}
           />
         ) : (
-          <span className={`text-gray-400 ${compact ? 'text-sm' : 'text-xl'}`}>
+          <span
+            className={`display text-mute ${compact ? 'text-sm' : 'text-xl'}`}
+          >
             {teamInfo.code}
           </span>
         )}

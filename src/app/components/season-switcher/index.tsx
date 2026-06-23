@@ -43,7 +43,7 @@ export function SeasonSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 rounded-full bg-gray-800/80 hover:bg-gray-800 px-4 py-2 text-sm font-semibold text-white transition-colors"
+        className="flex items-center gap-1.5 rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm font-semibold text-soft transition-colors hover:text-ink"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Byt säsong"
@@ -74,17 +74,17 @@ export function SeasonSwitcher() {
             onClick={() => setOpen(false)}
             aria-label="Stäng säsongsmeny"
           />
-          <div className="absolute left-1/2 top-full z-50 mt-2 min-w-[140px] -translate-x-1/2 overflow-hidden rounded-lg bg-white py-2 shadow-lg">
+          <div className="absolute right-0 top-full z-50 mt-2 min-w-[140px] overflow-hidden rounded-lg border border-line bg-surface py-1.5 shadow-2xl">
             {seasons.map((s) => (
               <button
                 key={s.key}
                 type="button"
                 onClick={() => goTo(s.key)}
                 aria-current={s.key === season}
-                className={`block w-full px-4 py-2 text-left transition-colors hover:bg-gray-100 ${
+                className={`block w-full px-4 py-2 text-left text-sm transition-colors hover:bg-surface-3 ${
                   s.key === season
-                    ? 'font-semibold text-blue-600'
-                    : 'text-gray-800'
+                    ? 'font-semibold text-accent'
+                    : 'text-soft hover:text-ink'
                 }`}
               >
                 {seasonLabel(s.key)}

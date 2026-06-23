@@ -154,8 +154,8 @@ export function CompactStandings({
 
   if (!compactTeams.length) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="text-center text-gray-500">
+      <div className="rounded-lg border border-line bg-surface p-6">
+        <div className="text-center text-dim">
           Ingen ligatabell tillgänglig för de valda lagen
         </div>
       </div>
@@ -163,30 +163,30 @@ export function CompactStandings({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="rounded-lg border border-line bg-surface overflow-hidden">
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-100">
+          <thead className="bg-surface-2 border-b border-line">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs text-mute display uppercase tracking-[0.06em]">
                 #
               </th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs text-mute display uppercase tracking-[0.06em]">
                 Lag
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                 M
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                 P
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                 GM
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-line-soft">
             {compactTeams.map(({ team, rank }) => {
               const teamCode = getTeamCode(team);
               const teamName = getTeamName(team);
@@ -199,11 +199,11 @@ export function CompactStandings({
               return (
                 <tr
                   key={teamCode}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="hover:bg-white/[0.03] transition-colors"
                 >
                   {/* Rank */}
                   <td
-                    className={`px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${getRankBorderClass(league, fullPosition, totalTeams)}`}
+                    className={`px-3 py-3 whitespace-nowrap text-sm display text-ink ${getRankBorderClass(league, fullPosition, totalTeams)}`}
                   >
                     {getRankDisplay(rank)}
                   </td>
@@ -214,7 +214,7 @@ export function CompactStandings({
                       href={teamPath(league, season, teamCode)}
                       className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
                     >
-                      <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                      <div className="w-6 h-6 bg-surface-3 rounded-full flex items-center justify-center overflow-hidden">
                         {teamLogo ? (
                           <Image
                             src={teamLogo}
@@ -224,11 +224,11 @@ export function CompactStandings({
                             className="w-6 h-6 object-contain"
                           />
                         ) : (
-                          <span className="text-gray-400 text-xs">🏒</span>
+                          <span className="text-mute text-xs">🏒</span>
                         )}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-ink">
                           {teamName}
                         </div>
                       </div>
@@ -236,17 +236,17 @@ export function CompactStandings({
                   </td>
 
                   {/* Games Played */}
-                  <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
+                  <td className="px-3 py-3 whitespace-nowrap text-sm num text-soft text-center">
                     {gamesPlayed}
                   </td>
 
                   {/* Points */}
-                  <td className="px-3 py-3 whitespace-nowrap text-sm font-bold text-gray-900 text-center">
+                  <td className="px-3 py-3 whitespace-nowrap display num font-bold text-ink text-lg text-center">
                     {points}
                   </td>
 
                   {/* Goal Difference */}
-                  <td className="px-3 py-3 whitespace-nowrap text-sm text-center font-medium text-gray-900">
+                  <td className="px-3 py-3 whitespace-nowrap text-sm num text-center font-medium text-dim">
                     {goalDifference > 0 ? '+' : ''}
                     {goalDifference}
                   </td>

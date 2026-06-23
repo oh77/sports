@@ -88,11 +88,13 @@ export function UpcomingGamesTable({
     return { rows: teamRows, dateCols: limitedDates, padCount };
   }, [games, teams]);
 
+  const padKeys = Array.from({ length: padCount }, (_, i) => `pad-${i}`);
+
   if (teams.length === 0 || dateCols.length === 0) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="p-8 text-center text-gray-500">
+        <div className="rounded-lg border border-line bg-surface overflow-hidden">
+          <div className="p-8 text-center text-dim">
             Inga kommande matcher tillgängliga
           </div>
         </div>
@@ -102,47 +104,47 @@ export function UpcomingGamesTable({
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="rounded-lg border border-line bg-surface overflow-hidden">
         {/* Legend */}
-        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-5 text-xs text-gray-600">
+        <div className="px-4 py-3 bg-surface-2 border-b border-line flex items-center gap-5 text-xs text-dim">
           <div className="flex items-center gap-1.5">
-            <span className="inline-block w-5 h-5 rounded-full border-3 border-blue-400" />
+            <span className="inline-block w-5 h-5 rounded-full border-3 border-accent" />
             <span>Hemma</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="inline-block w-5 h-5 rounded-full border-3 border-orange-400" />
+            <span className="inline-block w-5 h-5 rounded-full border-3 border-otl" />
             <span>Borta</span>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-100">
+            <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sticky left-0 bg-gray-100 z-10">
+                <th className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em] w-16 sticky left-0 bg-surface-2 z-10">
                   Lag
                 </th>
                 {dateCols.map((dateKey) => (
                   <th
                     key={dateKey}
-                    className="px-2 py-3 text-center text-[10px] font-medium text-gray-500 tracking-wider whitespace-nowrap"
+                    className="px-2 py-3 text-center text-[10px] num text-mute tracking-wider whitespace-nowrap"
                   >
                     {formatShortDateFromString(dateKey)}
                   </th>
                 ))}
-                {Array.from({ length: padCount }, (_, i) => (
-                  <th key={`pad-${i}`} className="px-2 py-3" />
+                {padKeys.map((key) => (
+                  <th key={key} className="px-2 py-3" />
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-line-soft">
               {rows.map(({ team, entryMap }) => (
                 <tr
                   key={team.code}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="hover:bg-white/[0.03] transition-colors"
                 >
                   {/* Team logo */}
-                  <td className="px-4 py-2 sticky left-0 bg-white z-10">
+                  <td className="px-4 py-2 sticky left-0 bg-surface z-10">
                     <div className="w-10 h-10 flex items-center justify-center">
                       {team.logo ? (
                         <Image
@@ -154,7 +156,7 @@ export function UpcomingGamesTable({
                           className="w-10 h-10 object-contain"
                         />
                       ) : (
-                        <span className="text-sm font-semibold text-gray-600">
+                        <span className="text-sm font-semibold text-dim">
                           {team.short}
                         </span>
                       )}
@@ -175,8 +177,8 @@ export function UpcomingGamesTable({
                         <div
                           className={`w-10 h-10 mx-auto flex items-center justify-center rounded-full overflow-hidden ${
                             entry.isHome
-                              ? 'border-3 border-blue-400'
-                              : 'border-3 border-orange-400'
+                              ? 'border-3 border-accent'
+                              : 'border-3 border-otl'
                           }`}
                           title={`${entry.isHome ? 'Hemma' : 'Borta'} mot ${entry.opponent.long}`}
                         >
@@ -189,7 +191,7 @@ export function UpcomingGamesTable({
                               className="w-8 h-8 object-contain"
                             />
                           ) : (
-                            <span className="text-xs font-semibold text-gray-600">
+                            <span className="text-xs font-semibold text-dim">
                               {entry.opponent.short}
                             </span>
                           )}
@@ -197,8 +199,8 @@ export function UpcomingGamesTable({
                       </td>
                     );
                   })}
-                  {Array.from({ length: padCount }, (_, i) => (
-                    <td key={`pad-${i}`} className="px-2 py-2" />
+                  {padKeys.map((key) => (
+                    <td key={key} className="px-2 py-2" />
                   ))}
                 </tr>
               ))}

@@ -67,35 +67,38 @@ export const HomeAwayStats: React.FC<HomeAwayStatsProps> = ({
   };
   // Display format: {Games Played} {W} {OTW} {OTL} {L} {GF} {GA} {GM}
   return (
-    <div className="text-sm text-gray-800">
+    <div className="text-sm text-ink">
       <table className="w-full">
-        <tbody className="bg-white divide-y divide-gray-200">
-          <tr key={teamCode} className="hover:bg-gray-50 transition-colors">
-            {/*<td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-900 text-center">*/}
+        <tbody className="bg-surface divide-y divide-line-soft">
+          <tr
+            key={teamCode}
+            className="hover:bg-white/[0.03] transition-colors"
+          >
+            {/*<td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-ink text-center">*/}
             {/*    {stats.GP}*/}
             {/*</td>*/}
-            <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
+            <td className="num px-3 py-3 whitespace-nowrap text-sm text-ink text-center">
               {stats.W}
             </td>
-            <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
+            <td className="num px-3 py-3 whitespace-nowrap text-sm text-ink text-center">
               <span className="hidden md:table-cell">
                 {stats.OTW} | {stats.OTL}
               </span>
               <span className="md:hidden">{stats.OTW + stats.OTL}</span>
             </td>
-            <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
+            <td className="num px-3 py-3 whitespace-nowrap text-sm text-ink text-center">
               {stats.L}
             </td>
-            <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
+            <td className="num hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-ink text-center">
               {stats.GF}-{stats.GA}
             </td>
-            <td className="px-3 py-3 whitespace-nowrap text-sm text-center font-medium text-gray-900">
+            <td className="num px-3 py-3 whitespace-nowrap text-sm text-center font-medium text-ink">
               {stats.GM > 0 ? '+' : ''}
               {stats.GM}
             </td>
 
             {/* Points */}
-            <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm font-bold text-gray-900 text-center">
+            <td className="num hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm font-bold text-ink text-center">
               {getPoints(stats)} p
             </td>
           </tr>

@@ -16,11 +16,7 @@ import type {
 } from '../../../../../types/domain/game';
 import type { StandingsData } from '../../../../../types/domain/standings';
 import type { TeamInfo } from '../../../../../types/domain/team';
-import {
-  leagueBasePath,
-  teamPath,
-  withSeason,
-} from '../../../../../utils/leaguePaths';
+import { leagueBasePath, withSeason } from '../../../../../utils/leaguePaths';
 
 export default function TeamPage({
   params,
@@ -42,7 +38,6 @@ export default function TeamPage({
   const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
   const [standings, setStandings] = useState<StandingsData | null>(null);
-  const [allTeams, setAllTeams] = useState<TeamInfo[]>([]);
   const [allGames, setAllGames] = useState<GameInfo[]>([]);
 
   // Helper function to match team code with short name
@@ -92,9 +87,6 @@ export default function TeamPage({
           ...(upcomingGamesData.gameInfo || []),
         ];
         const teams = teamsData;
-
-        // Store all teams for footer
-        setAllTeams(teams);
 
         // Store all games for trend indicators
         setAllGames(allGamesData);
@@ -226,12 +218,12 @@ export default function TeamPage({
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
+      <main className="relative py-6 md:py-8">
         <div className="container mx-auto px-4 relative z-10">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded mb-8 w-1/3 mx-auto"></div>
-            <div className="h-64 bg-gray-300 rounded mb-4"></div>
-            <div className="h-4 bg-gray-300 rounded"></div>
+            <div className="h-8 bg-surface-3 rounded mb-8 w-1/3 mx-auto"></div>
+            <div className="h-64 bg-surface rounded mb-4"></div>
+            <div className="h-4 bg-surface-3 rounded"></div>
           </div>
         </div>
       </main>
@@ -240,20 +232,20 @@ export default function TeamPage({
 
   if (error || !teamInfo) {
     return (
-      <main className="min-h-screen bg-gray-100 py-12 relative">
+      <main className="relative py-6 md:py-8">
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">
+            <div className="text-loss text-6xl mb-4">⚠️</div>
+            <h1 className="display text-3xl font-bold uppercase tracking-[0.02em] text-ink mb-4">
               {error || 'inget lag hittat'}
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-dim mb-6">
               {error ||
                 `Inga kommande matcher hittades för lagkod: ${teamCode}`}
             </p>
             <Link
               href={leagueBasePath('chl', season)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
+              className="display inline-block rounded-lg bg-accent px-6 py-3 font-bold uppercase tracking-[0.04em] text-white transition-opacity hover:opacity-90"
             >
               Tillbaka till CHL
             </Link>
@@ -264,13 +256,13 @@ export default function TeamPage({
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 py-12 relative">
+    <main className="relative py-6 md:py-8">
       {/* Background Team Logo */}
       <div
         className="absolute inset-0 flex items-center justify-center z-0 px-8"
         aria-hidden="true"
       >
-        <div className="opacity-10 w-full h-full flex items-center justify-center">
+        <div className="opacity-[0.05] w-full h-full flex items-center justify-center">
           <Image
             src={teamInfo.logo || '/placeholder-team.png'}
             alt=""
@@ -285,7 +277,7 @@ export default function TeamPage({
       <div className="container mx-auto px-4 relative z-10">
         {/* Header Row */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6">
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full flex items-center justify-center">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-surface-3 rounded-full flex items-center justify-center">
             <Image
               src={teamInfo.logo || '/placeholder-team.png'}
               alt={`${teamInfo.full} logo`}
@@ -294,7 +286,7 @@ export default function TeamPage({
               className="w-16 h-16 object-contain"
             />
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-800 uppercase tracking-wider text-center md:text-left">
+          <h1 className="display text-3xl md:text-5xl font-bold text-ink uppercase tracking-[0.04em] text-center md:text-left">
             {teamInfo.full}
           </h1>
         </div>
@@ -371,64 +363,6 @@ export default function TeamPage({
           </div>
         </div>
 
-        {/* Teams Footer */}
-        {allTeams.length > 0 && (
-          <footer className="bg-gray-800 py-8 mt-12">
-            <div className="container mx-auto px-4">
-              <div className="flex flex-wrap justify-center gap-4 max-w-6xl mx-auto">
-                {[
-                  // CHL league logo as first item
-                  {
-                    key: 'league-chl',
-                    href: leagueBasePath('chl', season),
-                    logo: 'https://www.chl.hockey/static/img/logo.png',
-                    alt: 'CHL Logo',
-                    tooltip: 'CHL',
-                    isLeague: true,
-                  },
-                  // Team logos
-                  ...allTeams.map((team) => ({
-                    key: `team-${team.short}`,
-                    href: teamPath('chl', season, team.short.toUpperCase()),
-                    logo: team.logo || '/placeholder-team.png',
-                    alt: `${team.full} logo`,
-                    tooltip: team.full,
-                    isCurrentTeam:
-                      team.short.toUpperCase() === teamCode.toUpperCase(),
-                    isLeague: false,
-                  })),
-                ].map((item) => (
-                  <Link
-                    key={item.key}
-                    href={item.href}
-                    className={`group relative transition-all duration-200 ${
-                      'isCurrentTeam' in item && item.isCurrentTeam
-                        ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800'
-                        : 'hover:scale-110'
-                    }`}
-                  >
-                    <div
-                      className={`w-12 h-12 ${item.isLeague ? 'bg-gray-800' : 'bg-gray-100'} rounded-full flex items-center justify-center overflow-hidden`}
-                    >
-                      <Image
-                        src={item.logo}
-                        alt={item.alt}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 object-contain"
-                      />
-                    </div>
-
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                      {item.tooltip}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </footer>
-        )}
       </div>
     </main>
   );
