@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/*
+ * Broadcast-style football theme, shared with the Gameday design language.
+ * Near-black surfaces, electric accent (per-league, set via --accent on a
+ * wrapper), heavy condensed display type for headings/numbers.
+ */
+:root {
+  /* surfaces */
+  --bg: #0b0e13; /* page / app surface */
+  --surface: #12161c; /* elevated cards, rails */
+  --surface-2: #0e1218; /* secondary rail */
+  --surface-3: #1a202a; /* chips, inactive pills */
+
+  /* borders */
+  --line: #20262f;
+  --line-strong: #232a34;
+  --line-soft: #1a2029;
+
+  /* accent — overridden per-league on the <LeagueShell> wrapper */
+  --accent: #2f7bf6;
+
+  /* text */
+  --text: #f4f6f9;
+  --text-soft: #cdd4de;
+  --text-dim: #8b95a4;
+  --text-mute: #5f6875;
+
+  /* result semantics (win / draw / loss) */
+  --win: #1f9d57;
+  --draw: #e0a313;
+  --loss: #d2433a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-line-soft: var(--line-soft);
+
+  --color-accent: var(--accent);
+
+  --color-ink: var(--text);
+  --color-soft: var(--text-soft);
+  --color-dim: var(--text-dim);
+  --color-mute: var(--text-mute);
+
+  --color-win: var(--win);
+  --color-draw: var(--draw);
+  --color-loss: var(--loss);
+
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-display: var(--font-saira), var(--font-archivo), system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+}
+
+/* Tabular numbers for scores, points, times. */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Condensed broadcast display type. */
+.display {
+  font-family: var(--font-saira), var(--font-archivo), system-ui, sans-serif;
+}
