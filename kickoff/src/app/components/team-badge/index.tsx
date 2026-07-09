@@ -3,15 +3,17 @@ import type { TeamInfo } from '@/app/types/domain/team';
 
 type Props = {
   team: TeamInfo;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
 };
+
+const SIZE_PX = { sm: 24, md: 32, lg: 72 } as const;
 
 /**
  * Team identity chip: the provider logo when one exists, otherwise an
- * initials fallback (fixture leagues have no logo URLs yet).
+ * initials fallback.
  */
 export function TeamBadge({ team, size = 'md' }: Props) {
-  const px = size === 'sm' ? 24 : 32;
+  const px = SIZE_PX[size];
 
   if (team.logo) {
     return (
@@ -27,7 +29,11 @@ export function TeamBadge({ team, size = 'md' }: Props) {
     );
   }
 
-  const box = size === 'sm' ? 'h-6 w-6 text-[9px]' : 'h-8 w-8 text-[10px]';
+  const box = {
+    sm: 'h-6 w-6 text-[9px]',
+    md: 'h-8 w-8 text-[10px]',
+    lg: 'h-18 w-18 text-lg',
+  }[size];
   return (
     <span
       aria-hidden="true"

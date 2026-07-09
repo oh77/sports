@@ -13,7 +13,6 @@ export default function LeagueFooter({ league }: Props) {
         <p className="display font-bold uppercase tracking-[0.1em]">
           {leagueMeta[league].name}
         </p>
-        <p>Fixturdata visas tills liga-API:er kopplas på.</p>
         <Link href="/" className="text-soft transition-colors hover:text-ink">
           Till startsidan
         </Link>

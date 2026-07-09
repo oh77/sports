@@ -7,6 +7,8 @@ export interface MatchTeamInfo {
   score: number;
   /** Penalty shoot-out goals; set only when the match went to penalties. */
   penaltyScore?: number;
+  /** Tie total for two-legged knockout games, when the provider supplies it. */
+  aggregateScore?: number;
 }
 
 export interface VenueInfo {
@@ -29,6 +31,8 @@ export interface MatchInfo {
   extraTime?: boolean;
   /** Knockout matches only: decided on penalties (see penaltyScore). */
   penalties?: boolean;
+  /** Cup competitions: the match belongs to a qualifying phase. */
+  qualifying?: boolean;
 }
 
 export interface MatchesData {

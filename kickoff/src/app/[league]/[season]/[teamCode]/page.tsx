@@ -4,12 +4,11 @@ import { MatchList } from '@/app/components/match-list';
 import { TeamBadge } from '@/app/components/team-badge';
 import { isLeague } from '@/app/config/leagues';
 import { getMatches, getTeams } from '@/app/services/leagueData';
-import type { MatchInfo } from '@/app/types/domain/match';
-import type { MatchOutcome } from '@/app/types/domain/standings';
 import {
   formatLongDateFromString,
   formatTimeFromString,
 } from '@/app/utils/dateUtils';
+import { outcomeFor } from '@/app/utils/form';
 
 export default async function TeamPage({
   params,
@@ -79,13 +78,4 @@ export default async function TeamPage({
       </div>
     </main>
   );
-}
-
-function outcomeFor(teamCode: string, match: MatchInfo): MatchOutcome {
-  const isHome = match.homeTeamInfo.teamInfo.code === teamCode;
-  const own = isHome ? match.homeTeamInfo.score : match.awayTeamInfo.score;
-  const other = isHome ? match.awayTeamInfo.score : match.homeTeamInfo.score;
-  if (own > other) return 'W';
-  if (own < other) return 'L';
-  return 'D';
 }

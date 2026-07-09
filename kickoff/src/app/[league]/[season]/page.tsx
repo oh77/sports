@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { MatchList } from '@/app/components/match-list';
+import { SeasonChampion } from '@/app/components/season-champion';
 import { StandingsTable } from '@/app/components/standings-table';
 import { StatsTable } from '@/app/components/stats-table';
 import { isLeague } from '@/app/config/leagues';
@@ -10,6 +11,7 @@ import {
   getStandings,
 } from '@/app/services/leagueData';
 import { leagueMeta } from '@/app/theme/pitch';
+import { seasonChampion } from '@/app/utils/champion';
 import { standingsPath, statsPath } from '@/app/utils/leaguePaths';
 
 export default async function LeagueOverviewPage({
@@ -36,6 +38,9 @@ export default async function LeagueOverviewPage({
     .sort((a, b) => b.startDateTime.localeCompare(a.startDateTime))
     .slice(0, 4);
 
+  // A fully played season has a champion; it replaces the upcoming section.
+  const champion = seasonChampion(league, matches, standings);
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
       <h1 className="sr-only">{leagueMeta[league].name} – Matcher</h1>
@@ -51,12 +56,19 @@ export default async function LeagueOverviewPage({
             </section>
           )}
 
-          <section>
-            <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">
-              Kommande matcher
-            </h2>
-            <MatchList matches={upcoming} />
-          </section>
+          {champion ? (
+            <section>
+              <h2 className="sr-only">Mästare</h2>
+              <SeasonChampion team={champion} league={league} season={season} />
+            </section>
+          ) : (
+            <section>
+              <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">
+                Kommande matcher
+              </h2>
+              <MatchList matches={upcoming} />
+            </section>
+          )}
 
           <section>
             <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">

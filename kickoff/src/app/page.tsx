@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import { MatchList } from '@/app/components/match-list';
@@ -6,6 +7,7 @@ import { getMatches } from '@/app/services/leagueData';
 import { leagueAccent, leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
 import type { MatchInfo } from '@/app/types/domain/match';
+import { dateKeyFromString } from '@/app/utils/dateUtils';
 import {
   leagueBasePath,
   standingsPath,
@@ -15,22 +17,56 @@ import {
 // Schedules are time-relative and fetched live; render per request.
 export const dynamic = 'force-dynamic';
 
-/** Next three upcoming matches; a failing provider hides its league here. */
-async function upcomingFor(league: League): Promise<MatchInfo[]> {
-  try {
-    const { matches } = await getMatches(league);
-    return matches
-      .filter((m) => m.state === 'not-started')
-      .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime))
-      .slice(0, 3);
-  } catch (error) {
-    console.error(`Failed to fetch upcoming matches for ${league}:`, error);
-    return [];
+/** At least this many upcoming matches on the landing page. */
+const MIN_UPCOMING = 10;
+
+/**
+ * Combined upcoming matches across all leagues, chronological. Whole days are
+ * included: once the minimum is reached, the current day is still completed,
+ * so the last day shown is never truncated.
+ */
+async function combinedUpcoming(): Promise<{
+  matches: MatchInfo[];
+  leagueByMatch: Map<MatchInfo, League>;
+}> {
+  const perLeague = await Promise.all(
+    ALL_LEAGUES.map(async (league) => {
+      try {
+        return { league, matches: (await getMatches(league)).matches };
+      } catch (error) {
+        console.error(`Failed to fetch matches for ${league}:`, error);
+        return { league, matches: [] };
+      }
+    }),
+  );
+
+  const leagueByMatch = new Map<MatchInfo, League>();
+  const upcoming = perLeague
+    .flatMap(({ league, matches }) =>
+      matches
+        .filter((m) => m.state === 'not-started')
+        .map((m) => {
+          leagueByMatch.set(m, league);
+          return m;
+        }),
+    )
+    .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime));
+
+  const selected: MatchInfo[] = [];
+  let currentDay = '';
+  for (const match of upcoming) {
+    const day = dateKeyFromString(match.startDateTime);
+    if (selected.length >= MIN_UPCOMING && day !== currentDay) break;
+    selected.push(match);
+    currentDay = day;
   }
+
+  return { matches: selected, leagueByMatch };
 }
 
 export default async function Home() {
-  const upcomingByLeague = await Promise.all(ALL_LEAGUES.map(upcomingFor));
+  const { matches, leagueByMatch } = await combinedUpcoming();
+
   return (
     <div className="min-h-screen bg-bg text-ink">
       <header className="border-b border-line-strong">
@@ -60,8 +96,26 @@ export default async function Home() {
               <h2 className="display text-lg font-bold uppercase tracking-[0.08em]">
                 <Link
                   href={leagueBasePath(league)}
-                  className="transition-colors hover:text-accent"
+                  className="flex items-center gap-2.5 transition-colors hover:text-accent"
                 >
+                  {leagueMeta[league].logo && (
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md p-1 ${
+                        leagueMeta[league].logoOnDark
+                          ? 'bg-surface-3'
+                          : 'bg-white/90'
+                      }`}
+                    >
+                      <Image
+                        src={leagueMeta[league].logo}
+                        alt=""
+                        aria-hidden="true"
+                        width={28}
+                        height={28}
+                        className="h-full w-full object-contain"
+                      />
+                    </span>
+                  )}
                   {leagueMeta[league].name}
                 </Link>
               </h2>
@@ -96,33 +150,18 @@ export default async function Home() {
           <h2 className="display mb-4 text-xl font-bold uppercase tracking-[0.08em]">
             Kommande matcher
           </h2>
-          <div className="grid gap-8 lg:grid-cols-3">
-            {ALL_LEAGUES.map((league, i) => {
-              const upcoming = upcomingByLeague[i];
-              return (
-                <section
-                  key={league}
-                  style={{ '--accent': leagueAccent[league] } as CSSProperties}
-                >
-                  <h3 className="display mb-2 text-sm font-bold uppercase tracking-[0.1em] text-accent">
-                    <Link
-                      href={leagueBasePath(league)}
-                      className="transition-colors hover:text-ink"
-                    >
-                      {leagueMeta[league].name}
-                    </Link>
-                  </h3>
-                  <MatchList matches={upcoming} showDateHeadings={false} />
-                </section>
-              );
-            })}
+          <div className="mx-auto max-w-3xl">
+            <MatchList
+              matches={matches}
+              leagueOf={(match) => leagueByMatch.get(match)}
+            />
           </div>
         </section>
       </main>
 
       <footer className="mt-12 border-t border-line py-8">
-        <p className="text-center text-sm text-mute">
-          Fixturdata visas tills liga-API:er kopplas på.
+        <p className="display text-center text-sm font-bold uppercase tracking-[0.1em] text-mute">
+          Matchday
         </p>
       </footer>
     </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -42,7 +43,7 @@ export function TopNav({ league, season }: TopNavProps) {
     { id: 'statistik', label: 'Statistik', href: statsPath(league, season) },
   ];
 
-  const { name, short } = leagueMeta[league];
+  const { name, short, logo, logoOnDark } = leagueMeta[league];
 
   return (
     <header className="sticky top-0 z-30 border-b border-line-strong bg-bg/95 backdrop-blur">
@@ -57,12 +58,29 @@ export function TopNav({ league, season }: TopNavProps) {
             aria-expanded={menuOpen}
             aria-label="Byt liga"
           >
-            <span
-              aria-hidden="true"
-              className="display flex h-8 w-8 items-center justify-center rounded-md bg-surface text-[11px] font-bold uppercase tracking-wide text-accent"
-            >
-              {short}
-            </span>
+            {logo ? (
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-md p-1 ${
+                  logoOnDark ? 'bg-surface' : 'bg-white/90'
+                }`}
+              >
+                <Image
+                  src={logo}
+                  alt=""
+                  aria-hidden="true"
+                  width={28}
+                  height={28}
+                  className="h-full w-full object-contain"
+                />
+              </span>
+            ) : (
+              <span
+                aria-hidden="true"
+                className="display flex h-8 w-8 items-center justify-center rounded-md bg-surface text-[11px] font-bold uppercase tracking-wide text-accent"
+              >
+                {short}
+              </span>
+            )}
             <span className="display text-[17px] font-bold uppercase tracking-[0.1em] text-ink">
               {name}
             </span>

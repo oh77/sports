@@ -32,6 +32,11 @@ https://sdp-prem-prod.premier-league-prod.pulselive.com/api/v1/competitions/8/se
 {"pagination":{"_limit":20,"_prev":null,"_next":null},"data":[{"name":"Arsenal","stadium":{},"id":"3","shortName":"Arsenal","abbr":"ARS"},{"name":"Aston Villa","stadium":{},"id":"7","shortName":"Villa","abbr":"AVL"},{"name":"Bournemouth","stadium":{},"id":"91","shortName":"Bournemouth","abbr":"BOU"},{"name":"Brentford","stadium":{},"id":"94","shortName":"Brentford","abbr":"BRE"},{"name":"Brighton and Hove Albion","stadium":{},"id":"36","shortName":"Brighton","abbr":"BHA"},{"name":"Chelsea","stadium":{},"id":"8","shortName":"Chelsea","abbr":"CHE"},{"name":"Coventry City","stadium":{},"id":"9","shortName":"Coventry","abbr":"COV"},{"name":"Crystal Palace","stadium":{},"id":"31","shortName":"Palace","abbr":"CRY"},{"name":"Everton","stadium":{},"id":"11","shortName":"Everton","abbr":"EVE"},{"name":"Fulham","stadium":{},"id":"54","shortName":"Fulham","abbr":"FUL"},{"name":"Hull City","stadium":{},"id":"88","shortName":"Hull","abbr":"HUL"},{"name":"Ipswich Town","stadium":{},"id":"40","shortName":"Ipswich","abbr":"IPS"},{"name":"Leeds United","stadium":{},"id":"2","shortName":"Leeds","abbr":"LEE"},{"name":"Liverpool","stadium":{},"id":"14","shortName":"Liverpool","abbr":"LIV"},{"name":"Manchester City","stadium":{},"id":"43","shortName":"Man City","abbr":"MCI"},{"name":"Manchester United","stadium":{},"id":"1","shortName":"Man Utd","abbr":"MUN"},{"name":"Newcastle United","stadium":{},"id":"4","shortName":"Newcastle","abbr":"NEW"},{"name":"Nottingham Forest","stadium":{},"id":"17","shortName":"Forest","abbr":"NFO"},{"name":"Sunderland","stadium":{},"id":"56","shortName":"Sunderland","abbr":"SUN"},{"name":"Tottenham Hotspur","stadium":{},"id":"6","shortName":"Spurs","abbr":"TOT"}]}
 ```
 
+## League logo
+
+Dark-background variant (white artwork), used by the app:
+https://www.premierleague.com/resources/v1.48.1-21/i/svg-files/elements/pl-logo-dark.svg
+
 ## Team logos
 
 ### Links

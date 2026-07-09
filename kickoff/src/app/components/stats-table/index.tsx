@@ -42,6 +42,14 @@ export function StatsTable<T extends StatRow>({
 }: Props<T>) {
   const rows = limit ? stats.slice(0, limit) : stats;
 
+  if (rows.length === 0) {
+    return (
+      <p className="py-6 text-center text-sm text-mute">
+        Statistiken är inte tillgänglig ännu.
+      </p>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-sm">

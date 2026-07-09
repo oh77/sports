@@ -40,7 +40,8 @@ src/app/
 
 Config-driven, in `src/app/config/`:
 - Per-league constants that don't change across seasons (provider, external competition ids)
-- `SeasonConfig[]` with a URL-facing `key`, per-league external season ids, exactly one `current: true`
+- `SeasonConfig[]` with a URL-facing `key` and per-league external season ids
+- **The default season is computed, not flagged**: `currentSeason()` picks the season in progress today, else the next upcoming, else the most recently ended (key implies the span: calendar year for `2026`, July–June for `25-26`). Add upcoming seasons to `LEAGUE_SEASONS` as soon as the provider has data for them.
 - `resolveSeason(key?)` falls back to the current season for missing/unknown keys
 - **Season key formats differ per league:** Allsvenskan is calendar-year (`2026`), PL/CL are cross-year (`25-26`)
 
@@ -89,11 +90,11 @@ Full build plan: `football-gameday-prompt.md`
 4. ✅ UI shell with fixture data (`src/app/utils/fixtures.ts` drives all pages)
 5. League integrations — ask for APIs per checkpoint protocol
    - ✅ **Premier League** (pulselive; endpoints in `docs/endpoints/premierleague.md`): matches (v2, window of matchweeks around current from standings), standings, player stats leaderboard, teams + badge SVGs. **Gap:** no keeper-stats endpoint yet, so the Målvakter tab is hidden for PL.
-   - Allsvenskan — pending API
-   - Champions League — pending API
+   - ✅ **Allsvenskan** (sportomedia GraphQL at gql.sportomedia.se; endpoints in `docs/endpoints/allssvenskan.md`): full-season matches, standings (named stat cells gp/w/t/l/gf/ga/d/pts), all-player statistics (sorted client-side), teams + PNG logos. Form is computed from finished matches (`utils/form.ts`) since the provider's form field was null in samples. **Gap:** no keeper stats in the statistics query, so the Målvakter tab is hidden here too. Match payloads carry no logos — the facade joins them in from the teams query.
+   - ✅ **Champions League** (UEFA micro-services; endpoints in `docs/endpoints/uefa_champions_league_api.md`): full tournament schedule (paged from match.uefa.com), standings (league phase + any group/knockout mini-tables), player leaderboards from compstats.uefa.com — that host is **origin-locked**, so the service sends `Origin: https://www.uefa.com`. One metric per ranking request, so CL stat tabs show single-metric columns (cards merges yellow+red rankings). Teams derive from standings (comp.uefa.com is origin-locked), falling back to the schedule; form computed from the schedule. Standings/player-ranking 404 before the league-phase draw — mapped to empty data, and the tables render "inte tillgänglig ännu" messages. **Note:** the player-ranking response shape is typed defensively from a terse doc description — if it breaks, capture a browser sample.
 6. Landing page with combined upcoming matches (done for integrated leagues via `services/leagueData.ts`)
 7. Polish (cache debug pages, error/loading states, accessibility, metadata)
 
 ## Data access
 
-Pages/API routes call `src/app/services/leagueData.ts` (the per-league dispatch facade) — never a provider service directly. Leagues without an integration fall back to fixture data. PL provider chain: `services/pulseliveService.ts` → `utils/translators/pulseliveToDomain.ts`.
+Pages/API routes call `src/app/services/leagueData.ts` (the per-league dispatch facade) — never a provider service directly. Provider chains: PL `pulseliveService` → `pulseliveToDomain`; Allsvenskan `sportomediaService` → `sportomediaToDomain`; CL `uefaService` → `uefaToDomain`. All three leagues run on live data; `utils/fixtures.ts` is retained as a reference/offline dataset but is no longer wired in. Keeper stats: no provider exposes them yet, `getKeeperStats()` returns null everywhere.

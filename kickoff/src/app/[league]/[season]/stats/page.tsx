@@ -18,7 +18,7 @@ export default async function StatsPage({
     getPlayerStats(league, season, 'goals'),
     getPlayerStats(league, season, 'assists'),
     getPlayerStats(league, season, 'cards'),
-    getKeeperStats(league),
+    getKeeperStats(),
   ]);
 
   const tabs: Tab[] = [

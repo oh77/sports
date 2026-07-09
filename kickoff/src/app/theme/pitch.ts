@@ -31,11 +31,32 @@ export const leagueAccent: Record<League, string> = {
   cl: '#3b82f6', // Champions League blue
 };
 
-/** Display name + abbreviation for each league (top nav, footers, cards). */
-export const leagueMeta: Record<League, { name: string; short: string }> = {
-  allsvenskan: { name: 'Allsvenskan', short: 'ALL' },
-  pl: { name: 'Premier League', short: 'PL' },
-  cl: { name: 'Champions League', short: 'CL' },
+/**
+ * Display name, abbreviation and logo for each league (top nav, league chips,
+ * cards). `logo` URLs come from the endpoint docs. `logoOnDark` marks logos
+ * drawn for dark surfaces (rendered directly on the theme background);
+ * others get a light chip behind them.
+ */
+export const leagueMeta: Record<
+  League,
+  { name: string; short: string; logo?: string; logoOnDark?: boolean }
+> = {
+  allsvenskan: {
+    name: 'Allsvenskan',
+    short: 'ALL',
+    logo: 'https://allsvenskan.se/wp-content/themes/sef-leagues/images/allsvenskan/allsvenskan-logo.svg',
+  },
+  pl: {
+    name: 'Premier League',
+    short: 'PL',
+    logo: 'https://www.premierleague.com/resources/v1.48.1-21/i/svg-files/elements/pl-logo-dark.svg',
+    logoOnDark: true,
+  },
+  cl: {
+    name: 'Champions League',
+    short: 'CL',
+    logo: 'https://img.uefa.com/imgml/uefacom/elements/logos/competitions/color/full/1.svg',
+  },
 };
 
 export type ResultKind = 'win' | 'draw' | 'loss';

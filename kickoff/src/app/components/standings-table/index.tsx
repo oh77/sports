@@ -49,6 +49,14 @@ export function StandingsTable({
   caption,
   compact = false,
 }: Props) {
+  if (data.stats.length === 0) {
+    return (
+      <p className="py-6 text-center text-sm text-mute">
+        Tabellen är inte tillgänglig ännu.
+      </p>
+    );
+  }
+
   const groups = new Map<string | undefined, TeamStanding[]>();
   for (const row of data.stats) {
     const list = groups.get(row.group) ?? [];
