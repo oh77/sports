@@ -89,13 +89,18 @@ export async function fetchPlTeams(seasonId: string): Promise<PulseliveTeam[]> {
 export async function fetchPlPlayerLeaderboard(
   seasonId: string,
   sortKey: string,
+  limit = 20,
 ): Promise<PulselivePlayerEntry[]> {
   const sort = encodeURIComponent(`${sortKey}:desc`);
   const response = await getCachedData<PulselivePlayersResponse>(
-    generateCacheKey('pl-players', { season: seasonId, sort: sortKey }),
+    generateCacheKey('pl-players', {
+      season: seasonId,
+      sort: sortKey,
+      limit: String(limit),
+    }),
     () =>
       fetchJson(
-        `${PULSELIVE_API}/v3/competitions/${PL_COMPETITION_ID}/seasons/${seasonId}/players/stats/leaderboard?_sort=${sort}&country=&_limit=20`,
+        `${PULSELIVE_API}/v3/competitions/${PL_COMPETITION_ID}/seasons/${seasonId}/players/stats/leaderboard?_sort=${sort}&country=&_limit=${limit}`,
       ),
     TTL.stats,
   );

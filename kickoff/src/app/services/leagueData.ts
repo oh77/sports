@@ -4,7 +4,10 @@ import { UCL_PLAYER_STATS } from '@/app/config/uefa';
 import type { KeeperStatsData } from '@/app/types/domain/keeper-stats';
 import type { League } from '@/app/types/domain/league';
 import type { MatchesData } from '@/app/types/domain/match';
-import type { PlayerStatsData } from '@/app/types/domain/player-stats';
+import type {
+  PlayerStats,
+  PlayerStatsData,
+} from '@/app/types/domain/player-stats';
 import type { StandingsData } from '@/app/types/domain/standings';
 import type { TeamInfo } from '@/app/types/domain/team';
 import { playerColumns } from '@/app/utils/footballColumns';
@@ -129,11 +132,13 @@ export async function getPlayerStats(
   league: League,
   seasonKey: string | undefined,
   sort: PlayerStatsSort,
+  limit = 20,
 ): Promise<PlayerStatsData> {
   if (league === 'pl') {
     const entries = await fetchPlPlayerLeaderboard(
       plSeasonId(seasonKey),
       PL_PLAYER_SORT[sort],
+      limit,
     );
     return plPlayersToDomain(entries, HIGHLIGHT[sort]);
   }
@@ -147,14 +152,55 @@ export async function getPlayerStats(
   const year = clSeasonYear(seasonKey);
   if (sort === 'cards') {
     const [yellow, red] = await Promise.all([
-      fetchClPlayerRanking(year, UCL_PLAYER_STATS.yellowCards),
-      fetchClPlayerRanking(year, UCL_PLAYER_STATS.redCards),
+      fetchClPlayerRanking(year, UCL_PLAYER_STATS.yellowCards, limit),
+      fetchClPlayerRanking(year, UCL_PLAYER_STATS.redCards, limit),
     ]);
     return clCardsToPlayers(yellow, red, year);
   }
   const metric = sort === 'goals' ? 'G' : 'A';
-  const rows = await fetchClPlayerRanking(year, UCL_PLAYER_STATS[sort]);
+  const rows = await fetchClPlayerRanking(year, UCL_PLAYER_STATS[sort], limit);
   return clRankingToPlayers(rows, metric, year);
+}
+
+/**
+ * Deep enough leaderboard slice that every team is likely represented; the
+ * Allsvenskan provider always returns all players regardless.
+ */
+const TEAM_LEADERS_POOL = 100;
+
+export interface TeamLeaders {
+  topScorer?: PlayerStats;
+  topAssists?: PlayerStats;
+}
+
+/**
+ * Leading scorer and assist maker for specific teams, taken from the
+ * league-wide goals/assists leaderboards. PL/CL leaderboards are top-N
+ * slices, so a team with no player in the slice gets undefined leaders.
+ */
+export async function getTeamLeaders(
+  league: League,
+  seasonKey: string | undefined,
+  teams: TeamInfo[],
+): Promise<Map<string, TeamLeaders>> {
+  const [goals, assists] = await Promise.all([
+    getPlayerStats(league, seasonKey, 'goals', TEAM_LEADERS_POOL),
+    getPlayerStats(league, seasonKey, 'assists', TEAM_LEADERS_POOL),
+  ]);
+
+  const leaders = new Map<string, TeamLeaders>();
+  for (const team of teams) {
+    // Provider quirk: PL player rows carry no team abbreviation, so the
+    // player's team code differs from the team's — the external id agrees.
+    const belongsToTeam = (p: PlayerStats) =>
+      p.info.team.code === team.code ||
+      p.info.team.externalId === team.externalId;
+    leaders.set(team.code, {
+      topScorer: goals.stats.find((p) => belongsToTeam(p) && p.G > 0),
+      topAssists: assists.stats.find((p) => belongsToTeam(p) && p.A > 0),
+    });
+  }
+  return leaders;
 }
 
 // Takes no params: none of the providers exposes keeper stats yet, so the

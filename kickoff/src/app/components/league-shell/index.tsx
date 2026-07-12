@@ -23,7 +23,7 @@ export function LeagueShell({ league, season, children }: LeagueShellProps) {
     >
       <TopNav league={league} season={season} />
       {children}
-      <LeagueFooter league={league} />
+      <LeagueFooter league={league} season={season} />
     </div>
   );
 }

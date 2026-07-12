@@ -1,14 +1,17 @@
 import Image from 'next/image';
 import type { CSSProperties } from 'react';
+import { OUTCOME_LABEL, OUTCOME_TEXT } from '@/app/components/form-markers';
 import { TeamBadge } from '@/app/components/team-badge';
 import { leagueAccent, leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
 import type { MatchInfo } from '@/app/types/domain/match';
+import type { MatchOutcome } from '@/app/types/domain/standings';
 import {
   dateKeyFromString,
   formatLongDateFromString,
   formatTimeFromString,
 } from '@/app/utils/dateUtils';
+import { outcomeFor } from '@/app/utils/form';
 
 type Props = {
   matches: MatchInfo[];
@@ -20,6 +23,11 @@ type Props = {
    * as an accent-colored chip on each row.
    */
   leagueOf?: (match: MatchInfo) => League | undefined;
+  /**
+   * Team-page mode: the code of the page's team. Rows show only the opponent
+   * plus a Hemma/Borta chip, and skip the finished-status tag.
+   */
+  perspective?: string;
 };
 
 /**
@@ -32,6 +40,7 @@ export function MatchList({
   headingLevel: Heading = 'h3',
   showDateHeadings = true,
   leagueOf,
+  perspective,
 }: Props) {
   if (matches.length === 0) {
     return <p className="py-6 text-center text-sm text-mute">Inga matcher.</p>;
@@ -60,7 +69,11 @@ export function MatchList({
                 key={match.uuid}
                 className="border-b border-line-soft last:border-b-0"
               >
-                <MatchRow match={match} league={leagueOf?.(match)} />
+                <MatchRow
+                  match={match}
+                  league={leagueOf?.(match)}
+                  perspective={perspective}
+                />
               </li>
             ))}
           </ul>
@@ -70,8 +83,37 @@ export function MatchList({
   );
 }
 
-function MatchRow({ match, league }: { match: MatchInfo; league?: League }) {
+function MatchRow({
+  match,
+  league,
+  perspective,
+}: {
+  match: MatchInfo;
+  league?: League;
+  perspective?: string;
+}) {
   const { homeTeamInfo, awayTeamInfo, state } = match;
+
+  if (perspective) {
+    const isHome = homeTeamInfo.teamInfo.code === perspective;
+    const opponent = isHome ? awayTeamInfo.teamInfo : homeTeamInfo.teamInfo;
+    const outcome =
+      state === 'finished' ? outcomeFor(perspective, match) : undefined;
+    return (
+      <div className="px-3 py-3 sm:px-4">
+        <div className="flex items-center gap-2">
+          <SideChip home={isHome} />
+          <span className="flex flex-1 items-center gap-2 text-sm font-medium text-ink">
+            <TeamBadge team={opponent} size="sm" />
+            <span className="hidden sm:inline">{opponent.long}</span>
+            <span className="sm:hidden">{opponent.short}</span>
+          </span>
+          <MatchCenter match={match} showStatusTag={false} outcome={outcome} />
+        </div>
+        {state === 'live' && <LiveTag />}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -98,16 +140,33 @@ function MatchRow({ match, league }: { match: MatchInfo; league?: League }) {
         <span className="sm:hidden">{awayTeamInfo.teamInfo.short}</span>
       </span>
 
-      {state === 'live' && (
-        <span className="col-span-full flex items-center justify-center gap-1.5 pt-1 text-[11px] font-bold uppercase tracking-wide text-loss">
-          <span
-            aria-hidden="true"
-            className="h-1.5 w-1.5 animate-pulse rounded-full bg-loss"
-          />
-          Live
-        </span>
-      )}
+      {state === 'live' && <LiveTag />}
     </div>
+  );
+}
+
+function LiveTag() {
+  return (
+    <span className="col-span-full flex items-center justify-center gap-1.5 pt-1 text-[11px] font-bold uppercase tracking-wide text-loss">
+      <span
+        aria-hidden="true"
+        className="h-1.5 w-1.5 animate-pulse rounded-full bg-loss"
+      />
+      Live
+    </span>
+  );
+}
+
+/** Hemma/Borta marker for team-page rows. */
+function SideChip({ home }: { home: boolean }) {
+  return (
+    <span
+      title={home ? 'Hemmamatch' : 'Bortamatch'}
+      className="display flex h-6 w-6 shrink-0 items-center justify-center rounded bg-surface-3 text-[10px] font-bold uppercase tracking-wide text-soft"
+    >
+      <span aria-hidden="true">{home ? 'H' : 'B'}</span>
+      <span className="sr-only">{home ? 'Hemma' : 'Borta'}</span>
+    </span>
   );
 }
 
@@ -146,7 +205,16 @@ function LeagueChip({ league }: { league: League }) {
   );
 }
 
-function MatchCenter({ match }: { match: MatchInfo }) {
+function MatchCenter({
+  match,
+  showStatusTag = true,
+  outcome,
+}: {
+  match: MatchInfo;
+  showStatusTag?: boolean;
+  /** Colours the score as a win/draw/loss, from one team's perspective. */
+  outcome?: MatchOutcome;
+}) {
   const { homeTeamInfo, awayTeamInfo, state } = match;
 
   if (state === 'not-started') {
@@ -175,9 +243,21 @@ function MatchCenter({ match }: { match: MatchInfo }) {
 
   return (
     <span className="flex flex-col items-center">
-      <span className="num display px-2 text-lg font-bold text-ink">
+      <span
+        className={`num display px-2 text-lg font-bold ${
+          outcome ? OUTCOME_TEXT[outcome] : 'text-ink'
+        }`}
+      >
         {homeTeamInfo.score}–{awayTeamInfo.score}
+        {outcome && (
+          <span className="sr-only"> ({OUTCOME_LABEL[outcome]})</span>
+        )}
       </span>
+      {state === 'finished' && showStatusTag && (
+        <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-dim">
+          Slut
+        </span>
+      )}
       {hasAggregate && (
         <span
           className="num text-[11px] text-dim"

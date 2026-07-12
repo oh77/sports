@@ -17,6 +17,16 @@ export type StandingsZone =
   | 'knockout'
   | 'knockoutPlayoff';
 
+/** Aggregate record over one venue side's games only (home or away). */
+export interface SideRecord {
+  GP: number;
+  W: number;
+  D: number;
+  L: number;
+  GF: number;
+  GA: number;
+}
+
 export interface TeamStanding {
   Rank: number | null;
   GP: number;
@@ -32,6 +42,10 @@ export interface TeamStanding {
   group?: string;
   /** Last five results, most recent last. */
   form?: MatchOutcome[];
+  /** Record in home games only, when the source can provide or derive it. */
+  homeRecord?: SideRecord;
+  /** Record in away games only, when the source can provide or derive it. */
+  awayRecord?: SideRecord;
   info: TeamInfo;
 }
 

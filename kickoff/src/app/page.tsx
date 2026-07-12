@@ -7,7 +7,7 @@ import { getMatches } from '@/app/services/leagueData';
 import { leagueAccent, leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
 import type { MatchInfo } from '@/app/types/domain/match';
-import { dateKeyFromString } from '@/app/utils/dateUtils';
+import { dateKeyFromString, todayDateKey } from '@/app/utils/dateUtils';
 import {
   leagueBasePath,
   standingsPath,
@@ -21,11 +21,14 @@ export const dynamic = 'force-dynamic';
 const MIN_UPCOMING = 10;
 
 /**
- * Combined upcoming matches across all leagues, chronological. Whole days are
- * included: once the minimum is reached, the current day is still completed,
- * so the last day shown is never truncated.
+ * Combined matches across all leagues, chronological, starting from today.
+ * Today's matches stay on the list all day regardless of state (live and
+ * finished included), so the day's results remain visible until midnight.
+ * Whole days are included: once the minimum number of upcoming matches is
+ * reached, the current day is still completed, so the last day shown is
+ * never truncated.
  */
-async function combinedUpcoming(): Promise<{
+async function combinedMatches(): Promise<{
   matches: MatchInfo[];
   leagueByMatch: Map<MatchInfo, League>;
 }> {
@@ -40,11 +43,15 @@ async function combinedUpcoming(): Promise<{
     }),
   );
 
+  const today = todayDateKey();
   const leagueByMatch = new Map<MatchInfo, League>();
-  const upcoming = perLeague
+  const relevant = perLeague
     .flatMap(({ league, matches }) =>
       matches
-        .filter((m) => m.state === 'not-started')
+        .filter(
+          (m) =>
+            m.state === 'live' || dateKeyFromString(m.startDateTime) >= today,
+        )
         .map((m) => {
           leagueByMatch.set(m, league);
           return m;
@@ -53,11 +60,13 @@ async function combinedUpcoming(): Promise<{
     .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime));
 
   const selected: MatchInfo[] = [];
+  let upcomingCount = 0;
   let currentDay = '';
-  for (const match of upcoming) {
+  for (const match of relevant) {
     const day = dateKeyFromString(match.startDateTime);
-    if (selected.length >= MIN_UPCOMING && day !== currentDay) break;
+    if (upcomingCount >= MIN_UPCOMING && day !== currentDay) break;
     selected.push(match);
+    if (match.state === 'not-started') upcomingCount++;
     currentDay = day;
   }
 
@@ -65,7 +74,7 @@ async function combinedUpcoming(): Promise<{
 }
 
 export default async function Home() {
-  const { matches, leagueByMatch } = await combinedUpcoming();
+  const { matches, leagueByMatch } = await combinedMatches();
 
   return (
     <div className="min-h-screen bg-bg text-ink">
@@ -148,7 +157,7 @@ export default async function Home() {
 
         <section className="mt-12">
           <h2 className="display mb-4 text-xl font-bold uppercase tracking-[0.08em]">
-            Kommande matcher
+            Dagens och kommande matcher
           </h2>
           <div className="mx-auto max-w-3xl">
             <MatchList

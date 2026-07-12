@@ -70,12 +70,17 @@ export async function fetchClStandings(
 export async function fetchClPlayerRanking(
   seasonYear: string,
   stat: string,
+  limit = 20,
 ): Promise<UefaPlayerRankingRow[]> {
   return getCachedData(
-    generateCacheKey('cl-players', { season: seasonYear, stat }),
+    generateCacheKey('cl-players', {
+      season: seasonYear,
+      stat,
+      limit: String(limit),
+    }),
     () =>
       fetchJson<UefaPlayerRankingRow[]>(
-        `${UEFA_COMPSTATS_API}/player-ranking?competitionId=${UCL_COMPETITION_ID}&seasonYear=${seasonYear}&phase=TOURNAMENT&stats=${stat}&limit=20&offset=0&order=DESC&optionalFields=PLAYER,TEAM`,
+        `${UEFA_COMPSTATS_API}/player-ranking?competitionId=${UCL_COMPETITION_ID}&seasonYear=${seasonYear}&phase=TOURNAMENT&stats=${stat}&limit=${limit}&offset=0&order=DESC&optionalFields=PLAYER,TEAM`,
         {
           headers: { Origin: UEFA_ORIGIN, Referer: `${UEFA_ORIGIN}/` },
           // Not published before the season starts.

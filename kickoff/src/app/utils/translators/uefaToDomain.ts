@@ -20,7 +20,7 @@ import type { UefaMatch, UefaTeam } from '@/app/types/uefa/matches';
 import type { UefaPlayerRankingRow } from '@/app/types/uefa/players';
 import type { UefaStandingsGroup } from '@/app/types/uefa/standings';
 import { STANDINGS_COLUMNS } from '@/app/utils/footballColumns';
-import { lastFiveForm } from '@/app/utils/form';
+import { lastFiveForm, sideRecordFor } from '@/app/utils/form';
 
 export function clTeamToDomain(team: UefaTeam): TeamInfo {
   const short =
@@ -163,7 +163,11 @@ export function clStandingsToDomain(
           ? { group: group.group.translations?.name?.EN }
           : {}),
         ...(matchesData
-          ? { form: lastFiveForm(matchesData.matches, info.code) }
+          ? {
+              form: lastFiveForm(matchesData.matches, info.code),
+              homeRecord: sideRecordFor(matchesData.matches, info.code, 'home'),
+              awayRecord: sideRecordFor(matchesData.matches, info.code, 'away'),
+            }
           : {}),
         info,
       };

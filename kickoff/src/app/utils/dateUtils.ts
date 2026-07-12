@@ -46,6 +46,10 @@ export const formatShortDateFromString = (dateTimeStr: string) => {
   }
 };
 
+/** Today's date key (YYYY-MM-DD) in Swedish local time. */
+export const todayDateKey = () =>
+  new Date().toLocaleDateString('sv-SE', { timeZone: TIME_ZONE });
+
 /** Stable per-day grouping key (YYYY-MM-DD) in Swedish local time. */
 export const dateKeyFromString = (dateTimeStr: string) => {
   try {

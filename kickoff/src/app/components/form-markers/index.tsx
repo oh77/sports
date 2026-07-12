@@ -1,15 +1,21 @@
 import type { MatchOutcome } from '@/app/types/domain/standings';
 
-const OUTCOME_LABEL: Record<MatchOutcome, string> = {
+export const OUTCOME_LABEL: Record<MatchOutcome, string> = {
   W: 'Vinst',
   D: 'Oavgjort',
   L: 'Förlust',
 };
 
-const OUTCOME_STYLE: Record<MatchOutcome, string> = {
-  W: 'bg-win/20 text-win',
-  D: 'bg-draw/20 text-draw',
-  L: 'bg-loss/20 text-loss',
+export const OUTCOME_TEXT: Record<MatchOutcome, string> = {
+  W: 'text-win',
+  D: 'text-draw',
+  L: 'text-loss',
+};
+
+export const OUTCOME_STYLE: Record<MatchOutcome, string> = {
+  W: `bg-win/20 ${OUTCOME_TEXT.W}`,
+  D: `bg-draw/20 ${OUTCOME_TEXT.D}`,
+  L: `bg-loss/20 ${OUTCOME_TEXT.L}`,
 };
 
 type Props = {

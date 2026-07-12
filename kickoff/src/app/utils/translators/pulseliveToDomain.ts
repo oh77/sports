@@ -10,6 +10,7 @@ import type {
   PlayerStatsData,
 } from '@/app/types/domain/player-stats';
 import type {
+  SideRecord,
   StandingsData,
   StandingsZone,
   TeamStanding,
@@ -17,7 +18,10 @@ import type {
 import type { TeamInfo } from '@/app/types/domain/team';
 import type { PulseliveMatch } from '@/app/types/pulselive/matches';
 import type { PulselivePlayerEntry } from '@/app/types/pulselive/players';
-import type { PulseliveStandingsResponse } from '@/app/types/pulselive/standings';
+import type {
+  PulseliveStandingsResponse,
+  PulseliveStandingsSplit,
+} from '@/app/types/pulselive/standings';
 import type { PulseliveTeam } from '@/app/types/pulselive/teams';
 import { zonedTimeToIso } from '@/app/utils/dateUtils';
 import { playerColumns, STANDINGS_COLUMNS } from '@/app/utils/footballColumns';
@@ -93,6 +97,17 @@ function plZone(position: number, total: number): StandingsZone | undefined {
   return undefined;
 }
 
+function splitToSideRecord(split: PulseliveStandingsSplit): SideRecord {
+  return {
+    GP: split.played,
+    W: split.won,
+    D: split.drawn,
+    L: split.lost,
+    GF: split.goalsFor,
+    GA: split.goalsAgainst,
+  };
+}
+
 export function plStandingsToDomain(
   response: PulseliveStandingsResponse,
 ): StandingsData {
@@ -111,6 +126,8 @@ export function plStandingsToDomain(
         GD: overall.goalsFor - overall.goalsAgainst,
         Points: overall.points,
         zone: plZone(overall.position, entries.length),
+        homeRecord: splitToSideRecord(entry.home),
+        awayRecord: splitToSideRecord(entry.away),
         info: teamInfoFromRef(entry.team),
       };
     })

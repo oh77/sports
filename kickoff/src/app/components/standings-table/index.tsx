@@ -9,7 +9,7 @@ import type {
 } from '@/app/types/domain/standings';
 import { teamPath } from '@/app/utils/leaguePaths';
 
-const ZONE_LABEL: Record<StandingsZone, string> = {
+export const ZONE_LABEL: Record<StandingsZone, string> = {
   title: 'Titel',
   championsLeague: 'Champions League',
   europe: 'Europaspel',
@@ -19,7 +19,7 @@ const ZONE_LABEL: Record<StandingsZone, string> = {
   knockoutPlayoff: 'Slutspelskval',
 };
 
-const ZONE_COLOR: Record<StandingsZone, string> = {
+export const ZONE_COLOR: Record<StandingsZone, string> = {
   title: 'bg-accent',
   championsLeague: 'bg-[#3b82f6]',
   europe: 'bg-[#2dd4bf]',

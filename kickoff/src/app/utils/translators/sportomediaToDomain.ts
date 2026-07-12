@@ -18,7 +18,7 @@ import type { SportomediaPlayer } from '@/app/types/sportomedia/players';
 import type { SportomediaStanding } from '@/app/types/sportomedia/standings';
 import type { SportomediaTeam } from '@/app/types/sportomedia/teams';
 import { playerColumns, STANDINGS_COLUMNS } from '@/app/utils/footballColumns';
-import { lastFiveForm } from '@/app/utils/form';
+import { lastFiveForm, sideRecordFor } from '@/app/utils/form';
 
 export function allsvenskanTeamToDomain(team: SportomediaTeam): TeamInfo {
   return {
@@ -153,6 +153,8 @@ export function allsvenskanStandingsToDomain(
         Points: statNum(entry, 'pts'),
         zone: allsvenskanZone(entry.position, standings.length),
         form: lastFiveForm(matchesData.matches, info.code),
+        homeRecord: sideRecordFor(matchesData.matches, info.code, 'home'),
+        awayRecord: sideRecordFor(matchesData.matches, info.code, 'away'),
         info,
       };
     })
