@@ -49,8 +49,7 @@ export const leagueMeta: Record<
   pl: {
     name: 'Premier League',
     short: 'PL',
-    logo: 'https://www.premierleague.com/resources/v1.48.1-21/i/svg-files/elements/pl-logo-dark.svg',
-    logoOnDark: true,
+    logo: '/assets/PL_LOGO_COMPACT_DARK_RGB.png',
   },
   cl: {
     name: 'Champions League',
