@@ -27,6 +27,31 @@ export function teamPath(
   return `${leagueBasePath(league, season)}/${encodeURIComponent(teamCode)}`;
 }
 
+/**
+ * Canonicalize a team code for comparison. Route params carrying Nordic
+ * characters (e.g. `mjä`) can arrive percent-encoded and/or in a different
+ * Unicode normalization form than the API-derived code — `ä` may be a single
+ * codepoint (NFC) on one side and `a` + combining diaeresis (NFD) on the
+ * other, so a strict `===` misses. We decode, normalize to NFC, and lowercase.
+ *
+ * NFC preserves the diacritic (it does not fold `ä`→`a`), so distinct codes
+ * like `mjä` and `mja` stay distinct.
+ */
+export function canonicalTeamCode(raw: string): string {
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    // Already-decoded value containing a stray `%` — use it as-is.
+  }
+  return decoded.normalize('NFC').toLowerCase();
+}
+
+/** Whether a route param refers to the given team code (normalization-safe). */
+export function teamCodeMatches(code: string, param: string): boolean {
+  return canonicalTeamCode(code) === canonicalTeamCode(param);
+}
+
 /** Append `?season=`/`&season=` to an API URL when a season is set. */
 export function withSeason(url: string, season?: string | null): string {
   if (!season) return url;

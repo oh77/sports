@@ -1,4 +1,8 @@
-import { uclPlayerPhotoUrl } from '@/app/config/uefa';
+import {
+  uclPlayerPhotoUrl,
+  uefaCountryFlagUrl,
+  uefaCountryName,
+} from '@/app/config/uefa';
 import type { DataColumn } from '@/app/types/domain/data-table';
 import type {
   MatchesData,
@@ -32,6 +36,15 @@ export function clTeamToDomain(team: UefaTeam): TeamInfo {
     long: team.internationalName,
     full: team.translations?.displayOfficialName?.EN ?? team.internationalName,
     logo: team.logoUrl ?? team.mediumLogoUrl ?? '',
+    ...(team.countryCode
+      ? {
+          country: {
+            code: team.countryCode,
+            name: uefaCountryName(team.countryCode),
+            flag: uefaCountryFlagUrl(team.countryCode),
+          },
+        }
+      : {}),
   };
 }
 

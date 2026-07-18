@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import { OUTCOME_LABEL, OUTCOME_TEXT } from '@/app/components/form-markers';
 import { TeamBadge } from '@/app/components/team-badge';
@@ -12,6 +13,7 @@ import {
   formatTimeFromString,
 } from '@/app/utils/dateUtils';
 import { outcomeFor } from '@/app/utils/form';
+import { teamPath } from '@/app/utils/leaguePaths';
 
 type Props = {
   matches: MatchInfo[];
@@ -28,6 +30,12 @@ type Props = {
    * plus a Hemma/Borta chip, and skip the finished-status tag.
    */
   perspective?: string;
+  /**
+   * League + season for the current view. When set in perspective mode, the
+   * opponent links to its own team page.
+   */
+  league?: League;
+  season?: string;
 };
 
 /**
@@ -41,6 +49,8 @@ export function MatchList({
   showDateHeadings = true,
   leagueOf,
   perspective,
+  league,
+  season,
 }: Props) {
   if (matches.length === 0) {
     return <p className="py-6 text-center text-sm text-mute">Inga matcher.</p>;
@@ -71,8 +81,9 @@ export function MatchList({
               >
                 <MatchRow
                   match={match}
-                  league={leagueOf?.(match)}
+                  league={leagueOf?.(match) ?? league}
                   perspective={perspective}
+                  season={season}
                 />
               </li>
             ))}
@@ -87,10 +98,12 @@ function MatchRow({
   match,
   league,
   perspective,
+  season,
 }: {
   match: MatchInfo;
   league?: League;
   perspective?: string;
+  season?: string;
 }) {
   const { homeTeamInfo, awayTeamInfo, state } = match;
 
@@ -99,15 +112,29 @@ function MatchRow({
     const opponent = isHome ? awayTeamInfo.teamInfo : homeTeamInfo.teamInfo;
     const outcome =
       state === 'finished' ? outcomeFor(perspective, match) : undefined;
+    const opponentBody = (
+      <>
+        <TeamBadge team={opponent} size="sm" />
+        <span className="hidden sm:inline">{opponent.long}</span>
+        <span className="sm:hidden">{opponent.short}</span>
+      </>
+    );
     return (
       <div className="px-3 py-3 sm:px-4">
         <div className="flex items-center gap-2">
           <SideChip home={isHome} />
-          <span className="flex flex-1 items-center gap-2 text-sm font-medium text-ink">
-            <TeamBadge team={opponent} size="sm" />
-            <span className="hidden sm:inline">{opponent.long}</span>
-            <span className="sm:hidden">{opponent.short}</span>
-          </span>
+          {league ? (
+            <Link
+              href={teamPath(league, season, opponent.code)}
+              className="flex flex-1 items-center gap-2 text-sm font-medium text-ink transition-colors hover:text-accent"
+            >
+              {opponentBody}
+            </Link>
+          ) : (
+            <span className="flex flex-1 items-center gap-2 text-sm font-medium text-ink">
+              {opponentBody}
+            </span>
+          )}
           <MatchCenter match={match} showStatusTag={false} outcome={outcome} />
         </div>
         {state === 'live' && <LiveTag />}

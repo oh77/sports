@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { FormMarkers } from '@/app/components/form-markers';
 import { MatchList } from '@/app/components/match-list';
@@ -15,7 +16,7 @@ import type { League } from '@/app/types/domain/league';
 import type { MatchInfo } from '@/app/types/domain/match';
 import type { PlayerStats } from '@/app/types/domain/player-stats';
 import type { SideRecord, TeamStanding } from '@/app/types/domain/standings';
-import type { TeamInfo } from '@/app/types/domain/team';
+import type { TeamCountry, TeamInfo } from '@/app/types/domain/team';
 import {
   dateKeyFromString,
   formatLongDateFromString,
@@ -23,6 +24,7 @@ import {
   todayDateKey,
 } from '@/app/utils/dateUtils';
 import { outcomeFor } from '@/app/utils/form';
+import { teamCodeMatches } from '@/app/utils/leaguePaths';
 
 export default async function TeamPage({
   params,
@@ -37,7 +39,7 @@ export default async function TeamPage({
     getMatches(league, season),
   ]);
 
-  const team = teams.find((t) => t.code === teamCode);
+  const team = teams.find((t) => teamCodeMatches(t.code, teamCode));
   if (!team) notFound();
 
   const teamMatches = matches.filter(
@@ -81,12 +83,14 @@ export default async function TeamPage({
       </div>
 
       <div className="flex flex-col gap-8">
-        {featured && (
+        {featured ? (
           <MatchHero
             match={featured}
             isToday={!!todaysMatch}
             comparison={matchup?.comparison}
           />
+        ) : (
+          <TeamHero team={team} />
         )}
 
         {featured && matchup && matchup.tableRows.length > 0 && (
@@ -109,13 +113,23 @@ export default async function TeamPage({
             <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">
               Senaste matcherna
             </h2>
-            <MatchList matches={previous} perspective={team.code} />
+            <MatchList
+              matches={previous}
+              perspective={team.code}
+              league={league}
+              season={season}
+            />
           </section>
           <section>
             <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">
               Kommande matcher
             </h2>
-            <MatchList matches={upcoming} perspective={team.code} />
+            <MatchList
+              matches={upcoming}
+              perspective={team.code}
+              league={league}
+              season={season}
+            />
           </section>
         </div>
       </div>
@@ -327,6 +341,44 @@ function HeroTeam({ team }: { team: TeamInfo }) {
         <span className="hidden sm:inline">{team.long}</span>
         <span className="sm:hidden">{team.short}</span>
       </span>
+      {team.country && <CountryLabel country={team.country} />}
+    </span>
+  );
+}
+
+/**
+ * Hero fallback when the team has no upcoming or ongoing match to feature:
+ * logo, name and country centered in the same card.
+ */
+function TeamHero({ team }: { team: TeamInfo }) {
+  return (
+    <section
+      aria-label="Lag"
+      className="flex flex-col items-center gap-4 rounded-xl border border-line bg-surface px-4 py-16 text-center sm:px-6 sm:py-20"
+    >
+      <TeamBadge team={team} size="lg" />
+      <span className="display text-xl font-bold uppercase tracking-[0.08em] text-ink">
+        {team.full}
+      </span>
+      {team.country && <CountryLabel country={team.country} />}
+    </section>
+  );
+}
+
+/** Flag + country name. The name is the text alternative, so the flag is decorative. */
+function CountryLabel({ country }: { country: TeamCountry }) {
+  return (
+    <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-dim">
+      <Image
+        src={country.flag}
+        alt=""
+        aria-hidden="true"
+        width={16}
+        height={16}
+        className="shrink-0 object-contain"
+        style={{ width: 16, height: 'auto' }}
+      />
+      {country.name}
     </span>
   );
 }
