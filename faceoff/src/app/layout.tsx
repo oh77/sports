@@ -18,7 +18,7 @@ const sairaCondensed = Saira_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: 'Gameday',
+  title: 'Faceoff',
   description: 'CHL, SHL och SDHL matchinformation',
 };
 

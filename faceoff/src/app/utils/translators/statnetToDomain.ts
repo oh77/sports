@@ -21,6 +21,7 @@ import type {
   StatnetPlayerInfo,
   StatnetPlayerStats,
 } from '../../types/statnet/player-stats';
+import { chlCountryToAlpha2 } from '../chlCountryCode';
 
 export function translateStatnetGameTeamToDomain(
   statnetTeam: StatnetGameTeamInfo,
@@ -188,28 +189,6 @@ function getCHLStatValue(
     : prop.value;
 }
 
-// Map CHL nationality codes to domain format (for flag display)
-function mapCHLNationalityToDomain(chlCode: string): string {
-  const codeMap: Record<string, string> = {
-    usa: 'US',
-    swe: 'SE',
-    can: 'CA',
-    fin: 'FI',
-    cze: 'CZ',
-    svk: 'SK',
-    nor: 'NO',
-    den: 'DK',
-    ger: 'DE',
-    sui: 'CH',
-    aut: 'AT',
-    fra: 'FR',
-    ita: 'IT',
-    slo: 'SI',
-  };
-  const lowerCode = chlCode.toLowerCase();
-  return codeMap[lowerCode] || chlCode.toUpperCase();
-}
-
 export function translateCHLPlayerStatsToDomain(
   chlPlayer: CHLPlayerStats,
   rank: number | null,
@@ -242,7 +221,7 @@ export function translateCHLPlayerStatsToDomain(
       firstName: chlPlayer.firstName,
       lastName: chlPlayer.lastName,
       birthDate: '', // CHL doesn't provide birthDate
-      nationality: mapCHLNationalityToDomain(chlPlayer.nationality.code),
+      nationality: chlCountryToAlpha2(chlPlayer.nationality.code),
       number: chlPlayer.number,
       position: chlPlayer.position.shortName,
       shoots: null,
@@ -300,7 +279,7 @@ export function translateCHLGoalieStatsToDomain(
       firstName: chlGoalie.firstName,
       lastName: chlGoalie.lastName,
       birthDate: '', // CHL doesn't provide birthDate
-      nationality: mapCHLNationalityToDomain(chlGoalie.nationality.code),
+      nationality: chlCountryToAlpha2(chlGoalie.nationality.code),
       number: chlGoalie.number,
       position: chlGoalie.position.shortName,
       shoots: null,

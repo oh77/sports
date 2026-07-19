@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
+import { CountryFlag } from '../../../../../components/country-flag';
 import GameStatsContainer from '../../../../../components/gamestats-container';
 import NextGame from '../../../../../components/next-game';
 import PreviousGames from '../../../../../components/previous-games';
@@ -286,9 +287,17 @@ export default function TeamPage({
               className="w-16 h-16 object-contain"
             />
           </div>
-          <h1 className="display text-3xl md:text-5xl font-bold text-ink uppercase tracking-[0.04em] text-center md:text-left">
-            {teamInfo.full}
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="display text-3xl md:text-5xl font-bold text-ink uppercase tracking-[0.04em] text-center md:text-left">
+              {teamInfo.full}
+            </h1>
+            {teamInfo.country && (
+              <CountryFlag
+                country={teamInfo.country}
+                className="h-6 w-[34px] md:h-7 md:w-[40px]"
+              />
+            )}
+          </div>
         </div>
 
         <NextGame
@@ -362,7 +371,6 @@ export default function TeamPage({
             />
           </div>
         </div>
-
       </div>
     </main>
   );

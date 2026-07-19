@@ -152,14 +152,10 @@ export function CompactStandings({
   // Get total number of teams for colorization
   const totalTeams = standings.stats?.length || 0;
 
+  // No standings for the selected teams (e.g. early in a new season). Stay
+  // silent for the user — the section just collapses.
   if (!compactTeams.length) {
-    return (
-      <div className="rounded-lg border border-line bg-surface p-6">
-        <div className="text-center text-dim">
-          Ingen ligatabell tillgänglig för de valda lagen
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

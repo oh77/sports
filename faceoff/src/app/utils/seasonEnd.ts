@@ -94,6 +94,35 @@ export function getLastFinishedGame(games: GameInfo[]): GameInfo | null {
   return finished[0] ?? null;
 }
 
+/**
+ * All finished games in the final series, most recent first. The final is the
+ * matchup of the two teams that played the last finished game (champion +
+ * runner-up); their games form the series, whether that's a single game or a
+ * best-of-3/5/7. Since two teams only meet in one playoff series, filtering by
+ * the pair is enough to isolate the final.
+ */
+export function buildFinalSeries(
+  games: GameInfo[],
+  lastGame: GameInfo,
+): GameInfo[] {
+  const finalists = new Set([
+    lastGame.homeTeamInfo.teamInfo.code,
+    lastGame.awayTeamInfo.teamInfo.code,
+  ]);
+  return games
+    .filter((game) => game.state === 'finished')
+    .filter(
+      (game) =>
+        finalists.has(game.homeTeamInfo.teamInfo.code) &&
+        finalists.has(game.awayTeamInfo.teamInfo.code),
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.startDateTime).getTime() -
+        new Date(a.startDateTime).getTime(),
+    );
+}
+
 /** The winning team of a finished game, or null on a tie. */
 export function getGameWinner(game: GameInfo): TeamInfo | null {
   const { homeTeamInfo, awayTeamInfo } = game;

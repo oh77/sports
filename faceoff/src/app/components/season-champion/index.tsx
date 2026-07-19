@@ -1,56 +1,73 @@
+'use client';
+
 import Image from 'next/image';
-import type { GameInfo } from '@/app/types/domain/game';
 import type { TeamInfo } from '@/app/types/domain/team';
+import { seasonLabel } from '@/app/utils/seasonLabel';
+import {
+  lighten,
+  type RGB,
+  rgba,
+  useDominantColor,
+} from '@/app/utils/useDominantColor';
 
 interface SeasonChampionProps {
   team: TeamInfo;
-  game: GameInfo;
+  season?: string;
 }
+
+// Neutral slate used until the logo color resolves, or when it has none.
+const DEFAULT_ACCENT: RGB = { r: 82, g: 98, b: 128 };
 
 /**
  * Shown on a league landing page when the season has no upcoming games: the
- * winner of the last played game (most likely the champion), with the final
- * score of that game.
+ * winner of the last played game (most likely the champion), with an accent
+ * gradient pulled from the team's logo.
  */
-export function SeasonChampion({ team, game }: SeasonChampionProps) {
-  const { homeTeamInfo, awayTeamInfo } = game;
+export function SeasonChampion({ team, season }: SeasonChampionProps) {
+  const accent = useDominantColor(team.logo) ?? DEFAULT_ACCENT;
+
   return (
-    <div className="max-w-2xl mx-auto mb-8 rounded-lg border border-line bg-surface p-8 text-center">
-      <div className="display text-sm font-semibold uppercase tracking-[0.04em] text-dim mb-6">
-        Vinnare av säsongens sista match
+    <div
+      className="mx-auto mb-8 max-w-2xl overflow-hidden rounded-2xl border border-white/5 p-8 text-center"
+      style={{
+        background: [
+          `radial-gradient(90% 120% at 50% 0%, ${rgba(accent, 0.5)} 0%, ${rgba(accent, 0.12)} 38%, transparent 66%)`,
+          'linear-gradient(180deg, #0d1119, #090c12)',
+        ].join(', '),
+      }}
+    >
+      <div
+        className="display mb-6 text-sm font-semibold uppercase tracking-[0.18em]"
+        style={{ color: rgba(lighten(accent, 0.5), 0.95) }}
+      >
+        MÄSTARE{season ? ` ${seasonLabel(season)}` : ''}
       </div>
 
       <div className="flex flex-col items-center gap-4">
-        <div className="relative">
+        <div
+          className="relative flex h-28 w-28 items-center justify-center rounded-full md:h-36 md:w-36"
+          style={{
+            backgroundColor: rgba(accent, 0.14),
+            border: `1px solid ${rgba(accent, 0.3)}`,
+            boxShadow: `0 0 55px ${rgba(accent, 0.4)}`,
+          }}
+        >
           {team.logo ? (
             <Image
               src={team.logo}
               alt={team.short}
-              width={128}
-              height={128}
-              className="w-24 h-24 md:w-32 md:h-32 object-contain"
+              width={144}
+              height={144}
+              className="h-20 w-20 object-contain md:h-24 md:w-24"
             />
           ) : (
-            <div className="w-24 h-24 md:w-32 md:h-32 bg-surface-3 rounded-full flex items-center justify-center text-4xl">
-              🏒
-            </div>
+            <span className="text-4xl text-mute">🏒</span>
           )}
-          <span
-            className="absolute -top-3 -right-3 text-4xl"
-            aria-hidden="true"
-          >
-            🏆
-          </span>
         </div>
 
-        <h1 className="display text-3xl md:text-4xl font-bold text-ink uppercase tracking-[0.04em]">
+        <h1 className="display text-3xl font-bold uppercase tracking-[0.04em] text-ink md:text-4xl">
           {team.full}
         </h1>
-
-        <p className="num text-dim">
-          {homeTeamInfo.teamInfo.short} {homeTeamInfo.score}–
-          {awayTeamInfo.score} {awayTeamInfo.teamInfo.short}
-        </p>
       </div>
     </div>
   );

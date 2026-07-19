@@ -3,15 +3,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { FinalSeries } from '../../components/final-series';
 import { GameDayHeader } from '../../components/game-day-header';
 import { GameGroup } from '../../components/game-group';
-import { PreviousGameDays } from '../../components/previous-game-days';
 import { SeasonChampion } from '../../components/season-champion';
 import type { GameInfo, LeagueResponse } from '../../types/domain/game';
 import type { TeamInfo } from '../../types/domain/team';
 import { withSeason } from '../../utils/leaguePaths';
 import {
-  buildPreviousGameDays,
+  buildFinalSeries,
   buildUpcomingGameDays,
   type GameDayGroup,
   getGameWinner,
@@ -22,10 +22,9 @@ import { useSeason } from '../../utils/useSeason';
 export default function CHLPage() {
   const season = useSeason();
   const [gameDays, setGameDays] = useState<GameDayGroup[]>([]);
-  const [previousGameDays, setPreviousGameDays] = useState<GameDayGroup[]>([]);
   const [champion, setChampion] = useState<{
     team: TeamInfo;
-    game: GameInfo;
+    series: GameInfo[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,10 +48,6 @@ export default function CHLPage() {
 
         if (upcoming.length > 0) {
           setGameDays(upcoming);
-          const firstDate = new Date(upcoming[0].games[0].startDateTime);
-          setPreviousGameDays(
-            buildPreviousGameDays(allGames, { before: firstDate, limit: 2 }),
-          );
           return;
         }
 
@@ -62,8 +57,10 @@ export default function CHLPage() {
         const lastGame = getLastFinishedGame(allGames);
         const winner = lastGame ? getGameWinner(lastGame) : null;
         if (lastGame && winner) {
-          setChampion({ team: winner, game: lastGame });
-          setPreviousGameDays(buildPreviousGameDays(allGames, { limit: 2 }));
+          setChampion({
+            team: winner,
+            series: buildFinalSeries(allGames, lastGame),
+          });
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -188,14 +185,9 @@ export default function CHLPage() {
         {/* Season has no upcoming games: highlight the last game's winner */}
         {gameDays.length === 0 && champion && (
           <div className="max-w-4xl mx-auto">
-            <SeasonChampion team={champion.team} game={champion.game} />
+            <SeasonChampion team={champion.team} season={season} />
 
-            {previousGameDays.length > 0 && (
-              <PreviousGameDays
-                previousGameDays={previousGameDays}
-                league="chl"
-              />
-            )}
+            <FinalSeries games={champion.series} />
           </div>
         )}
 
@@ -207,7 +199,6 @@ export default function CHLPage() {
             </div>
           </div>
         )}
-
       </div>
     </main>
   );

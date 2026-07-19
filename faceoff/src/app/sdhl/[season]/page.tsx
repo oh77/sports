@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { FinalSeries } from '../../components/final-series';
 import { GameDayHeader } from '../../components/game-day-header';
 import { GameGroup } from '../../components/game-group';
 import { PreviousGameDays } from '../../components/previous-game-days';
@@ -11,6 +12,7 @@ import { StatnetService } from '../../services/statnetService';
 import type { GameInfo } from '../../types/domain/game';
 import type { TeamInfo } from '../../types/domain/team';
 import {
+  buildFinalSeries,
   buildPreviousGameDays,
   buildUpcomingGameDays,
   type GameDayGroup,
@@ -25,7 +27,7 @@ export default function SDHLPage() {
   const [previousGameDays, setPreviousGameDays] = useState<GameDayGroup[]>([]);
   const [champion, setChampion] = useState<{
     team: TeamInfo;
-    game: GameInfo;
+    series: GameInfo[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,8 +63,10 @@ export default function SDHLPage() {
         const lastGame = getLastFinishedGame(endGames);
         const winner = lastGame ? getGameWinner(lastGame) : null;
         if (lastGame && winner) {
-          setChampion({ team: winner, game: lastGame });
-          setPreviousGameDays(buildPreviousGameDays(endGames, { limit: 2 }));
+          setChampion({
+            team: winner,
+            series: buildFinalSeries(endGames, lastGame),
+          });
         } else {
           setError(
             games.length > 0
@@ -152,16 +156,10 @@ export default function SDHLPage() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <SeasonChampion team={champion.team} game={champion.game} />
+            <SeasonChampion team={champion.team} season={season} />
 
-            {previousGameDays.length > 0 && (
-              <PreviousGameDays
-                previousGameDays={previousGameDays}
-                league="sdhl"
-              />
-            )}
+            <FinalSeries games={champion.series} />
           </div>
-
         </div>
       </main>
     );
@@ -231,7 +229,6 @@ export default function SDHLPage() {
             </div>
           ))}
         </div>
-
       </div>
     </main>
   );

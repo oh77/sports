@@ -4,13 +4,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CHL_SEASONS } from '@/app/config/chl';
 import { STATNET_SEASONS } from '@/app/config/statnet';
+import { seasonLabel } from '@/app/utils/seasonLabel';
 import { useSeason } from '@/app/utils/useSeason';
-
-/** Human-friendly label for a season key, e.g. "25-26" -> "2025/26". */
-function seasonLabel(key: string): string {
-  const [start, end] = key.split('-');
-  return start && end ? `20${start}/${end}` : key;
-}
 
 /**
  * Dropdown for switching the active season. Keeps the current sub-path (e.g.

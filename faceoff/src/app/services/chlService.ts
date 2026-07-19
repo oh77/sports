@@ -53,13 +53,13 @@ function transformMatchToGame(
       name: match.teams.home?.name || 'n/a',
       shortName: match.teams.home?.shortName || 'n/a',
       externalId: match.teams.home?.externalId || 'n/a',
-      country: homeTeamInfo?.country?.name || 'n/a',
+      country: homeTeamInfo?.country?.code || 'n/a',
     },
     awayTeam: {
       name: match.teams.away?.name || 'n/a',
       shortName: match.teams.away?.shortName || 'n/a',
       externalId: match.teams.away?.externalId || 'n/a',
-      country: awayTeamInfo?.country?.name || 'n/a',
+      country: awayTeamInfo?.country?.code || 'n/a',
     },
     scores: match.results?.scores
       ? {

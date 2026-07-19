@@ -2,6 +2,12 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
+    // Team logos for SHL/SDHL/HA are SVGs; allow the optimizer to serve them so
+    // they load same-origin (needed for the next-game logo color extraction to
+    // read canvas pixels without CORS taint). The CSP neutralizes any scripts.
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'inline',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',

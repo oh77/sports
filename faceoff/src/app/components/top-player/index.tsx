@@ -19,7 +19,6 @@ export const TopPlayer: React.FC<TopPlayerProps> = ({ league, teamCode }) => {
   const season = useSeason();
   const [topPlayer, setTopPlayer] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTopPlayer = async () => {
@@ -37,17 +36,16 @@ export const TopPlayer: React.FC<TopPlayerProps> = ({ league, teamCode }) => {
 
         const data: PlayerStatsData = await response.json();
 
-        console.log('TopPlayer data:', data);
-        console.log('TopPlayer stats:', data.stats);
-
         // Get top player (already sorted by points, rank applies)
         const top = data.stats && data.stats.length > 0 ? data.stats[0] : null;
-
-        console.log('Top player:', top);
         setTopPlayer(top);
       } catch (err) {
-        console.error('Error fetching top player:', err);
-        setError('Failed to load player statistics');
+        // Player stats may be unavailable (e.g. early in a new season). Log for
+        // diagnostics but stay silent for the user — the section just collapses.
+        // Use console.warn (not error) so it doesn't trip the Next.js dev
+        // error overlay.
+        console.warn('Error fetching top player:', err);
+        setTopPlayer(null);
       } finally {
         setLoading(false);
       }
@@ -67,20 +65,8 @@ export const TopPlayer: React.FC<TopPlayerProps> = ({ league, teamCode }) => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-        <p className="text-red-600">{error}</p>
-      </div>
-    );
-  }
-
   if (!topPlayer) {
-    return (
-      <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-        <p className="text-gray-500">No player data available</p>
-      </div>
-    );
+    return null;
   }
 
   return (

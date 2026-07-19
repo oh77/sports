@@ -1,6 +1,7 @@
 import type { CHLGame, CHLTeamInfo } from '../../types/chl/game';
 import type { GameInfo, LeagueResponse } from '../../types/domain/game';
 import type { TeamInfo } from '../../types/domain/team';
+import { chlCountryToAlpha2 } from '../chlCountryCode';
 
 /**
  * Construct CHL team logo URL from externalId
@@ -20,12 +21,18 @@ export function translateCHLTeamToDomain(chlTeam: CHLTeamInfo): TeamInfo {
     long: chlTeam.name,
     full: chlTeam.name,
     logo: getCHLLogoUrl(chlTeam.externalId),
+    country: chlTeam.country?.code
+      ? chlCountryToAlpha2(chlTeam.country.code)
+      : undefined,
   };
 }
 
 export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
   // Map CHL status to domain GameState
   const state = chlGame.status === 'finished' ? 'finished' : 'not-started';
+
+  const toCountry = (code?: string): string | undefined =>
+    code && code !== 'n/a' ? chlCountryToAlpha2(code) : undefined;
 
   return {
     uuid: chlGame.id,
@@ -39,6 +46,7 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
         long: chlGame.homeTeam.name,
         full: chlGame.homeTeam.name,
         logo: getCHLLogoUrl(chlGame.homeTeam.externalId),
+        country: toCountry(chlGame.homeTeam.country),
       },
       score: chlGame.scores?.home || 0,
     },
@@ -50,6 +58,7 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
         long: chlGame.awayTeam.name,
         full: chlGame.awayTeam.name,
         logo: getCHLLogoUrl(chlGame.awayTeam.externalId),
+        country: toCountry(chlGame.awayTeam.country),
       },
       score: chlGame.scores?.away || 0,
     },
