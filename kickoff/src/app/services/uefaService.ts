@@ -1,5 +1,4 @@
 import {
-  UCL_COMPETITION_ID,
   UEFA_COMPSTATS_API,
   UEFA_MATCH_API,
   UEFA_ORIGIN,
@@ -25,18 +24,31 @@ async function fetchJson<T>(
 }
 
 const PAGE_SIZE = 40;
-/** Safety cap: 10 pages × 40 covers qualifying + a full UCL tournament. */
-const MAX_PAGES = 10;
+/**
+ * Runaway backstop only — the paging loop already stops when a short page
+ * comes back. It must clear the *largest* UEFA field: the Conference League
+ * runs ~450–500 matches a season (its qualifying alone spans the preliminary
+ * round through the play-offs), well past a Champions League season. 30 × 40 =
+ * 1200 leaves generous headroom; smaller competitions break out early.
+ */
+const MAX_PAGES = 30;
 
-/** All matches for a season (qualifying + tournament), paged until exhausted. */
-export async function fetchClMatches(seasonYear: string): Promise<UefaMatch[]> {
+/**
+ * All matches for a season (qualifying + tournament), paged until exhausted.
+ * `competitionId` selects the UEFA competition (1 = Champions League,
+ * 2019 = Conference League).
+ */
+export async function fetchClMatches(
+  competitionId: string,
+  seasonYear: string,
+): Promise<UefaMatch[]> {
   return getCachedData(
-    generateCacheKey('cl-matches', { season: seasonYear }),
+    generateCacheKey('uefa-matches', { comp: competitionId, season: seasonYear }),
     async () => {
       const all: UefaMatch[] = [];
       for (let page = 0; page < MAX_PAGES; page++) {
         const batch = await fetchJson<UefaMatch[]>(
-          `${UEFA_MATCH_API}/matches?competitionId=${UCL_COMPETITION_ID}&seasonYear=${seasonYear}&phase=ALL&limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}&order=ASC`,
+          `${UEFA_MATCH_API}/matches?competitionId=${competitionId}&seasonYear=${seasonYear}&phase=ALL&limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}&order=ASC`,
         );
         all.push(...batch);
         if (batch.length < PAGE_SIZE) break;
@@ -48,13 +60,17 @@ export async function fetchClMatches(seasonYear: string): Promise<UefaMatch[]> {
 }
 
 export async function fetchClStandings(
+  competitionId: string,
   seasonYear: string,
 ): Promise<UefaStandingsGroup[]> {
   return getCachedData(
-    generateCacheKey('cl-standings', { season: seasonYear }),
+    generateCacheKey('uefa-standings', {
+      comp: competitionId,
+      season: seasonYear,
+    }),
     () =>
       fetchJson<UefaStandingsGroup[]>(
-        `${UEFA_STANDINGS_API}/standings?competitionId=${UCL_COMPETITION_ID}&seasonYear=${seasonYear}&phase=TOURNAMENT`,
+        `${UEFA_STANDINGS_API}/standings?competitionId=${competitionId}&seasonYear=${seasonYear}&phase=TOURNAMENT`,
         // Before the league-phase draw the standings resource doesn't exist
         // yet (404) — treat that as "no table published".
         { notFound: [] },
@@ -68,19 +84,21 @@ export async function fetchClStandings(
  * compstats host only answers requests with a uefa.com Origin header.
  */
 export async function fetchClPlayerRanking(
+  competitionId: string,
   seasonYear: string,
   stat: string,
   limit = 20,
 ): Promise<UefaPlayerRankingRow[]> {
   return getCachedData(
-    generateCacheKey('cl-players', {
+    generateCacheKey('uefa-players', {
+      comp: competitionId,
       season: seasonYear,
       stat,
       limit: String(limit),
     }),
     () =>
       fetchJson<UefaPlayerRankingRow[]>(
-        `${UEFA_COMPSTATS_API}/player-ranking?competitionId=${UCL_COMPETITION_ID}&seasonYear=${seasonYear}&phase=TOURNAMENT&stats=${stat}&limit=${limit}&offset=0&order=DESC&optionalFields=PLAYER,TEAM`,
+        `${UEFA_COMPSTATS_API}/player-ranking?competitionId=${competitionId}&seasonYear=${seasonYear}&phase=TOURNAMENT&stats=${stat}&limit=${limit}&offset=0&order=DESC&optionalFields=PLAYER,TEAM`,
         {
           headers: { Origin: UEFA_ORIGIN, Referer: `${UEFA_ORIGIN}/` },
           // Not published before the season starts.

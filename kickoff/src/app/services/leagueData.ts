@@ -1,6 +1,10 @@
 import { resolveSeason } from '@/app/config/leagues';
 import { PL_PLAYER_SORT } from '@/app/config/pulselive';
-import { UCL_PLAYER_STATS } from '@/app/config/uefa';
+import {
+  UCL_COMPETITION_ID,
+  UCL_PLAYER_STATS,
+  UECL_COMPETITION_ID,
+} from '@/app/config/uefa';
 import type { KeeperStatsData } from '@/app/types/domain/keeper-stats';
 import type { League } from '@/app/types/domain/league';
 import type { MatchesData } from '@/app/types/domain/match';
@@ -75,9 +79,14 @@ function allsvenskanSeasonYear(seasonKey?: string | null): number {
 }
 
 /** UEFA's seasonYear is the season's end year ("25-26" -> "2026"). */
-function clSeasonYear(seasonKey?: string | null): string {
-  const season = resolveSeason('cl', seasonKey);
+function uefaSeasonYear(league: League, seasonKey?: string | null): string {
+  const season = resolveSeason(league, seasonKey);
   return season.externalId ?? season.key;
+}
+
+/** UEFA competition id for a UEFA league (Champions vs Conference League). */
+function uefaCompetitionId(league: League): string {
+  return league === 'col' ? UECL_COMPETITION_ID : UCL_COMPETITION_ID;
 }
 
 export async function getMatches(
@@ -95,7 +104,12 @@ export async function getMatches(
     ]);
     return allsvenskanMatchesToDomain(matches, teams);
   }
-  return clMatchesToDomain(await fetchClMatches(clSeasonYear(seasonKey)));
+  return clMatchesToDomain(
+    await fetchClMatches(
+      uefaCompetitionId(league),
+      uefaSeasonYear(league, seasonKey),
+    ),
+  );
 }
 
 export async function getStandings(
@@ -119,10 +133,11 @@ export async function getStandings(
       allsvenskanMatchesToDomain(matches, teams),
     );
   }
-  const year = clSeasonYear(seasonKey);
+  const competitionId = uefaCompetitionId(league);
+  const year = uefaSeasonYear(league, seasonKey);
   const [groups, matches] = await Promise.all([
-    fetchClStandings(year),
-    fetchClMatches(year),
+    fetchClStandings(competitionId, year),
+    fetchClMatches(competitionId, year),
   ]);
   // UEFA supplies no form; derive it from the schedule.
   return clStandingsToDomain(groups, clMatchesToDomain(matches));
@@ -148,18 +163,34 @@ export async function getPlayerStats(
     );
     return sortPlayerStats(allsvenskanPlayersToDomain(players), sort);
   }
-  // CL: the ranking endpoint serves one metric per request.
-  const year = clSeasonYear(seasonKey);
+  // CL/Conference League: the ranking endpoint serves one metric per request.
+  const competitionId = uefaCompetitionId(league);
+  const year = uefaSeasonYear(league, seasonKey);
   if (sort === 'cards') {
     const [yellow, red] = await Promise.all([
-      fetchClPlayerRanking(year, UCL_PLAYER_STATS.yellowCards, limit),
-      fetchClPlayerRanking(year, UCL_PLAYER_STATS.redCards, limit),
+      fetchClPlayerRanking(
+        competitionId,
+        year,
+        UCL_PLAYER_STATS.yellowCards,
+        limit,
+      ),
+      fetchClPlayerRanking(
+        competitionId,
+        year,
+        UCL_PLAYER_STATS.redCards,
+        limit,
+      ),
     ]);
-    return clCardsToPlayers(yellow, red, year);
+    return clCardsToPlayers(yellow, red, competitionId, year);
   }
   const metric = sort === 'goals' ? 'G' : 'A';
-  const rows = await fetchClPlayerRanking(year, UCL_PLAYER_STATS[sort], limit);
-  return clRankingToPlayers(rows, metric, year);
+  const rows = await fetchClPlayerRanking(
+    competitionId,
+    year,
+    UCL_PLAYER_STATS[sort],
+    limit,
+  );
+  return clRankingToPlayers(rows, metric, competitionId, year);
 }
 
 /**
@@ -221,17 +252,20 @@ export async function getTeams(
     const teams = await fetchAllsvenskanTeams(allsvenskanSeasonYear(seasonKey));
     return teams.map(allsvenskanTeamToDomain);
   }
-  // CL: the teams host is origin-locked, so derive teams from the standings
-  // (falling back to the schedule before standings exist).
-  const year = clSeasonYear(seasonKey);
-  const groups = await fetchClStandings(year);
+  // CL/Conference League: the teams host is origin-locked, so derive teams
+  // from the standings (falling back to the schedule before standings exist).
+  const competitionId = uefaCompetitionId(league);
+  const year = uefaSeasonYear(league, seasonKey);
+  const groups = await fetchClStandings(competitionId, year);
   const fromStandings = groups.flatMap((g) =>
     g.items.map((item) => clTeamToDomain(item.team)),
   );
   if (fromStandings.length > 0) return fromStandings;
 
   const byCode = new Map<string, TeamInfo>();
-  for (const match of clMatchesToDomain(await fetchClMatches(year)).matches) {
+  for (const match of clMatchesToDomain(
+    await fetchClMatches(competitionId, year),
+  ).matches) {
     const home = match.homeTeamInfo.teamInfo;
     const away = match.awayTeamInfo.teamInfo;
     byCode.set(home.code, home);

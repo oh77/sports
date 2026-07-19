@@ -33,6 +33,8 @@ export interface MatchInfo {
   penalties?: boolean;
   /** Cup competitions: the match belongs to a qualifying phase. */
   qualifying?: boolean;
+  /** Cup competitions: the match is the final (decides the champion). */
+  isFinal?: boolean;
 }
 
 export interface MatchesData {

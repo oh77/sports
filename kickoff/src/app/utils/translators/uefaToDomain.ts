@@ -1,7 +1,7 @@
 import {
-  uclPlayerPhotoUrl,
   uefaCountryFlagUrl,
   uefaCountryName,
+  uefaPlayerPhotoUrl,
 } from '@/app/config/uefa';
 import type { DataColumn } from '@/app/types/domain/data-table';
 import type {
@@ -48,10 +48,22 @@ export function clTeamToDomain(team: UefaTeam): TeamInfo {
   };
 }
 
-function statusToState(status: string): MatchState {
+function statusToState(m: UefaMatch): MatchState {
+  const status = m.status?.toUpperCase() ?? '';
   if (status === 'UPCOMING') return 'not-started';
   if (status === 'FINISHED') return 'finished';
-  return 'live';
+  // In-progress matches are LIVE (with half-time/second-half variants).
+  if (status === 'LIVE' || status.startsWith('LIVE')) return 'live';
+  // ABANDONED: a void/awarded qualifying tie (e.g. a walkover that was never
+  // actually played) that still carries an awarded score. It is a decided, not
+  // a live, result — group it with played matches.
+  if (status === 'ABANDONED') return 'finished';
+  // Any other unrecognised status: decide from the data rather than defaulting
+  // to "live", which would strand a played game in the live section
+  // indefinitely — a match with a result has been played.
+  const played =
+    m.score?.total !== undefined || m.score?.regular !== undefined;
+  return played ? 'finished' : 'not-started';
 }
 
 /** "MD17" → 17. */
@@ -101,11 +113,14 @@ export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
       const qualifying =
         m.competitionPhase === 'QUALIFYING' ||
         m.matchday?.phase === 'QUALIFYING';
+      // `round.mode` is the machine-readable round identifier; the display
+      // name is localizable, so the mode is what we key the final off.
+      const isFinal = m.round?.mode === 'FINAL';
 
       return {
         uuid: m.id,
         startDateTime: m.kickOffTime?.dateTime as string,
-        state: statusToState(m.status),
+        state: statusToState(m),
         homeTeamInfo: {
           teamInfo: clTeamToDomain(home),
           score: score?.home ?? 0,
@@ -124,6 +139,7 @@ export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
         ...(extraTime ? { extraTime } : {}),
         ...(penalties ? { penalties } : {}),
         ...(qualifying ? { qualifying } : {}),
+        ...(isFinal ? { isFinal } : {}),
       };
     });
 
@@ -192,6 +208,7 @@ export function clStandingsToDomain(
 
 function clPlayerInfo(
   row: UefaPlayerRankingRow,
+  competitionId: string,
   seasonYear: string,
 ): PlayerInfo {
   const p = row.player ?? {};
@@ -206,7 +223,8 @@ function clPlayerInfo(
     nationality: p.countryCode,
     position: p.fieldPosition,
     photo:
-      p.imageUrl ?? (p.id ? uclPlayerPhotoUrl(p.id, seasonYear) : undefined),
+      p.imageUrl ??
+      (p.id ? uefaPlayerPhotoUrl(competitionId, p.id, seasonYear) : undefined),
     team: {
       externalId: team?.id ?? '',
       name: team?.internationalName ?? '',
@@ -227,6 +245,7 @@ function singleStatColumn(name: string): DataColumn[] {
 export function clRankingToPlayers(
   rows: UefaPlayerRankingRow[],
   metric: 'G' | 'A',
+  competitionId: string,
   seasonYear: string,
 ): PlayerStatsData {
   const stats: PlayerStats[] = rows
@@ -239,7 +258,7 @@ export function clRankingToPlayers(
       TP: row.value ?? 0,
       YC: 0,
       RC: 0,
-      info: clPlayerInfo(row, seasonYear),
+      info: clPlayerInfo(row, competitionId, seasonYear),
     }));
 
   return {
@@ -253,6 +272,7 @@ export function clRankingToPlayers(
 export function clCardsToPlayers(
   yellowRows: UefaPlayerRankingRow[],
   redRows: UefaPlayerRankingRow[],
+  competitionId: string,
   seasonYear: string,
 ): PlayerStatsData {
   const redByPlayer = new Map(
@@ -271,7 +291,7 @@ export function clCardsToPlayers(
       TP: 0,
       YC: row.value ?? 0,
       RC: redByPlayer.get(row.player?.id) ?? 0,
-      info: clPlayerInfo(row, seasonYear),
+      info: clPlayerInfo(row, competitionId, seasonYear),
     }))
     .sort((a, b) => b.YC + b.RC * 2 - (a.YC + a.RC * 2))
     .map((row, i) => ({ ...row, Rank: i + 1 }));

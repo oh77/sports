@@ -91,11 +91,11 @@ export default async function Home() {
           Matchday
         </h1>
         <p className="mt-2 max-w-xl text-soft">
-          Spelscheman, tabeller och statistik för Allsvenskan, Premier League
-          och Champions League.
+          Spelscheman, tabeller och statistik för Allsvenskan, Premier League,
+          Champions League och Conference League.
         </p>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {ALL_LEAGUES.map((league) => (
             <div
               key={league}

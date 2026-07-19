@@ -24,27 +24,30 @@ export function matchWinner(match: MatchInfo): TeamInfo | null {
 
 /**
  * The season's champion, or null while the season is still being played.
- * League champions top the standings; the CL champion wins the final (the
- * last match of the season).
+ * Domestic leagues crown the standings leader; UEFA knockout competitions
+ * crown the winner of the final.
  */
 export function seasonChampion(
   league: League,
   matches: MatchInfo[],
   standings: StandingsData,
 ): TeamInfo | null {
+  if (league === 'cl' || league === 'col') {
+    // The champion is the winner of the final — the last tournament match of
+    // the season. The official UEFA site reads it from the tournament matches
+    // ordered by date descending (matches[0] is the final); we already hold
+    // the full schedule, so pick the finished match labelled "Final". This
+    // deliberately does not wait on the whole sprawling qualifying phase being
+    // marked finished — only the final itself decides the title.
+    const final = matches
+      .filter((m) => m.state === 'finished' && m.isFinal)
+      .sort((a, b) => b.startDateTime.localeCompare(a.startDateTime))[0];
+    return final ? matchWinner(final) : null;
+  }
+
+  // Domestic leagues: the standings leader, once every match is played.
   const allPlayed =
     matches.length > 0 && matches.every((m) => m.state === 'finished');
   if (!allPlayed) return null;
-
-  if (league === 'cl') {
-    const final = [...matches].sort((a, b) =>
-      b.startDateTime.localeCompare(a.startDateTime),
-    )[0];
-    // Early in a CL season every match so far can be finished (qualifying
-    // legs) — only the actual final decides a champion.
-    if (final.roundLabel !== 'Final') return null;
-    return matchWinner(final);
-  }
-
   return standings.stats.find((row) => row.Rank === 1)?.info ?? null;
 }

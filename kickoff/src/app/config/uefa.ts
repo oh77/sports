@@ -11,6 +11,7 @@ export const UEFA_COMPSTATS_API = 'https://compstats.uefa.com/v1';
 export const UEFA_ORIGIN = 'https://www.uefa.com';
 
 export const UCL_COMPETITION_ID = '1';
+export const UECL_COMPETITION_ID = '2019';
 
 /** player-ranking `stats` codes per stats view. */
 export const UCL_PLAYER_STATS = {
@@ -20,11 +21,12 @@ export const UCL_PLAYER_STATS = {
   redCards: 'red_cards',
 } as const;
 
-export function uclPlayerPhotoUrl(
+export function uefaPlayerPhotoUrl(
+  competitionId: string,
   playerId: string,
   seasonYear: string,
 ): string {
-  return `https://img.uefa.com/imgml/TP/players/1/${seasonYear}/324x324/${playerId}.jpg`;
+  return `https://img.uefa.com/imgml/TP/players/${competitionId}/${seasonYear}/324x324/${playerId}.jpg`;
 }
 
 /** National flag PNG for a UEFA association code, e.g. "ENG" → England. */

@@ -73,6 +73,16 @@ const FIXTURE_TEAMS: Record<League, TeamInfo[]> = {
     team('liverpool', 'LIV', 'Liverpool'),
     team('dortmund', 'BVB', 'Borussia Dortmund'),
   ],
+  col: [
+    team('fiorentina', 'FIO', 'Fiorentina'),
+    team('villarreal', 'VIL', 'Villarreal'),
+    team('az', 'AZ', 'AZ Alkmaar'),
+    team('gent', 'GNT', 'KAA Gent'),
+    team('slavia', 'SLA', 'Slavia Prag'),
+    team('rapid', 'RAP', 'Rapid Wien'),
+    team('molde', 'MOL', 'Molde'),
+    team('legia', 'LEG', 'Legia Warszawa'),
+  ],
 };
 
 export function fixtureTeams(league: League): TeamInfo[] {
@@ -256,12 +266,25 @@ const PLAYER_NAMES: Record<League, string[]> = {
     'Pavel Horák',
     'Nicolás Ferreyra',
   ],
+  col: [
+    'Matteo Bianchi',
+    'Lars Veenstra',
+    'Tomas Novotný',
+    'Dragan Petrović',
+    'Sander Aalbu',
+    'Kamil Zieliński',
+    'Bruno Salgado',
+    'Niklas Roth',
+    'Yannis Papadakis',
+    'Ivan Marković',
+  ],
 };
 
 const NATIONALITY: Record<League, string> = {
   allsvenskan: 'SWE',
   pl: 'ENG',
   cl: 'ESP',
+  col: 'ITA',
 };
 
 function fixturePlayer(
@@ -334,6 +357,13 @@ const KEEPER_NAMES: Record<League, string[]> = {
     'Timo Reinhardt',
     'Aleksander Novak',
     'Diego Sarmiento',
+  ],
+  col: [
+    'Marco Ferretti',
+    'Sven Bakker',
+    'Petr Svoboda',
+    'Goran Ilić',
+    'Henrik Sørland',
   ],
 };
 

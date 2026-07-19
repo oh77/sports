@@ -16,6 +16,8 @@ Captured live on **2026‑07‑08**. All examples use the **2025/26 season** (`s
 
 `seasonYear` is the year the season **ends** (2025/26 → `2026`).
 
+> **App usage:** the same hosts serve the **Conference League** (`col` league, `competitionId=2019`) — the app runs both through `uefaService`/`uefaToDomain`, switching only the competition id (confirmed against a `seasonYear=2027` sample for the 2026/27 season).
+
 ## Host quick‑reference
 
 | Data | Base URL | Server‑side fetch* |
@@ -50,6 +52,10 @@ GET https://match.uefa.com/v5/matches
 Optional filters: `groupId`, `opponentTeamIds` (array), or `matchId` (array — returns those exact matches, ignores paging).
 
 Returns an **array of match objects**. A `status` of `UPCOMING` / `LIVE` / `FINISHED` distinguishes fixtures from results; `score` is present once played.
+
+> **Other observed `status` values:** `ABANDONED` — a void/awarded qualifying tie (e.g. a walkover never actually played) that still carries an awarded `score`. It is a decided result, not a live match. The translator (`statusToState`) treats `ABANDONED` as finished and maps any *other* unrecognised status by data (has a `score` ⇒ finished, else not-started) rather than defaulting to live.
+>
+> **Identifying the final:** use `round.mode === "FINAL"` (machine-readable) rather than the localizable `round.metaData.name`. The domain model carries this as `MatchInfo.isFinal`, and `seasonChampion` keys the UEFA champion off it.
 
 ### Sample response (one match, trimmed — the 2026 final)
 ```json

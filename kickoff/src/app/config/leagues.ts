@@ -1,6 +1,6 @@
 import type { League } from '@/app/types/domain/league';
 
-export const ALL_LEAGUES: League[] = ['allsvenskan', 'pl', 'cl'];
+export const ALL_LEAGUES: League[] = ['allsvenskan', 'pl', 'cl', 'col'];
 
 export function isLeague(value: string): value is League {
   return (ALL_LEAGUES as string[]).includes(value);
@@ -36,6 +36,12 @@ export const LEAGUE_SEASONS: Record<League, SeasonConfig[]> = {
   ],
   // UEFA's seasonYear is the year the season ends: 25-26 -> "2026".
   cl: [
+    { key: '26-27', externalId: '2027' },
+    { key: '25-26', externalId: '2026' },
+    { key: '24-25', externalId: '2025' },
+  ],
+  // Conference League runs on the same UEFA API (seasonYear = end year).
+  col: [
     { key: '26-27', externalId: '2027' },
     { key: '25-26', externalId: '2026' },
     { key: '24-25', externalId: '2025' },
