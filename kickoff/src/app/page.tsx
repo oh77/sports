@@ -7,7 +7,11 @@ import { getMatches } from '@/app/services/leagueData';
 import { leagueAccent, leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
 import type { MatchInfo } from '@/app/types/domain/match';
-import { dateKeyFromString, todayDateKey } from '@/app/utils/dateUtils';
+import {
+  dateKeyFromString,
+  formatWeekdayShortDateFromString,
+  todayDateKey,
+} from '@/app/utils/dateUtils';
 import {
   leagueBasePath,
   standingsPath,
@@ -31,6 +35,7 @@ const MIN_UPCOMING = 10;
 async function combinedMatches(): Promise<{
   matches: MatchInfo[];
   leagueByMatch: Map<MatchInfo, League>;
+  nextRoundByLeague: Map<League, string>;
 }> {
   const perLeague = await Promise.all(
     ALL_LEAGUES.map(async (league) => {
@@ -44,6 +49,20 @@ async function combinedMatches(): Promise<{
   );
 
   const today = todayDateKey();
+
+  // The next round per league: the earliest kick-off of the next upcoming
+  // (or ongoing) match day.
+  const nextRoundByLeague = new Map<League, string>();
+  for (const { league, matches } of perLeague) {
+    const next = matches
+      .filter(
+        (m) =>
+          m.state === 'live' || dateKeyFromString(m.startDateTime) >= today,
+      )
+      .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime))[0];
+    if (next) nextRoundByLeague.set(league, next.startDateTime);
+  }
+
   const leagueByMatch = new Map<MatchInfo, League>();
   const relevant = perLeague
     .flatMap(({ league, matches }) =>
@@ -70,11 +89,11 @@ async function combinedMatches(): Promise<{
     currentDay = day;
   }
 
-  return { matches: selected, leagueByMatch };
+  return { matches: selected, leagueByMatch, nextRoundByLeague };
 }
 
 export default async function Home() {
-  const { matches, leagueByMatch } = await combinedMatches();
+  const { matches, leagueByMatch, nextRoundByLeague } = await combinedMatches();
 
   return (
     <div className="min-h-screen bg-bg text-ink">
@@ -128,6 +147,16 @@ export default async function Home() {
                   {leagueMeta[league].name}
                 </Link>
               </h2>
+              {nextRoundByLeague.has(league) && (
+                <p className="mt-2 text-sm text-soft">
+                  <span className="text-mute">Nästa omgång: </span>
+                  <span className="capitalize text-ink">
+                    {formatWeekdayShortDateFromString(
+                      nextRoundByLeague.get(league) as string,
+                    )}
+                  </span>
+                </p>
+              )}
               <nav
                 aria-label={`Genvägar ${leagueMeta[league].name}`}
                 className="mt-3 flex gap-4 text-sm"
@@ -169,9 +198,42 @@ export default async function Home() {
       </main>
 
       <footer className="mt-12 border-t border-line py-8">
-        <p className="display text-center text-sm font-bold uppercase tracking-[0.1em] text-mute">
-          Matchday
-        </p>
+        <nav
+          aria-label="Ligor och turneringar"
+          className="mx-auto max-w-7xl px-4 md:px-6"
+        >
+          <ul className="flex flex-wrap items-center justify-center gap-4">
+            {ALL_LEAGUES.map((league) => (
+              <li key={league}>
+                <Link
+                  href={leagueBasePath(league)}
+                  title={leagueMeta[league].name}
+                  className="flex opacity-75 transition-opacity hover:opacity-100 focus-visible:opacity-100"
+                >
+                  {leagueMeta[league].logo && (
+                    <span
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md p-1.5 ${
+                        leagueMeta[league].logoOnDark
+                          ? 'bg-surface-3'
+                          : 'bg-white/90'
+                      }`}
+                    >
+                      <Image
+                        src={leagueMeta[league].logo as string}
+                        alt=""
+                        aria-hidden="true"
+                        width={36}
+                        height={36}
+                        className="h-full w-full object-contain"
+                      />
+                    </span>
+                  )}
+                  <span className="sr-only">{leagueMeta[league].name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </footer>
     </div>
   );

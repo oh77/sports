@@ -46,6 +46,20 @@ export const formatShortDateFromString = (dateTimeStr: string) => {
   }
 };
 
+/** Weekday + short date, e.g. "lördag 25 jul", in Swedish local time. */
+export const formatWeekdayShortDateFromString = (dateTimeStr: string) => {
+  try {
+    const date = new Date(dateTimeStr);
+    const weekday = date.toLocaleDateString('sv-SE', {
+      weekday: 'long',
+      timeZone: TIME_ZONE,
+    });
+    return `${weekday} ${formatShortDateFromString(dateTimeStr)}`;
+  } catch {
+    return dateTimeStr;
+  }
+};
+
 /** Today's date key (YYYY-MM-DD) in Swedish local time. */
 export const todayDateKey = () =>
   new Date().toLocaleDateString('sv-SE', { timeZone: TIME_ZONE });
