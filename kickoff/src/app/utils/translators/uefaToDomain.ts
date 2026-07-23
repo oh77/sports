@@ -61,8 +61,7 @@ function statusToState(m: UefaMatch): MatchState {
   // Any other unrecognised status: decide from the data rather than defaulting
   // to "live", which would strand a played game in the live section
   // indefinitely — a match with a result has been played.
-  const played =
-    m.score?.total !== undefined || m.score?.regular !== undefined;
+  const played = m.score?.total !== undefined || m.score?.regular !== undefined;
   return played ? 'finished' : 'not-started';
 }
 

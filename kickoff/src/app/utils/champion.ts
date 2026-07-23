@@ -32,7 +32,7 @@ export function seasonChampion(
   matches: MatchInfo[],
   standings: StandingsData,
 ): TeamInfo | null {
-  if (league === 'cl' || league === 'col') {
+  if (league === 'cl' || league === 'el' || league === 'col') {
     // The champion is the winner of the final — the last tournament match of
     // the season. The official UEFA site reads it from the tournament matches
     // ordered by date descending (matches[0] is the final); we already hold

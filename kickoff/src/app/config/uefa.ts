@@ -11,6 +11,7 @@ export const UEFA_COMPSTATS_API = 'https://compstats.uefa.com/v1';
 export const UEFA_ORIGIN = 'https://www.uefa.com';
 
 export const UCL_COMPETITION_ID = '1';
+export const UEL_COMPETITION_ID = '14';
 export const UECL_COMPETITION_ID = '2019';
 
 /** player-ranking `stats` codes per stats view. */

@@ -43,7 +43,10 @@ export async function fetchClMatches(
   seasonYear: string,
 ): Promise<UefaMatch[]> {
   return getCachedData(
-    generateCacheKey('uefa-matches', { comp: competitionId, season: seasonYear }),
+    generateCacheKey('uefa-matches', {
+      comp: competitionId,
+      season: seasonYear,
+    }),
     async () => {
       const all: UefaMatch[] = [];
       for (let page = 0; page < MAX_PAGES; page++) {

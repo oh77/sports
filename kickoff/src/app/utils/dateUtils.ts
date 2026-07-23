@@ -64,6 +64,23 @@ export const formatWeekdayShortDateFromString = (dateTimeStr: string) => {
 export const todayDateKey = () =>
   new Date().toLocaleDateString('sv-SE', { timeZone: TIME_ZONE });
 
+/** Tomorrow's date key (YYYY-MM-DD) in Swedish local time. */
+export const tomorrowDateKey = () =>
+  new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString('sv-SE', {
+    timeZone: TIME_ZONE,
+  });
+
+/**
+ * Weekday + short date, but "Idag"/"Imorgon" for today and tomorrow, e.g.
+ * "Idag", "Imorgon", "lördag 25 jul", in Swedish local time.
+ */
+export const formatRelativeWeekdayDateFromString = (dateTimeStr: string) => {
+  const key = dateKeyFromString(dateTimeStr);
+  if (key === todayDateKey()) return 'Idag';
+  if (key === tomorrowDateKey()) return 'Imorgon';
+  return formatWeekdayShortDateFromString(dateTimeStr);
+};
+
 /** Stable per-day grouping key (YYYY-MM-DD) in Swedish local time. */
 export const dateKeyFromString = (dateTimeStr: string) => {
   try {

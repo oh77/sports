@@ -73,6 +73,16 @@ const FIXTURE_TEAMS: Record<League, TeamInfo[]> = {
     team('liverpool', 'LIV', 'Liverpool'),
     team('dortmund', 'BVB', 'Borussia Dortmund'),
   ],
+  el: [
+    team('roma', 'ROM', 'AS Roma'),
+    team('leverkusen', 'B04', 'Bayer Leverkusen'),
+    team('ajax', 'AJA', 'Ajax'),
+    team('lyon', 'LYO', 'Olympique Lyonnais'),
+    team('porto', 'POR', 'FC Porto'),
+    team('rangers', 'RAN', 'Rangers'),
+    team('lazio', 'LAZ', 'Lazio'),
+    team('feyenoord', 'FEY', 'Feyenoord'),
+  ],
   col: [
     team('fiorentina', 'FIO', 'Fiorentina'),
     team('villarreal', 'VIL', 'Villarreal'),
@@ -266,6 +276,18 @@ const PLAYER_NAMES: Record<League, string[]> = {
     'Pavel Horák',
     'Nicolás Ferreyra',
   ],
+  el: [
+    'Federico Rossi',
+    'Daan van Dijk',
+    'Mathis Lefèvre',
+    'Rúben Costa',
+    'Stefan Jovanović',
+    'Callum Fraser',
+    'Lorenzo Greco',
+    'Tobias Weber',
+    'Nordin El Amrani',
+    'Milos Stankovic',
+  ],
   col: [
     'Matteo Bianchi',
     'Lars Veenstra',
@@ -284,6 +306,7 @@ const NATIONALITY: Record<League, string> = {
   allsvenskan: 'SWE',
   pl: 'ENG',
   cl: 'ESP',
+  el: 'ITA',
   col: 'ITA',
 };
 
@@ -357,6 +380,13 @@ const KEEPER_NAMES: Record<League, string[]> = {
     'Timo Reinhardt',
     'Aleksander Novak',
     'Diego Sarmiento',
+  ],
+  el: [
+    'Alessandro Conti',
+    'Wout Janssen',
+    'Rui Aguiar',
+    'Marco Keller',
+    'Dylan Ferguson',
   ],
   col: [
     'Marco Ferretti',

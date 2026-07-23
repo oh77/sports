@@ -29,6 +29,7 @@ export const leagueAccent: Record<League, string> = {
   allsvenskan: '#facc15', // Allsvenskan yellow (on blue-dark surfaces)
   pl: '#a78bfa', // Premier League purple
   cl: '#3b82f6', // Champions League blue
+  el: '#f97316', // Europa League orange
   col: '#34d399', // Conference League green
 };
 
@@ -56,6 +57,11 @@ export const leagueMeta: Record<
     name: 'Champions League',
     short: 'CL',
     logo: 'https://img.uefa.com/imgml/uefacom/elements/logos/competitions/color/full/1.svg',
+  },
+  el: {
+    name: 'Europa League',
+    short: 'UEL',
+    logo: '/assets/europa-league-logo.svg',
   },
   col: {
     name: 'Conference League',

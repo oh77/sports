@@ -9,7 +9,7 @@ import type { League } from '@/app/types/domain/league';
 import type { MatchInfo } from '@/app/types/domain/match';
 import {
   dateKeyFromString,
-  formatWeekdayShortDateFromString,
+  formatRelativeWeekdayDateFromString,
   todayDateKey,
 } from '@/app/utils/dateUtils';
 import {
@@ -35,7 +35,7 @@ const MIN_UPCOMING = 10;
 async function combinedMatches(): Promise<{
   matches: MatchInfo[];
   leagueByMatch: Map<MatchInfo, League>;
-  nextRoundByLeague: Map<League, string>;
+  nextRoundByLeague: Map<League, { next: string; following?: string }>;
 }> {
   const perLeague = await Promise.all(
     ALL_LEAGUES.map(async (league) => {
@@ -50,17 +50,30 @@ async function combinedMatches(): Promise<{
 
   const today = todayDateKey();
 
-  // The next round per league: the earliest kick-off of the next upcoming
-  // (or ongoing) match day.
-  const nextRoundByLeague = new Map<League, string>();
+  // The next round per league (earliest kick-off of the next upcoming or
+  // ongoing match day) plus the round after it — the earliest kick-off on a
+  // later day.
+  const nextRoundByLeague = new Map<
+    League,
+    { next: string; following?: string }
+  >();
   for (const { league, matches } of perLeague) {
-    const next = matches
+    const upcoming = matches
       .filter(
         (m) =>
           m.state === 'live' || dateKeyFromString(m.startDateTime) >= today,
       )
-      .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime))[0];
-    if (next) nextRoundByLeague.set(league, next.startDateTime);
+      .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime));
+    const next = upcoming[0];
+    if (!next) continue;
+    const nextDay = dateKeyFromString(next.startDateTime);
+    const following = upcoming.find(
+      (m) => dateKeyFromString(m.startDateTime) > nextDay,
+    );
+    nextRoundByLeague.set(league, {
+      next: next.startDateTime,
+      following: following?.startDateTime,
+    });
   }
 
   const leagueByMatch = new Map<MatchInfo, League>();
@@ -111,77 +124,97 @@ export default async function Home() {
         </h1>
         <p className="mt-2 max-w-xl text-soft">
           Spelscheman, tabeller och statistik för Allsvenskan, Premier League,
-          Champions League och Conference League.
+          Champions League, Europa League och Conference League.
         </p>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {ALL_LEAGUES.map((league) => (
-            <div
-              key={league}
-              style={{ '--accent': leagueAccent[league] } as CSSProperties}
-              className="rounded-xl border border-line border-t-2 border-t-accent bg-surface p-4"
-            >
-              <h2 className="display text-lg font-bold uppercase tracking-[0.08em]">
-                <Link
-                  href={leagueBasePath(league)}
-                  className="flex items-center gap-2.5 transition-colors hover:text-accent"
-                >
-                  {leagueMeta[league].logo && (
-                    <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md p-1 ${
-                        leagueMeta[league].logoOnDark
-                          ? 'bg-surface-3'
-                          : 'bg-white/90'
-                      }`}
-                    >
-                      <Image
-                        src={leagueMeta[league].logo}
-                        alt=""
-                        aria-hidden="true"
-                        width={28}
-                        height={28}
-                        className="h-full w-full object-contain"
-                      />
-                    </span>
-                  )}
-                  {leagueMeta[league].name}
-                </Link>
-              </h2>
-              {nextRoundByLeague.has(league) && (
-                <p className="mt-2 text-sm text-soft">
-                  <span className="text-mute">Nästa omgång: </span>
-                  <span className="capitalize text-ink">
-                    {formatWeekdayShortDateFromString(
-                      nextRoundByLeague.get(league) as string,
-                    )}
-                  </span>
-                </p>
-              )}
-              <nav
-                aria-label={`Genvägar ${leagueMeta[league].name}`}
-                className="mt-3 flex gap-4 text-sm"
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {ALL_LEAGUES.map((league) => {
+            const round = nextRoundByLeague.get(league);
+            return (
+              <div
+                key={league}
+                style={{ '--accent': leagueAccent[league] } as CSSProperties}
+                className="rounded-xl border border-line border-t-2 border-t-accent bg-surface p-4"
               >
-                <Link
-                  href={leagueBasePath(league)}
-                  className="text-soft transition-colors hover:text-accent"
+                <h2 className="display text-lg font-bold uppercase tracking-[0.08em]">
+                  <Link
+                    href={leagueBasePath(league)}
+                    className="flex items-center gap-2.5 transition-colors hover:text-accent"
+                  >
+                    {leagueMeta[league].logo && (
+                      <span
+                        className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
+                          leagueMeta[league].logoOnDark
+                            ? 'bg-surface-3'
+                            : 'bg-white/90'
+                        }`}
+                      >
+                        <Image
+                          src={leagueMeta[league].logo}
+                          alt=""
+                          aria-hidden="true"
+                          fill
+                          sizes="32px"
+                          className="object-contain p-1"
+                        />
+                      </span>
+                    )}
+                    {leagueMeta[league].name}
+                  </Link>
+                </h2>
+                {round &&
+                  (() => {
+                    const nextLabel = formatRelativeWeekdayDateFromString(
+                      round.next,
+                    );
+                    // Only surface the following round when the next one is
+                    // today or tomorrow.
+                    const showFollowing =
+                      (nextLabel === 'Idag' || nextLabel === 'Imorgon') &&
+                      round.following;
+                    return (
+                      <p className="mt-2 text-sm text-soft">
+                        <span className="text-mute">Nästa omgång: </span>
+                        <span className="capitalize text-ink">{nextLabel}</span>
+                        {showFollowing && (
+                          <>
+                            <span className="text-mute">, sedan </span>
+                            <span className="text-ink">
+                              {formatRelativeWeekdayDateFromString(
+                                round.following as string,
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </p>
+                    );
+                  })()}
+                <nav
+                  aria-label={`Genvägar ${leagueMeta[league].name}`}
+                  className="mt-3 flex gap-4 text-sm"
                 >
-                  Matcher
-                </Link>
-                <Link
-                  href={standingsPath(league)}
-                  className="text-soft transition-colors hover:text-accent"
-                >
-                  Tabell
-                </Link>
-                <Link
-                  href={statsPath(league)}
-                  className="text-soft transition-colors hover:text-accent"
-                >
-                  Statistik
-                </Link>
-              </nav>
-            </div>
-          ))}
+                  <Link
+                    href={leagueBasePath(league)}
+                    className="text-soft transition-colors hover:text-accent"
+                  >
+                    Matcher
+                  </Link>
+                  <Link
+                    href={standingsPath(league)}
+                    className="text-soft transition-colors hover:text-accent"
+                  >
+                    Tabell
+                  </Link>
+                  <Link
+                    href={statsPath(league)}
+                    className="text-soft transition-colors hover:text-accent"
+                  >
+                    Statistik
+                  </Link>
+                </nav>
+              </div>
+            );
+          })}
         </div>
 
         <section className="mt-12">
@@ -212,7 +245,7 @@ export default async function Home() {
                 >
                   {leagueMeta[league].logo && (
                     <span
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md p-1.5 ${
+                      className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-md ${
                         leagueMeta[league].logoOnDark
                           ? 'bg-surface-3'
                           : 'bg-white/90'
@@ -222,9 +255,9 @@ export default async function Home() {
                         src={leagueMeta[league].logo as string}
                         alt=""
                         aria-hidden="true"
-                        width={36}
-                        height={36}
-                        className="h-full w-full object-contain"
+                        fill
+                        sizes="44px"
+                        className="object-contain p-1.5"
                       />
                     </span>
                   )}

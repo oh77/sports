@@ -4,6 +4,7 @@ import {
   UCL_COMPETITION_ID,
   UCL_PLAYER_STATS,
   UECL_COMPETITION_ID,
+  UEL_COMPETITION_ID,
 } from '@/app/config/uefa';
 import type { KeeperStatsData } from '@/app/types/domain/keeper-stats';
 import type { League } from '@/app/types/domain/league';
@@ -84,9 +85,11 @@ function uefaSeasonYear(league: League, seasonKey?: string | null): string {
   return season.externalId ?? season.key;
 }
 
-/** UEFA competition id for a UEFA league (Champions vs Conference League). */
+/** UEFA competition id for a UEFA league (Champions/Europa/Conference League). */
 function uefaCompetitionId(league: League): string {
-  return league === 'col' ? UECL_COMPETITION_ID : UCL_COMPETITION_ID;
+  if (league === 'col') return UECL_COMPETITION_ID;
+  if (league === 'el') return UEL_COMPETITION_ID;
+  return UCL_COMPETITION_ID;
 }
 
 export async function getMatches(

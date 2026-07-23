@@ -60,7 +60,7 @@ export function TopNav({ league, season }: TopNavProps) {
           >
             {logo ? (
               <span
-                className={`flex h-8 w-8 items-center justify-center rounded-md p-1 ${
+                className={`relative flex h-8 w-8 items-center justify-center rounded-md ${
                   logoOnDark ? 'bg-surface' : 'bg-white/90'
                 }`}
               >
@@ -68,9 +68,9 @@ export function TopNav({ league, season }: TopNavProps) {
                   src={logo}
                   alt=""
                   aria-hidden="true"
-                  width={28}
-                  height={28}
-                  className="h-full w-full object-contain"
+                  fill
+                  sizes="32px"
+                  className="object-contain p-1"
                 />
               </span>
             ) : (
