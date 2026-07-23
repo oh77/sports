@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import { CURRENT_CHL_SEASON } from '../../config/chl';
 import type { StatnetLeague } from '../../config/statnet';
 import { getAllUpcomingGames } from '../../services/chlService';
+import { getAllUpcomingGames as getAllUpcomingNHLGames } from '../../services/nhlService';
 import type { GameInfo } from '../../types/domain/game';
 import type { League } from '../../types/domain/league';
 import type { StatnetLeagueResponse } from '../../types/statnet/game';
 import { fetchStatnet } from '../../utils/statnetSource';
 import { translateCHLGamesToDomainResponse } from '../../utils/translators/chlToDomain';
+import { translateNHLGamesToDomainResponse } from '../../utils/translators/nhlToDomain';
 import { translateStatnetGameToDomain } from '../../utils/translators/statnetToDomain';
 
 const STATNET_LEAGUES: StatnetLeague[] = ['shl', 'sdhl', 'ha'];
@@ -49,7 +51,17 @@ export async function GET(request: Request) {
       chl = [];
     }
 
-    const sorted = [...statnet.flat(), ...chl]
+    let nhl: LeagueGame[] = [];
+    try {
+      const nhlGames = await getAllUpcomingNHLGames();
+      nhl = (translateNHLGamesToDomainResponse(nhlGames).gameInfo || []).map(
+        (game) => ({ league: 'nhl' as League, game }),
+      );
+    } catch {
+      nhl = [];
+    }
+
+    const sorted = [...statnet.flat(), ...chl, ...nhl]
       .filter(({ game }) => new Date(game.startDateTime).getTime() >= now)
       .sort(
         (a, b) =>

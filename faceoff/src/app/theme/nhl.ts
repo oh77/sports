@@ -30,6 +30,7 @@ export const leagueAccent: Record<League, string> = {
   sdhl: '#2dd4bf', // teal
   ha: '#6366f1', // indigo
   chl: '#3b82f6', // blue
+  nhl: '#e5352b', // hockey red
 };
 
 /** Display name + logo for each league (used by the top nav and footers). */
@@ -49,6 +50,10 @@ export const leagueMeta: Record<League, { name: string; logo: string }> = {
   chl: {
     name: 'CHL',
     logo: 'https://www.chl.hockey/static/img/logo.png',
+  },
+  nhl: {
+    name: 'NHL',
+    logo: 'https://assets.nhle.com/logos/nhl/svg/NHL_light.svg',
   },
 };
 

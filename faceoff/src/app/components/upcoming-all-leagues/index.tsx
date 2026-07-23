@@ -29,6 +29,11 @@ const LEAGUE_CHIP: Record<League, { bg: string; logo: string; label: string }> =
       logo: 'https://www.chl.hockey/static/img/logo.png',
       label: 'CHL',
     },
+    nhl: {
+      bg: 'rgba(17,19,25,1)',
+      logo: 'https://assets.nhle.com/logos/nhl/svg/NHL_light.svg',
+      label: 'NHL',
+    },
   };
 
 function formatTime(iso: string): string {

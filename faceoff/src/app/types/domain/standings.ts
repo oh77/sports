@@ -17,6 +17,10 @@ export interface TeamStats {
   SOL: number;
   Points: number;
   info: TeamInfo;
+  /** Conference name for leagues split into conferences (NHL). */
+  conference?: string;
+  /** Division name for leagues split into divisions (NHL). */
+  division?: string;
 }
 
 export interface DataColumn {

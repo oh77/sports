@@ -67,10 +67,12 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
       )}
     </span>
 
-    {/* Jersey number badge */}
-    <span className="display num inline-flex h-[26px] min-w-[34px] items-center justify-center rounded-md bg-surface-3 px-1.5 text-[13px] font-bold text-soft">
-      #{playerNumber}
-    </span>
+    {/* Jersey number badge (hidden when unknown, e.g. NHL summary feed) */}
+    {playerNumber > 0 && (
+      <span className="display num inline-flex h-[26px] min-w-[34px] items-center justify-center rounded-md bg-surface-3 px-1.5 text-[13px] font-bold text-soft">
+        #{playerNumber}
+      </span>
+    )}
 
     {/* Name + club */}
     <div className="min-w-0 flex-1">

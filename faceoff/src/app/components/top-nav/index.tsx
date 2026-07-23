@@ -16,7 +16,7 @@ interface TopNavProps {
   season?: string;
 }
 
-const ALL_LEAGUES: League[] = ['shl', 'sdhl', 'ha', 'chl'];
+const ALL_LEAGUES: League[] = ['shl', 'sdhl', 'ha', 'chl', 'nhl'];
 
 /** Derive the active nav section from the path segment after the season. */
 function activeSection(pathname: string): Section | null {

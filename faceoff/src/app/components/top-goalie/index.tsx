@@ -19,7 +19,6 @@ export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
   const season = useSeason();
   const [topGoalie, setTopGoalie] = useState<GoalieStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTopGoalie = async () => {
@@ -37,17 +36,14 @@ export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
 
         const data: GoalieStatsData = await response.json();
 
-        console.log('TopGoalie data:', data);
-        console.log('TopGoalie stats:', data.stats);
-
         // Get top goalie (already sorted by SVS%, rank applies)
         const top = data.stats && data.stats.length > 0 ? data.stats[0] : null;
-
-        console.log('Top goalie:', top);
         setTopGoalie(top);
       } catch (err) {
-        console.error('Error fetching top goalie:', err);
-        setError('Failed to load goalie statistics');
+        // Goalie stats may be unavailable (e.g. early in a new season). Warn for
+        // diagnostics but stay silent for the user — the section collapses.
+        console.warn('Error fetching top goalie:', err);
+        setTopGoalie(null);
       } finally {
         setLoading(false);
       }
@@ -67,20 +63,8 @@ export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-        <p className="text-red-600">{error}</p>
-      </div>
-    );
-  }
-
   if (!topGoalie) {
-    return (
-      <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-        <p className="text-gray-500">No goalie data available</p>
-      </div>
-    );
+    return null;
   }
 
   return (

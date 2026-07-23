@@ -2,10 +2,12 @@ import { NextResponse } from 'next/server';
 import { CURRENT_CHL_SEASON } from '../../config/chl';
 import type { StatnetLeague } from '../../config/statnet';
 import { getAllUpcomingGames } from '../../services/chlService';
+import { getAllUpcomingGames as getAllUpcomingNHLGames } from '../../services/nhlService';
 import type { League } from '../../types/domain/league';
 import type { StatnetLeagueResponse } from '../../types/statnet/game';
 import { fetchStatnet } from '../../utils/statnetSource';
 import { translateCHLGamesToDomainResponse } from '../../utils/translators/chlToDomain';
+import { translateNHLGamesToDomainResponse } from '../../utils/translators/nhlToDomain';
 import { translateStatnetGameToDomain } from '../../utils/translators/statnetToDomain';
 
 const STATNET_LEAGUES: StatnetLeague[] = ['shl', 'sdhl', 'ha'];
@@ -22,6 +24,7 @@ export async function GET() {
     sdhl: null,
     ha: null,
     chl: null,
+    nhl: null,
   };
 
   const earliest = (times: number[]): string | null => {
@@ -53,6 +56,17 @@ export async function GET() {
     );
   } catch {
     next.chl = null;
+  }
+
+  try {
+    const nhlGames = await getAllUpcomingNHLGames();
+    next.nhl = earliest(
+      (translateNHLGamesToDomainResponse(nhlGames).gameInfo || []).map((game) =>
+        new Date(game.startDateTime).getTime(),
+      ),
+    );
+  } catch {
+    next.nhl = null;
   }
 
   return NextResponse.json({ next });

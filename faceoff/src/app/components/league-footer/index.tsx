@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { NHL_TEAMS } from '@/app/config/nhlTeams';
 import type { League } from '@/app/types/domain/league';
 import { leagueBasePath, teamPath } from '@/app/utils/leaguePaths';
 import { useSeason } from '@/app/utils/useSeason';
@@ -40,6 +41,12 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
       try {
         setLoading(true);
 
+        // NHL is not a Statnet league; its clubs are a static config list.
+        if (league === 'nhl') {
+          setTeams(NHL_TEAMS);
+          return;
+        }
+
         // Use LeagueService to handle API call and transformation
         const leagueService = new StatnetService(league, season);
         const teamList = await leagueService.fetchTeams();
@@ -64,6 +71,8 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
       return 'https://sportality.cdn.s8y.se/team-logos/ha1_ha.svg';
     } else if (league === 'chl') {
       return 'https://www.chl.hockey/static/img/logo.png';
+    } else if (league === 'nhl') {
+      return 'https://assets.nhle.com/logos/nhl/svg/NHL_light.svg';
     }
     return '';
   };
@@ -73,6 +82,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
     if (league === 'sdhl') return 'SDHL';
     if (league === 'ha') return 'HA';
     if (league === 'chl') return 'CHL';
+    if (league === 'nhl') return 'NHL';
     return '';
   };
 
