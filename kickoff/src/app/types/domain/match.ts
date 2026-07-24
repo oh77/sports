@@ -7,7 +7,12 @@ export interface MatchTeamInfo {
   score: number;
   /** Penalty shoot-out goals; set only when the match went to penalties. */
   penaltyScore?: number;
-  /** Tie total for two-legged knockout games, when the provider supplies it. */
+  /**
+   * Running tie total for two-legged knockout games: the other leg's result
+   * plus this leg's current score. On an upcoming second leg that is just the
+   * first-leg result carried over; once the tie is decided it is the final
+   * aggregate. Only set when the tie's other leg is known.
+   */
   aggregateScore?: number;
 }
 
@@ -27,6 +32,16 @@ export interface MatchInfo {
   round?: number;
   /** Human-readable phase or round, e.g. "Omgång 12", "Åttondelsfinal". */
   roundLabel?: string;
+  /**
+   * Cup competitions: the match belongs to a knockout round, which
+   * `roundLabel` names. League/group-phase matches leave this unset.
+   */
+  knockout?: boolean;
+  /**
+   * Two-legged knockout ties: which leg this match is, and how many legs the
+   * tie has. Absent for one-off matches.
+   */
+  leg?: { number: number; of: number };
   /** Knockout matches only: decided after extra time. */
   extraTime?: boolean;
   /** Knockout matches only: decided on penalties (see penaltyScore). */

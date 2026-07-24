@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { FormMarkers } from '@/app/components/form-markers';
 import { MatchList } from '@/app/components/match-list';
+import { AggregateLine, MatchMetaRow } from '@/app/components/match-meta';
 import { MatchupTable, matchupRows } from '@/app/components/matchup-table';
 import { TeamBadge } from '@/app/components/team-badge';
 import { isLeague } from '@/app/config/leagues';
@@ -259,6 +260,8 @@ function MatchHero({
               Slut
             </span>
           )}
+          <MatchMetaRow match={match} />
+          <AggregateLine match={match} />
           <span className="text-center text-sm text-dim">
             {match.venueInfo.name}
           </span>

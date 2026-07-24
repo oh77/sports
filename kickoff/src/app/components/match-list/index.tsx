@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import { OUTCOME_LABEL, OUTCOME_TEXT } from '@/app/components/form-markers';
+import { AggregateLine, MatchMetaRow } from '@/app/components/match-meta';
 import { TeamBadge } from '@/app/components/team-badge';
 import { leagueAccent, leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
@@ -135,7 +136,12 @@ function MatchRow({
               {opponentBody}
             </span>
           )}
-          <MatchCenter match={match} showStatusTag={false} outcome={outcome} />
+          <MatchCenter
+            match={match}
+            showStatusTag={false}
+            outcome={outcome}
+            inlineAggregate
+          />
         </div>
         {state === 'live' && <LiveTag />}
       </div>
@@ -206,16 +212,16 @@ function LeagueChip({ league }: { league: League }) {
     return (
       <span
         title={name}
-        className={`flex h-6 w-9 shrink-0 items-center justify-center rounded p-0.5 ${
+        className={`relative flex h-6 w-9 shrink-0 items-center justify-center rounded ${
           logoOnDark ? '' : 'bg-white/90'
         }`}
       >
         <Image
           src={logo}
           alt={name}
-          width={28}
-          height={20}
-          className="h-full w-full object-contain"
+          fill
+          sizes="36px"
+          className="object-contain p-0.5"
         />
       </span>
     );
@@ -236,21 +242,32 @@ function MatchCenter({
   match,
   showStatusTag = true,
   outcome,
+  inlineAggregate = false,
 }: {
   match: MatchInfo;
   showStatusTag?: boolean;
   /** Colours the score as a win/draw/loss, from one team's perspective. */
   outcome?: MatchOutcome;
+  /**
+   * Sets the tie total beside the score instead of under it — keeps the
+   * single-opponent rows on team pages from growing a line per annotation.
+   */
+  inlineAggregate?: boolean;
 }) {
   const { homeTeamInfo, awayTeamInfo, state } = match;
+  const aggregate = <AggregateLine match={match} />;
 
   if (state === 'not-started') {
     return (
       <span className="flex flex-col items-center gap-0.5">
-        <span className="num rounded-md bg-surface-3 px-2.5 py-1 text-sm font-semibold text-soft">
-          {formatTimeFromString(match.startDateTime)}
+        <span className="flex items-baseline gap-1.5">
+          <span className="num rounded-md bg-surface-3 px-2.5 py-1 text-sm font-semibold text-soft">
+            {formatTimeFromString(match.startDateTime)}
+          </span>
+          {inlineAggregate && aggregate}
         </span>
-        {match.qualifying && <QualifyingTag />}
+        <MatchMetaRow match={match} />
+        {!inlineAggregate && aggregate}
       </span>
     );
   }
@@ -261,38 +278,32 @@ function MatchCenter({
       ? 'e. förl.'
       : null;
 
-  const hasAggregate =
-    homeTeamInfo.aggregateScore !== undefined &&
-    awayTeamInfo.aggregateScore !== undefined;
   const hasPenalties =
     homeTeamInfo.penaltyScore !== undefined &&
     awayTeamInfo.penaltyScore !== undefined;
 
   return (
     <span className="flex flex-col items-center">
-      <span
-        className={`num display px-2 text-lg font-bold ${
-          outcome ? OUTCOME_TEXT[outcome] : 'text-ink'
-        }`}
-      >
-        {homeTeamInfo.score}–{awayTeamInfo.score}
-        {outcome && (
-          <span className="sr-only"> ({OUTCOME_LABEL[outcome]})</span>
-        )}
+      <span className="flex items-baseline gap-1.5 px-2">
+        <span
+          className={`num display text-lg font-bold ${
+            outcome ? OUTCOME_TEXT[outcome] : 'text-ink'
+          }`}
+        >
+          {homeTeamInfo.score}–{awayTeamInfo.score}
+          {outcome && (
+            <span className="sr-only"> ({OUTCOME_LABEL[outcome]})</span>
+          )}
+        </span>
+        {inlineAggregate && aggregate}
       </span>
       {state === 'finished' && showStatusTag && (
         <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-dim">
           Slut
         </span>
       )}
-      {hasAggregate && (
-        <span
-          className="num text-[11px] text-dim"
-          title="Totalt över två matcher"
-        >
-          (tot. {homeTeamInfo.aggregateScore}–{awayTeamInfo.aggregateScore})
-        </span>
-      )}
+      <MatchMetaRow match={match} />
+      {!inlineAggregate && aggregate}
       {hasPenalties && (
         <span className="num text-[11px] text-dim" title="Straffar">
           (str. {homeTeamInfo.penaltyScore}–{awayTeamInfo.penaltyScore})
@@ -303,18 +314,6 @@ function MatchCenter({
           {suffix}
         </span>
       )}
-      {match.qualifying && <QualifyingTag />}
-    </span>
-  );
-}
-
-function QualifyingTag() {
-  return (
-    <span
-      title="Kvalmatch"
-      className="text-[10px] font-bold uppercase tracking-[0.08em] text-dim"
-    >
-      Kval
     </span>
   );
 }

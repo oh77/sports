@@ -20,7 +20,11 @@ import type {
   TeamStanding,
 } from '@/app/types/domain/standings';
 import type { TeamInfo } from '@/app/types/domain/team';
-import type { UefaMatch, UefaTeam } from '@/app/types/uefa/matches';
+import type {
+  UefaMatch,
+  UefaScorePair,
+  UefaTeam,
+} from '@/app/types/uefa/matches';
 import type { UefaPlayerRankingRow } from '@/app/types/uefa/players';
 import type { UefaStandingsGroup } from '@/app/types/uefa/standings';
 import { STANDINGS_COLUMNS } from '@/app/utils/footballColumns';
@@ -71,7 +75,42 @@ function matchdayNumber(name?: string): number | undefined {
   return match ? Number(match[1]) : undefined;
 }
 
+/**
+ * Swedish names for the knockout rounds, keyed on a normalised
+ * `round.metaData.name`. That field is the provider's English display name —
+ * captured payloads show `Final`, `Semi-finals` and `League phase`; the rest
+ * follow UEFA's own naming. An unmapped round keeps the provider's label and
+ * is not treated as a knockout round, so a name we don't know yet degrades to
+ * today's behaviour rather than to English text in a Swedish UI.
+ */
+const KNOCKOUT_ROUNDS: Record<string, string> = {
+  final: 'Final',
+  semifinal: 'Semifinal',
+  quarterfinal: 'Kvartsfinal',
+  roundof16: 'Åttondelsfinal',
+  knockoutplayoff: 'Slutspelskval',
+  knockoutroundplayoff: 'Slutspelskval',
+};
+
+/** "Semi-finals" → "semifinal": case, punctuation and plural all dropped. */
+function normalisedRoundName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .replace(/s$/, '');
+}
+
+function knockoutRound(m: UefaMatch): string | undefined {
+  // `round.mode` is machine-readable where `metaData.name` is localizable, so
+  // the final is keyed off the mode and never depends on the name matching.
+  if (m.round?.mode === 'FINAL') return KNOCKOUT_ROUNDS.final;
+  const name = m.round?.metaData?.name;
+  return name ? KNOCKOUT_ROUNDS[normalisedRoundName(name)] : undefined;
+}
+
 function roundLabel(m: UefaMatch): string | undefined {
+  const knockout = knockoutRound(m);
+  if (knockout) return knockout;
   const roundName = m.round?.metaData?.name;
   if (roundName === 'League phase') {
     return m.matchday?.longName ?? roundName;
@@ -86,7 +125,62 @@ function venueName(m: UefaMatch): string {
   return stadium ?? city ?? '';
 }
 
+/** UEFA ties run over two legs; the provider only says first or second. */
+const LEGS_PER_TIE = 2;
+
+function legNumber(m: UefaMatch): number | undefined {
+  if (m.leg?.number) return m.leg.number;
+  if (m.type === 'FIRST_LEG') return 1;
+  if (m.type === 'SECOND_LEG') return 2;
+  return undefined;
+}
+
+/** Key shared by both legs of a tie: the round plus the two teams. */
+function tieKey(m: UefaMatch): string | undefined {
+  const home = m.homeTeam?.id;
+  const away = m.awayTeam?.id;
+  if (!home || !away) return undefined;
+  const round = m.round?.id ?? m.matchday?.id ?? '';
+  return `${round}|${[home, away].sort().join('-')}`;
+}
+
+/**
+ * Running tie totals, keyed by match id. The provider only backfills
+ * `score.aggregate` once a tie is decided, so until then we add the other
+ * leg's result to this leg's current score ourselves — that is what an
+ * upcoming or live second leg needs to show.
+ */
+function runningTieTotals(matches: UefaMatch[]): Map<string, UefaScorePair> {
+  const firstLegs = new Map<string, UefaMatch>();
+  for (const m of matches) {
+    const key = legNumber(m) === 1 ? tieKey(m) : undefined;
+    if (key) firstLegs.set(key, m);
+  }
+
+  const totals = new Map<string, UefaScorePair>();
+  for (const m of matches) {
+    if (legNumber(m) !== 2) continue;
+    const key = tieKey(m);
+    const firstLeg = key ? firstLegs.get(key) : undefined;
+    if (!firstLeg) continue;
+    // Nothing to carry over until the first leg has actually been played.
+    if (statusToState(firstLeg) === 'not-started') continue;
+    const first = firstLeg.score?.total ?? firstLeg.score?.regular;
+    if (!first) continue;
+    // The teams normally swap ends between legs, but orient by team id rather
+    // than assuming it.
+    const flipped = firstLeg.homeTeam?.id === m.awayTeam?.id;
+    const second = m.score?.total ?? m.score?.regular;
+    totals.set(m.id, {
+      home: (flipped ? first.away : first.home) + (second?.home ?? 0),
+      away: (flipped ? first.home : first.away) + (second?.away ?? 0),
+    });
+  }
+  return totals;
+}
+
 export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
+  const runningTotals = runningTieTotals(matches);
   const domainMatches: MatchInfo[] = matches
     // Knockout fixtures without decided participants can't be rendered yet.
     .filter((m) => m.homeTeam && m.awayTeam && m.kickOffTime?.dateTime)
@@ -106,9 +200,14 @@ export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
         penalties ||
         matchReason === 'WIN_ON_EXTRA_TIME' ||
         (decidingLeg && aggregateReason === 'WIN_ON_EXTRA_TIME');
-      const aggregate = m.score?.aggregate;
+      // The provider's aggregate is authoritative wherever it exists; our own
+      // running total only fills the gap before the tie is decided.
+      const state = statusToState(m);
+      const aggregate = m.score?.aggregate ?? runningTotals.get(m.id);
+      const leg = legNumber(m);
       const round = matchdayNumber(m.matchday?.name);
       const label = roundLabel(m);
+      const knockout = knockoutRound(m) !== undefined;
       const qualifying =
         m.competitionPhase === 'QUALIFYING' ||
         m.matchday?.phase === 'QUALIFYING';
@@ -119,7 +218,7 @@ export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
       return {
         uuid: m.id,
         startDateTime: m.kickOffTime?.dateTime as string,
-        state: statusToState(m),
+        state,
         homeTeamInfo: {
           teamInfo: clTeamToDomain(home),
           score: score?.home ?? 0,
@@ -134,7 +233,11 @@ export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
         },
         venueInfo: { name: venueName(m) },
         ...(round !== undefined ? { round } : {}),
+        ...(leg !== undefined
+          ? { leg: { number: leg, of: LEGS_PER_TIE } }
+          : {}),
         ...(label ? { roundLabel: label } : {}),
+        ...(knockout ? { knockout } : {}),
         ...(extraTime ? { extraTime } : {}),
         ...(penalties ? { penalties } : {}),
         ...(qualifying ? { qualifying } : {}),
