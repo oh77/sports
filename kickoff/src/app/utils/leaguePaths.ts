@@ -28,6 +28,21 @@ export function teamPath(
 }
 
 /**
+ * Matchup page for a match, seen from `teamCode`'s side — the other team of
+ * the match is the opponent regardless of home/away.
+ */
+export function matchupPath(
+  league: League,
+  season: string | null | undefined,
+  teamCode: string,
+  opponentCode: string,
+): string {
+  return `${teamPath(league, season, teamCode)}/vs/${encodeURIComponent(
+    opponentCode,
+  )}`;
+}
+
+/**
  * Canonicalize a team code for comparison. Route params carrying Nordic
  * characters (e.g. `mjä`) can arrive percent-encoded and/or in a different
  * Unicode normalization form than the API-derived code — `ä` may be a single

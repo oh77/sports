@@ -9,25 +9,28 @@ type Props = {
   rows: TeamStanding[];
   /** Codes of the matchup teams, rendered with a highlighted background. */
   highlight: string[];
+  /** What the highlight means, for screen readers. */
+  highlightNote?: string;
   league: League;
   season?: string;
   caption: string;
 };
 
 /**
- * Rows for a matchup excerpt: each matchup team's standing plus its direct
- * neighbours (±1 position within the team's own table/group), deduped and in
- * table order.
+ * Rows for a table excerpt: each named team's standing plus the `radius`
+ * positions above and below it, within that team's own table/group. Deduped
+ * and in table order, so overlapping windows merge into one run of rows.
  */
 export function matchupRows(
   stats: TeamStanding[],
   codes: string[],
+  radius = 1,
 ): TeamStanding[] {
   const picked = new Set<TeamStanding>();
   for (const code of codes) {
     const i = stats.findIndex((s) => s.info.code === code);
     if (i === -1) continue;
-    for (const j of [i - 1, i, i + 1]) {
+    for (let j = i - radius; j <= i + radius; j++) {
       const row = stats[j];
       if (row && row.group === stats[i].group) picked.add(row);
     }
@@ -43,6 +46,7 @@ export function matchupRows(
 export function MatchupTable({
   rows,
   highlight,
+  highlightNote = 'spelar i matchen',
   league,
   season,
   caption,
@@ -112,7 +116,7 @@ export function MatchupTable({
                     <span className="hidden sm:inline">{row.info.long}</span>
                     <span className="sm:hidden">{row.info.short}</span>
                     {isMatchupTeam && (
-                      <span className="sr-only">(spelar i matchen)</span>
+                      <span className="sr-only">({highlightNote})</span>
                     )}
                   </Link>
                 </td>

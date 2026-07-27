@@ -8,18 +8,20 @@ import { leagueAccent, leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
 import type { MatchInfo } from '@/app/types/domain/match';
 import type { MatchOutcome } from '@/app/types/domain/standings';
+import type { TeamInfo } from '@/app/types/domain/team';
 import {
   dateKeyFromString,
   formatLongDateFromString,
+  formatShortDateFromString,
   formatTimeFromString,
 } from '@/app/utils/dateUtils';
 import { outcomeFor } from '@/app/utils/form';
-import { teamPath } from '@/app/utils/leaguePaths';
+import { matchupPath } from '@/app/utils/leaguePaths';
 
 type Props = {
   matches: MatchInfo[];
   /** Heading level for the per-day date headings. */
-  headingLevel?: 'h2' | 'h3';
+  headingLevel?: 'h2' | 'h3' | 'h4';
   showDateHeadings?: boolean;
   /**
    * For cross-league lists: resolves which league a match belongs to, shown
@@ -32,11 +34,16 @@ type Props = {
    */
   perspective?: string;
   /**
-   * League + season for the current view. When set in perspective mode, the
-   * opponent links to its own team page.
+   * League + season for the current view. When set, each team links to its
+   * matchup page against the other team of the match.
    */
   league?: League;
   season?: string;
+  /**
+   * Label upcoming matches with their short date ("25 jul") instead of the
+   * kick-off time — for lists that carry no date headings of their own.
+   */
+  dateInsteadOfTime?: boolean;
 };
 
 /**
@@ -52,9 +59,33 @@ export function MatchList({
   perspective,
   league,
   season,
+  dateInsteadOfTime = false,
 }: Props) {
   if (matches.length === 0) {
     return <p className="py-6 text-center text-sm text-mute">Inga matcher.</p>;
+  }
+
+  const row = (match: MatchInfo) => (
+    <li key={match.uuid} className="border-b border-line-soft last:border-b-0">
+      <MatchRow
+        match={match}
+        league={leagueOf?.(match) ?? league}
+        chipLeague={leagueOf?.(match)}
+        perspective={perspective}
+        season={season}
+        dateInsteadOfTime={dateInsteadOfTime}
+      />
+    </li>
+  );
+
+  // Without date headings there is nothing to group by — one flat card keeps
+  // the list compact instead of splitting it into a box per day.
+  if (!showDateHeadings) {
+    return (
+      <ul className="overflow-hidden rounded-xl border border-line bg-surface">
+        {matches.map(row)}
+      </ul>
+    );
   }
 
   const byDay = new Map<string, MatchInfo[]>();
@@ -69,25 +100,11 @@ export function MatchList({
     <div className="flex flex-col gap-5">
       {Array.from(byDay.entries()).map(([day, dayMatches]) => (
         <section key={day}>
-          {showDateHeadings && (
-            <Heading className="display mb-2 text-[13px] font-bold uppercase tracking-[0.08em] text-dim">
-              {formatLongDateFromString(dayMatches[0].startDateTime)}
-            </Heading>
-          )}
+          <Heading className="display mb-2 text-[13px] font-bold uppercase tracking-[0.08em] text-dim">
+            {formatLongDateFromString(dayMatches[0].startDateTime)}
+          </Heading>
           <ul className="overflow-hidden rounded-xl border border-line bg-surface">
-            {dayMatches.map((match) => (
-              <li
-                key={match.uuid}
-                className="border-b border-line-soft last:border-b-0"
-              >
-                <MatchRow
-                  match={match}
-                  league={leagueOf?.(match) ?? league}
-                  perspective={perspective}
-                  season={season}
-                />
-              </li>
-            ))}
+            {dayMatches.map(row)}
           </ul>
         </section>
       ))}
@@ -98,13 +115,19 @@ export function MatchList({
 function MatchRow({
   match,
   league,
+  chipLeague,
   perspective,
   season,
+  dateInsteadOfTime,
 }: {
   match: MatchInfo;
+  /** Which league's pages the row links into. */
   league?: League;
+  /** Set only in cross-league lists, where the row has to name its league. */
+  chipLeague?: League;
   perspective?: string;
   season?: string;
+  dateInsteadOfTime?: boolean;
 }) {
   const { homeTeamInfo, awayTeamInfo, state } = match;
 
@@ -126,7 +149,7 @@ function MatchRow({
           <SideChip home={isHome} />
           {league ? (
             <Link
-              href={teamPath(league, season, opponent.code)}
+              href={matchupPath(league, season, perspective, opponent.code)}
               className="flex flex-1 items-center gap-2 text-sm font-medium text-ink transition-colors hover:text-accent"
             >
               {opponentBody}
@@ -141,6 +164,7 @@ function MatchRow({
             showStatusTag={false}
             outcome={outcome}
             inlineAggregate
+            dateInsteadOfTime={dateInsteadOfTime}
           />
         </div>
         {state === 'live' && <LiveTag />}
@@ -151,30 +175,95 @@ function MatchRow({
   return (
     <div
       className={`grid items-center gap-2 px-3 py-3 sm:px-4 ${
-        league ? 'grid-cols-[auto_1fr_auto_1fr]' : 'grid-cols-[1fr_auto_1fr]'
+        chipLeague
+          ? 'grid-cols-[auto_1fr_auto_1fr]'
+          : 'grid-cols-[1fr_auto_1fr]'
       }`}
     >
-      {league && <LeagueChip league={league} />}
+      {chipLeague && <LeagueChip league={chipLeague} />}
 
       {/* Home */}
-      <span className="flex items-center justify-end gap-2 text-right text-sm font-medium text-ink">
-        <span className="hidden sm:inline">{homeTeamInfo.teamInfo.long}</span>
-        <span className="sm:hidden">{homeTeamInfo.teamInfo.short}</span>
-        <TeamBadge team={homeTeamInfo.teamInfo} size="sm" />
-      </span>
+      <TeamCell
+        team={homeTeamInfo.teamInfo}
+        opponent={awayTeamInfo.teamInfo}
+        league={league}
+        season={season}
+        align="end"
+      />
 
       {/* Score / kickoff */}
-      <MatchCenter match={match} />
+      <MatchCenter match={match} dateInsteadOfTime={dateInsteadOfTime} />
 
       {/* Away */}
-      <span className="flex items-center gap-2 text-sm font-medium text-ink">
-        <TeamBadge team={awayTeamInfo.teamInfo} size="sm" />
-        <span className="hidden sm:inline">{awayTeamInfo.teamInfo.long}</span>
-        <span className="sm:hidden">{awayTeamInfo.teamInfo.short}</span>
-      </span>
+      <TeamCell
+        team={awayTeamInfo.teamInfo}
+        opponent={homeTeamInfo.teamInfo}
+        league={league}
+        season={season}
+        align="start"
+      />
 
       {state === 'live' && <LiveTag />}
     </div>
+  );
+}
+
+/**
+ * One side of a match row. With a known league the team links to its matchup
+ * page against the other team of the match — the clicked team is always the
+ * subject, home or away.
+ */
+function TeamCell({
+  team,
+  opponent,
+  league,
+  season,
+  align,
+}: {
+  team: TeamInfo;
+  opponent: TeamInfo;
+  league?: League;
+  season?: string;
+  align: 'start' | 'end';
+}) {
+  const body =
+    align === 'end' ? (
+      <>
+        <span className="hidden sm:inline">{team.long}</span>
+        <span className="sm:hidden">{team.short}</span>
+        <TeamBadge team={team} size="sm" />
+      </>
+    ) : (
+      <>
+        <TeamBadge team={team} size="sm" />
+        <span className="hidden sm:inline">{team.long}</span>
+        <span className="sm:hidden">{team.short}</span>
+      </>
+    );
+
+  const layout =
+    align === 'end'
+      ? 'justify-end text-right'
+      : // Keeps the away side from stretching past its label.
+        'justify-start';
+
+  if (!league) {
+    return (
+      <span
+        className={`flex items-center gap-2 text-sm font-medium text-ink ${layout}`}
+      >
+        {body}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      href={matchupPath(league, season, team.code, opponent.code)}
+      className={`flex items-center gap-2 text-sm font-medium text-ink transition-colors hover:text-accent ${layout}`}
+    >
+      {body}
+    </Link>
   );
 }
 
@@ -243,6 +332,7 @@ function MatchCenter({
   showStatusTag = true,
   outcome,
   inlineAggregate = false,
+  dateInsteadOfTime = false,
 }: {
   match: MatchInfo;
   showStatusTag?: boolean;
@@ -253,6 +343,8 @@ function MatchCenter({
    * single-opponent rows on team pages from growing a line per annotation.
    */
   inlineAggregate?: boolean;
+  /** Short date instead of kick-off time for upcoming matches. */
+  dateInsteadOfTime?: boolean;
 }) {
   const { homeTeamInfo, awayTeamInfo, state } = match;
   const aggregate = <AggregateLine match={match} />;
@@ -261,8 +353,10 @@ function MatchCenter({
     return (
       <span className="flex flex-col items-center gap-0.5">
         <span className="flex items-baseline gap-1.5">
-          <span className="num rounded-md bg-surface-3 px-2.5 py-1 text-sm font-semibold text-soft">
-            {formatTimeFromString(match.startDateTime)}
+          <span className="num whitespace-nowrap rounded-md bg-surface-3 px-2.5 py-1 text-sm font-semibold text-soft">
+            {dateInsteadOfTime
+              ? formatShortDateFromString(match.startDateTime)
+              : formatTimeFromString(match.startDateTime)}
           </span>
           {inlineAggregate && aggregate}
         </span>

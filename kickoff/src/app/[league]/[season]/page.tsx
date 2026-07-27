@@ -52,7 +52,12 @@ export default async function LeagueOverviewPage({
               <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">
                 Pågående
               </h2>
-              <MatchList matches={live} showDateHeadings={false} />
+              <MatchList
+                matches={live}
+                showDateHeadings={false}
+                league={league}
+                season={season}
+              />
             </section>
           )}
 
@@ -66,7 +71,7 @@ export default async function LeagueOverviewPage({
               <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">
                 Kommande matcher
               </h2>
-              <MatchList matches={upcoming} />
+              <MatchList matches={upcoming} league={league} season={season} />
             </section>
           )}
 
@@ -74,7 +79,7 @@ export default async function LeagueOverviewPage({
             <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">
               Senast spelade
             </h2>
-            <MatchList matches={previous} />
+            <MatchList matches={previous} league={league} season={season} />
           </section>
         </div>
 
