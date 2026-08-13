@@ -1,7 +1,4 @@
-import {
-  ALLSVENSKAN_LEAGUE_NAME,
-  SPORTOMEDIA_GQL,
-} from '@/app/config/sportomedia';
+import { SPORTOMEDIA_GQL } from '@/app/config/sportomedia';
 import type {
   SportomediaMatch,
   SportomediaMatchesData,
@@ -65,14 +62,22 @@ const TEAMS_QUERY = `
   }
 `;
 
-export async function fetchAllsvenskanTeams(
+/**
+ * All fetchers take the provider's `configLeagueName` (Allsvenskan or
+ * Superettan) — the queries are identical across the two leagues — and key
+ * their cache by it.
+ */
+export async function fetchSportomediaTeams(
+  leagueName: string,
   seasonStartYear: number,
 ): Promise<SportomediaTeam[]> {
   const data = await getCachedData<SportomediaTeamsData>(
-    generateCacheKey('allsvenskan-teams', { season: String(seasonStartYear) }),
+    generateCacheKey(`${leagueName}-teams`, {
+      season: String(seasonStartYear),
+    }),
     () =>
       gqlQuery('teams', TEAMS_QUERY, {
-        configLeagueName: ALLSVENSKAN_LEAGUE_NAME,
+        configLeagueName: leagueName,
         configSeasonStartYear: seasonStartYear,
       }),
   );
@@ -117,16 +122,17 @@ const MATCHES_QUERY = `
 `;
 
 /** The full season schedule (all rounds) in one call. */
-export async function fetchAllsvenskanMatches(
+export async function fetchSportomediaMatches(
+  leagueName: string,
   seasonStartYear: number,
 ): Promise<SportomediaMatch[]> {
   const data = await getCachedData<SportomediaMatchesData>(
-    generateCacheKey('allsvenskan-matches', {
+    generateCacheKey(`${leagueName}-matches`, {
       season: String(seasonStartYear),
     }),
     () =>
       gqlQuery('matchesForLeague', MATCHES_QUERY, {
-        configLeagueName: ALLSVENSKAN_LEAGUE_NAME,
+        configLeagueName: leagueName,
         configSeasonStartYear: seasonStartYear,
       }),
     TTL.matches,
@@ -160,16 +166,17 @@ const STANDINGS_QUERY = `
   }
 `;
 
-export async function fetchAllsvenskanStandings(
+export async function fetchSportomediaStandings(
+  leagueName: string,
   seasonStartYear: number,
 ): Promise<SportomediaStanding[]> {
   const data = await getCachedData<SportomediaStandingsData>(
-    generateCacheKey('allsvenskan-standings', {
+    generateCacheKey(`${leagueName}-standings`, {
       season: String(seasonStartYear),
     }),
     () =>
       gqlQuery('StandingsForLeague', STANDINGS_QUERY, {
-        configLeagueName: ALLSVENSKAN_LEAGUE_NAME,
+        configLeagueName: leagueName,
         configSeasonStartYear: seasonStartYear,
         type: 'total',
       }),
@@ -208,16 +215,17 @@ const STATISTICS_QUERY = `
 `;
 
 /** All players' season statistics (unsorted — callers sort). */
-export async function fetchAllsvenskanPlayers(
+export async function fetchSportomediaPlayers(
+  leagueName: string,
   seasonStartYear: number,
 ): Promise<SportomediaPlayer[]> {
   const data = await getCachedData<SportomediaStatisticsData>(
-    generateCacheKey('allsvenskan-players', {
+    generateCacheKey(`${leagueName}-players`, {
       season: String(seasonStartYear),
     }),
     () =>
       gqlQuery('statistics', STATISTICS_QUERY, {
-        configLeagueName: ALLSVENSKAN_LEAGUE_NAME,
+        configLeagueName: leagueName,
         configSeasonStartYear: seasonStartYear,
       }),
     TTL.stats,

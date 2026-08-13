@@ -1,6 +1,10 @@
 import { resolveSeason } from '@/app/config/leagues';
 import { PL_PLAYER_SORT } from '@/app/config/pulselive';
 import {
+  ALLSVENSKAN_LEAGUE_NAME,
+  SUPERETTAN_LEAGUE_NAME,
+} from '@/app/config/sportomedia';
+import {
   UCL_COMPETITION_ID,
   UCL_PLAYER_STATS,
   UECL_COMPETITION_ID,
@@ -23,10 +27,10 @@ import {
   plTeamToDomain,
 } from '@/app/utils/translators/pulseliveToDomain';
 import {
-  allsvenskanMatchesToDomain,
-  allsvenskanPlayersToDomain,
-  allsvenskanStandingsToDomain,
-  allsvenskanTeamToDomain,
+  sportomediaMatchesToDomain,
+  sportomediaPlayersToDomain,
+  sportomediaStandingsToDomain,
+  sportomediaTeamToDomain,
 } from '@/app/utils/translators/sportomediaToDomain';
 import {
   clCardsToPlayers,
@@ -42,10 +46,10 @@ import {
   fetchPlTeams,
 } from './pulseliveService';
 import {
-  fetchAllsvenskanMatches,
-  fetchAllsvenskanPlayers,
-  fetchAllsvenskanStandings,
-  fetchAllsvenskanTeams,
+  fetchSportomediaMatches,
+  fetchSportomediaPlayers,
+  fetchSportomediaStandings,
+  fetchSportomediaTeams,
 } from './sportomediaService';
 import {
   fetchClMatches,
@@ -56,7 +60,8 @@ import {
 /**
  * Per-league data access in the application contract. Pages and API routes
  * only talk to this module; it dispatches to the league's provider service +
- * translator (pulselive for PL, sportomedia for Allsvenskan, UEFA for CL).
+ * translator (pulselive for PL, sportomedia for Allsvenskan/Superettan, UEFA
+ * for the European competitions).
  */
 
 export type PlayerStatsSort = 'goals' | 'assists' | 'cards';
@@ -73,9 +78,24 @@ function plSeasonId(seasonKey?: string | null): string {
   return season.externalId ?? season.key;
 }
 
-/** Allsvenskan season keys are the start year ("2026"). */
-function allsvenskanSeasonYear(seasonKey?: string | null): number {
-  const season = resolveSeason('allsvenskan', seasonKey);
+/** True for the Swedish leagues, which share the sportomedia provider. */
+function isSportomedia(league: League): boolean {
+  return league === 'allsvenskan' || league === 'superettan';
+}
+
+/** The provider's `configLeagueName` for a Swedish league. */
+function sportomediaLeagueName(league: League): string {
+  return league === 'superettan'
+    ? SUPERETTAN_LEAGUE_NAME
+    : ALLSVENSKAN_LEAGUE_NAME;
+}
+
+/** Swedish season keys are the start year ("2026"). */
+function sportomediaSeasonYear(
+  league: League,
+  seasonKey?: string | null,
+): number {
+  const season = resolveSeason(league, seasonKey);
   return Number(season.externalId ?? season.key);
 }
 
@@ -99,13 +119,14 @@ export async function getMatches(
   if (league === 'pl') {
     return plMatchesToDomain(await fetchPlMatchesWindow(plSeasonId(seasonKey)));
   }
-  if (league === 'allsvenskan') {
-    const year = allsvenskanSeasonYear(seasonKey);
+  if (isSportomedia(league)) {
+    const name = sportomediaLeagueName(league);
+    const year = sportomediaSeasonYear(league, seasonKey);
     const [matches, teams] = await Promise.all([
-      fetchAllsvenskanMatches(year),
-      fetchAllsvenskanTeams(year),
+      fetchSportomediaMatches(name, year),
+      fetchSportomediaTeams(name, year),
     ]);
-    return allsvenskanMatchesToDomain(matches, teams);
+    return sportomediaMatchesToDomain(matches, teams);
   }
   return clMatchesToDomain(
     await fetchClMatches(
@@ -122,18 +143,20 @@ export async function getStandings(
   if (league === 'pl') {
     return plStandingsToDomain(await fetchPlStandings(plSeasonId(seasonKey)));
   }
-  if (league === 'allsvenskan') {
-    const year = allsvenskanSeasonYear(seasonKey);
+  if (isSportomedia(league)) {
+    const name = sportomediaLeagueName(league);
+    const year = sportomediaSeasonYear(league, seasonKey);
     const [standings, teams, matches] = await Promise.all([
-      fetchAllsvenskanStandings(year),
-      fetchAllsvenskanTeams(year),
-      fetchAllsvenskanMatches(year),
+      fetchSportomediaStandings(name, year),
+      fetchSportomediaTeams(name, year),
+      fetchSportomediaMatches(name, year),
     ]);
     // The provider's form field is unreliable; derive it from the schedule.
-    return allsvenskanStandingsToDomain(
+    return sportomediaStandingsToDomain(
+      league,
       standings,
       teams,
-      allsvenskanMatchesToDomain(matches, teams),
+      sportomediaMatchesToDomain(matches, teams),
     );
   }
   const competitionId = uefaCompetitionId(league);
@@ -160,11 +183,12 @@ export async function getPlayerStats(
     );
     return plPlayersToDomain(entries, HIGHLIGHT[sort]);
   }
-  if (league === 'allsvenskan') {
-    const players = await fetchAllsvenskanPlayers(
-      allsvenskanSeasonYear(seasonKey),
+  if (isSportomedia(league)) {
+    const players = await fetchSportomediaPlayers(
+      sportomediaLeagueName(league),
+      sportomediaSeasonYear(league, seasonKey),
     );
-    return sortPlayerStats(allsvenskanPlayersToDomain(players), sort);
+    return sortPlayerStats(sportomediaPlayersToDomain(players), sort);
   }
   // CL/Conference League: the ranking endpoint serves one metric per request.
   const competitionId = uefaCompetitionId(league);
@@ -251,9 +275,12 @@ export async function getTeams(
   if (league === 'pl') {
     return (await fetchPlTeams(plSeasonId(seasonKey))).map(plTeamToDomain);
   }
-  if (league === 'allsvenskan') {
-    const teams = await fetchAllsvenskanTeams(allsvenskanSeasonYear(seasonKey));
-    return teams.map(allsvenskanTeamToDomain);
+  if (isSportomedia(league)) {
+    const teams = await fetchSportomediaTeams(
+      sportomediaLeagueName(league),
+      sportomediaSeasonYear(league, seasonKey),
+    );
+    return teams.map(sportomediaTeamToDomain);
   }
   // CL/Conference League: the teams host is origin-locked, so derive teams
   // from the standings (falling back to the schedule before standings exist).

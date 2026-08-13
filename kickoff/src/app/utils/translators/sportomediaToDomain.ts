@@ -1,3 +1,4 @@
+import type { League } from '@/app/types/domain/league';
 import type {
   MatchesData,
   MatchInfo,
@@ -20,7 +21,7 @@ import type { SportomediaTeam } from '@/app/types/sportomedia/teams';
 import { playerColumns, STANDINGS_COLUMNS } from '@/app/utils/footballColumns';
 import { lastFiveForm, sideRecordFor } from '@/app/utils/form';
 
-export function allsvenskanTeamToDomain(team: SportomediaTeam): TeamInfo {
+export function sportomediaTeamToDomain(team: SportomediaTeam): TeamInfo {
   return {
     code: team.abbrv.toLowerCase(),
     externalId: String(team.everySportId),
@@ -59,7 +60,7 @@ function matchTeamInfo(
   };
 }
 
-export function allsvenskanMatchesToDomain(
+export function sportomediaMatchesToDomain(
   matches: SportomediaMatch[],
   teams: SportomediaTeam[],
 ): MatchesData {
@@ -115,24 +116,44 @@ function allsvenskanZone(
   return undefined;
 }
 
+/**
+ * Superettan zones (16 teams): 1-2 promoted, 3-4 to the promotion play-off,
+ * 13-14 to the relegation play-off, 15-16 straight down.
+ */
+function superettanZone(
+  position: number,
+  total: number,
+): StandingsZone | undefined {
+  if (position <= 2) return 'promotion';
+  if (position <= 4) return 'promotionPlayoff';
+  if (position >= total - 3 && position <= total - 2) {
+    return 'relegationPlayoff';
+  }
+  if (position > total - 2) return 'relegation';
+  return undefined;
+}
+
 /** Stats arrive as named string cells: gp, w, t, l, gf, ga, d, pts. */
 function statNum(standing: SportomediaStanding, name: string): number {
   const cell = standing.stats.find((s) => s.name === name);
   return cell ? Number(cell.value) : 0;
 }
 
-export function allsvenskanStandingsToDomain(
+export function sportomediaStandingsToDomain(
+  league: League,
   standings: SportomediaStanding[],
   teams: SportomediaTeam[],
   matchesData: MatchesData,
 ): StandingsData {
+  // The two Swedish leagues share every query but not their table format.
+  const zoneFor = league === 'superettan' ? superettanZone : allsvenskanZone;
   const teamByAbbrv = new Map(teams.map((t) => [t.abbrv, t]));
 
   const stats: TeamStanding[] = standings
     .map((entry) => {
       const team = teamByAbbrv.get(entry.teamAbbrv);
       const info: TeamInfo = team
-        ? allsvenskanTeamToDomain(team)
+        ? sportomediaTeamToDomain(team)
         : {
             code: entry.teamAbbrv.toLowerCase(),
             externalId: String(entry.teamId),
@@ -151,7 +172,7 @@ export function allsvenskanStandingsToDomain(
         GA: statNum(entry, 'ga'),
         GD: statNum(entry, 'd'),
         Points: statNum(entry, 'pts'),
-        zone: allsvenskanZone(entry.position, standings.length),
+        zone: zoneFor(entry.position, standings.length),
         form: lastFiveForm(matchesData.matches, info.code),
         homeRecord: sideRecordFor(matchesData.matches, info.code, 'home'),
         awayRecord: sideRecordFor(matchesData.matches, info.code, 'away'),
@@ -163,7 +184,7 @@ export function allsvenskanStandingsToDomain(
   return { dataColumns: STANDINGS_COLUMNS, stats };
 }
 
-export function allsvenskanPlayersToDomain(
+export function sportomediaPlayersToDomain(
   players: SportomediaPlayer[],
 ): PlayerStatsData {
   const stats: PlayerStats[] = players.map((p) => ({

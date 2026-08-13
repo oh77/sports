@@ -12,6 +12,8 @@ export type StandingsZone =
   | 'title'
   | 'championsLeague'
   | 'europe'
+  | 'promotion'
+  | 'promotionPlayoff'
   | 'relegationPlayoff'
   | 'relegation'
   | 'knockout'

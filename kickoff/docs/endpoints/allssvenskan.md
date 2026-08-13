@@ -3,6 +3,19 @@
 ## League Logo
 https://allsvenskan.se/wp-content/themes/sef-leagues/images/allsvenskan/allsvenskan-logo.svg
 
+## Superettan
+Superettan runs on the same endpoints and queries — only the variables differ:
+
+```json
+{"configLeagueName":"superettan","configSeasonStartYear":2026}
+```
+
+League logo:
+https://superettan.se/wp-content/themes/sef-leagues/images/superettan/SE2026.png
+
+Table format differs from Allsvenskan: 1-2 promoted, 3-4 promotion play-off,
+13-14 relegation play-off, 15-16 relegated.
+
 ## Teams
 
 ### Endpoint

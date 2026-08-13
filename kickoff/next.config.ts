@@ -36,6 +36,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'superettan.se',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'www.premierleague.com',
         pathname: '/**',
       },

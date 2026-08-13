@@ -1,6 +1,13 @@
 import type { League } from '@/app/types/domain/league';
 
-export const ALL_LEAGUES: League[] = ['allsvenskan', 'pl', 'cl', 'el', 'col'];
+export const ALL_LEAGUES: League[] = [
+  'allsvenskan',
+  'superettan',
+  'pl',
+  'cl',
+  'el',
+  'col',
+];
 
 export function isLeague(value: string): value is League {
   return (ALL_LEAGUES as string[]).includes(value);
@@ -28,29 +35,46 @@ export type SeasonConfig = {
  * provider API.
  */
 export const LEAGUE_SEASONS: Record<League, SeasonConfig[]> = {
-  allsvenskan: [{ key: '2026' }, { key: '2025' }],
+  allsvenskan: [
+    { key: '2026' },
+    { key: '2025' },
+    { key: '2024' },
+    { key: '2023' },
+  ],
+  // Superettan runs on the same provider and calendar as Allsvenskan. The
+  // provider has no usable data before 2023.
+  superettan: [
+    { key: '2026' },
+    { key: '2025' },
+    { key: '2024' },
+    { key: '2023' },
+  ],
   pl: [
     { key: '26-27', externalId: '2026' },
     { key: '25-26', externalId: '2025' },
     { key: '24-25', externalId: '2024' },
+    { key: '23-24', externalId: '2023' },
   ],
   // UEFA's seasonYear is the year the season ends: 25-26 -> "2026".
   cl: [
     { key: '26-27', externalId: '2027' },
     { key: '25-26', externalId: '2026' },
     { key: '24-25', externalId: '2025' },
+    { key: '23-24', externalId: '2024' },
   ],
   // Europa League runs on the same UEFA API (seasonYear = end year).
   el: [
     { key: '26-27', externalId: '2027' },
     { key: '25-26', externalId: '2026' },
     { key: '24-25', externalId: '2025' },
+    { key: '23-24', externalId: '2024' },
   ],
   // Conference League runs on the same UEFA API (seasonYear = end year).
   col: [
     { key: '26-27', externalId: '2027' },
     { key: '25-26', externalId: '2026' },
     { key: '24-25', externalId: '2025' },
+    { key: '23-24', externalId: '2024' },
   ],
 };
 

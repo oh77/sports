@@ -53,6 +53,16 @@ const FIXTURE_TEAMS: Record<League, TeamInfo[]> = {
     team('elfsborg', 'ELF', 'IF Elfsborg'),
     team('ifkn', 'IFKN', 'IFK Norrköping'),
   ],
+  superettan: [
+    team('hif', 'HIF', 'Helsingborgs IF'),
+    team('lbois', 'LBOIS', 'Landskrona BoIS'),
+    team('uts', 'UTS', 'Utsiktens BK'),
+    team('tff', 'TFF', 'Trelleborgs FF'),
+    team('oster', 'ÖST', 'Östers IF'),
+    team('ume', 'UME', 'Umeå FC'),
+    team('sif', 'SIF', 'Sandvikens IF'),
+    team('fff', 'FFF', 'Falkenbergs FF'),
+  ],
   pl: [
     team('arsenal', 'ARS', 'Arsenal'),
     team('liverpool', 'LIV', 'Liverpool'),
@@ -252,6 +262,18 @@ const PLAYER_NAMES: Record<League, string[]> = {
     'Filip Rydholm',
     'Leo Stenmark',
   ],
+  superettan: [
+    'Alve Kjellman',
+    'Sixten Bohlin',
+    'Vidar Almroth',
+    'Malte Ringdahl',
+    'Ture Lindkvist',
+    'Ivar Söderquist',
+    'Gustav Wennerlund',
+    'Emrik Tallberg',
+    'Sigge Hallberg',
+    'Noel Brandius',
+  ],
   pl: [
     'Harry Whitfield',
     'Jamal Okoye',
@@ -304,6 +326,7 @@ const PLAYER_NAMES: Record<League, string[]> = {
 
 const NATIONALITY: Record<League, string> = {
   allsvenskan: 'SWE',
+  superettan: 'SWE',
   pl: 'ENG',
   cl: 'ESP',
   el: 'ITA',
@@ -366,6 +389,13 @@ const KEEPER_NAMES: Record<League, string[]> = {
     'Jonatan Hellgren',
     'Simon Dahlqvist',
     'Ludvig Ekefjärd',
+  ],
+  superettan: [
+    'Melvin Rosengren',
+    'Alfred Kvarnström',
+    'Teodor Bergvall',
+    'Kasper Lindeberg',
+    'Rasmus Wiklander',
   ],
   pl: [
     'Nathan Prescott',

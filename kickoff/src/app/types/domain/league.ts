@@ -1,1 +1,7 @@
-export type League = 'allsvenskan' | 'pl' | 'cl' | 'el' | 'col';
+export type League =
+  | 'allsvenskan'
+  | 'superettan'
+  | 'pl'
+  | 'cl'
+  | 'el'
+  | 'col';
