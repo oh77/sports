@@ -27,7 +27,7 @@ export const pitch = {
 /** Per-league electric accent, applied via the `--accent` CSS variable. */
 export const leagueAccent: Record<League, string> = {
   allsvenskan: '#facc15', // Allsvenskan yellow (on blue-dark surfaces)
-  superettan: '#38bdf8', // Superettan sky blue
+  superettan: '#2f9e5e', // Superettan green (logo green #166938, lightened for contrast)
   pl: '#a78bfa', // Premier League purple
   cl: '#3b82f6', // Champions League blue
   el: '#f97316', // Europa League orange
