@@ -174,10 +174,17 @@ function MatchRow({
 
   return (
     <div
-      className={`grid items-center gap-2 px-3 py-3 sm:px-4 ${
+      // Cross-league rows carry a left accent stripe in the league's colour,
+      // reinforcing the logo chip beside it.
+      style={
         chipLeague
-          ? 'grid-cols-[auto_1fr_auto_1fr]'
-          : 'grid-cols-[1fr_auto_1fr]'
+          ? ({ '--accent': leagueAccent[chipLeague] } as CSSProperties)
+          : undefined
+      }
+      className={`grid items-center gap-2 py-3 ${
+        chipLeague
+          ? 'grid-cols-[auto_1fr_auto_1fr] border-l-2 border-l-accent pl-2.5 pr-3 sm:pl-3.5 sm:pr-4'
+          : 'grid-cols-[1fr_auto_1fr] px-3 sm:px-4'
       }`}
     >
       {chipLeague && <LeagueChip league={chipLeague} />}
