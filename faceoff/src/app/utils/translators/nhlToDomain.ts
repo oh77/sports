@@ -5,9 +5,15 @@ import type {
 } from '../../types/domain/game';
 import type { GoalieStats } from '../../types/domain/goalie-stats';
 import type { PlayerInfo, PlayerStats } from '../../types/domain/player-stats';
+import type { RosterPlayer } from '../../types/domain/roster';
 import type { TeamInfo } from '../../types/domain/team';
 import type { NHLGame, NHLGameTeam } from '../../types/nhl/game';
+import type {
+  NhlRosterPlayer,
+  NhlRosterResponse,
+} from '../../types/nhl/roster';
 import type { NhlGoalieSummary, NhlSkaterSummary } from '../../types/nhl/stats';
+import { countryCodeToAlpha2 } from '../countryCode';
 
 function translateNHLTeam(team: NHLGameTeam): TeamInfo {
   const full = [team.placeName, team.commonName].filter(Boolean).join(' ');
@@ -61,9 +67,11 @@ export function translateNHLGamesToDomainResponse(
 
 /**
  * Build a domain `PlayerInfo` from an NHL summary row. The summary feed carries
- * no jersey number, nationality, birth data or media, so those are stubbed
- * (mirroring how the CHL translator fills gaps). `teamAbbrevs` (e.g. "EDM", or
- * "EDM,LAK" when traded) is the only club identifier available.
+ * no jersey number, nationality, birth data or media — those come from the
+ * club-roster feed, passed in as `roster` when the player was found there.
+ * Without it they stay stubbed (mirroring how the CHL translator fills gaps).
+ * `teamAbbrevs` (e.g. "EDM", or "EDM,LAK" when traded) is the only club
+ * identifier the summary feed offers.
  */
 function buildNhlPlayerInfo(opts: {
   playerId: number;
@@ -72,8 +80,17 @@ function buildNhlPlayerInfo(opts: {
   position: string;
   shoots: string | null;
   teamAbbrevs: string;
+  roster?: RosterPlayer;
 }): PlayerInfo {
-  const { playerId, fullName, lastName, position, shoots, teamAbbrevs } = opts;
+  const {
+    playerId,
+    fullName,
+    lastName,
+    position,
+    shoots,
+    teamAbbrevs,
+    roster,
+  } = opts;
   const firstName = fullName.endsWith(lastName)
     ? fullName.slice(0, fullName.length - lastName.length).trim()
     : fullName;
@@ -83,15 +100,26 @@ function buildNhlPlayerInfo(opts: {
     fullName,
     firstName,
     lastName,
-    birthDate: '',
-    nationality: '',
-    number: 0,
+    birthDate: roster?.birthDate ?? '',
+    nationality: roster?.nationality ?? '',
+    number: roster?.number ?? 0,
     position,
     shoots,
     gender: '',
-    weight: { value: 0, format: '' },
-    height: { value: 0, format: '' },
-    playerMedia: { id: 0, mediaString: '', type: '', sortOrder: 0 },
+    weight: roster
+      ? { value: roster.weightKg, format: 'kg' }
+      : { value: 0, format: '' },
+    height: roster
+      ? { value: roster.heightCm, format: 'cm' }
+      : { value: 0, format: '' },
+    playerMedia: roster?.headshot
+      ? {
+          id: playerId,
+          mediaString: roster.headshot,
+          type: 'headshot',
+          sortOrder: 0,
+        }
+      : { id: 0, mediaString: '', type: '', sortOrder: 0 },
     team: {
       uuid: '',
       name: teamAbbrevs,
@@ -108,6 +136,7 @@ function buildNhlPlayerInfo(opts: {
 export function translateNhlSkaterStatsToDomain(
   row: NhlSkaterSummary,
   rank: number | null,
+  roster?: RosterPlayer,
 ): PlayerStats {
   return {
     Rank: rank,
@@ -130,6 +159,7 @@ export function translateNhlSkaterStatsToDomain(
       position: row.positionCode,
       shoots: row.shootsCatches,
       teamAbbrevs: row.teamAbbrevs,
+      roster,
     }),
   };
 }
@@ -137,6 +167,7 @@ export function translateNhlSkaterStatsToDomain(
 export function translateNhlGoalieStatsToDomain(
   row: NhlGoalieSummary,
   rank: number | null,
+  roster?: RosterPlayer,
 ): GoalieStats {
   return {
     Rank: rank,
@@ -157,6 +188,50 @@ export function translateNhlGoalieStatsToDomain(
       position: 'G',
       shoots: row.shootsCatches,
       teamAbbrevs: row.teamAbbrevs,
+      roster,
     }),
   };
+}
+
+/** Translate one NHL roster entry into the domain roster contract. */
+function translateNhlRosterPlayer(
+  player: NhlRosterPlayer,
+  teamCode: string,
+): RosterPlayer {
+  const firstName = player.firstName.default;
+  const lastName = player.lastName.default;
+
+  return {
+    uuid: String(player.id),
+    fullName: `${firstName} ${lastName}`.trim(),
+    firstName,
+    lastName,
+    // The feed omits `sweaterNumber` for players without an assigned number.
+    number: player.sweaterNumber ?? null,
+    position: player.positionCode,
+    shoots: player.shootsCatches ?? null,
+    nationality: countryCodeToAlpha2(player.birthCountry ?? ''),
+    nationalityCode: player.birthCountry ?? '',
+    birthDate: player.birthDate ?? '',
+    birthCity: player.birthCity?.default ?? '',
+    headshot: player.headshot ?? '',
+    heightCm: player.heightInCentimeters ?? 0,
+    weightKg: player.weightInKilograms ?? 0,
+    teamCode,
+  };
+}
+
+/**
+ * Flatten an NHL roster response (three position groups) into domain players,
+ * tagged with the club they were fetched for.
+ */
+export function translateNhlRosterToDomain(
+  response: NhlRosterResponse,
+  teamCode: string,
+): RosterPlayer[] {
+  return [
+    ...(response.forwards ?? []),
+    ...(response.defensemen ?? []),
+    ...(response.goalies ?? []),
+  ].map((player) => translateNhlRosterPlayer(player, teamCode));
 }

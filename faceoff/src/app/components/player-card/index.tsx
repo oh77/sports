@@ -67,7 +67,8 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
       )}
     </span>
 
-    {/* Jersey number badge (hidden when unknown, e.g. NHL summary feed) */}
+    {/* Jersey number badge (hidden when unknown, e.g. an NHL player with no
+        current roster entry) */}
     {playerNumber > 0 && (
       <span className="display num inline-flex h-[26px] min-w-[34px] items-center justify-center rounded-md bg-surface-3 px-1.5 text-[13px] font-bold text-soft">
         #{playerNumber}

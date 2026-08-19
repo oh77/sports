@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { nhlSkaterStatsUrl, resolveNhlSeason } from '../../config/nhl';
+import { getRosterIndex } from '../../services/nhlService';
 import type {
   DataColumn,
   PlayerStatsData,
 } from '../../types/domain/player-stats';
 import type { NhlSkaterSummary, NhlStatsResponse } from '../../types/nhl/stats';
 import { generateCacheKey, getCachedData } from '../../utils/cache';
+import { countryCodeToAlpha2 } from '../../utils/countryCode';
 import { translateNhlSkaterStatsToDomain } from '../../utils/translators/nhlToDomain';
 
 const DATA_COLUMNS: DataColumn[] = [
@@ -18,7 +20,9 @@ const DATA_COLUMNS: DataColumn[] = [
   { name: 'A', type: 'number', highlighted: false, group: 'points' },
 ];
 
-// Enough to cover the full league (~940 skaters) so team filtering is reliable.
+// Enough to cover the full league (~940 skaters) so team and nationality
+// filtering is reliable — a club's or a country's best scorer may sit well
+// outside the league top 50.
 const FULL_LIMIT = 1000;
 // The league page only needs the top scorers.
 const TOP_LIMIT = 50;
@@ -34,27 +38,39 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const teamCode = searchParams.get('teamCode');
+    const nationality = searchParams.get('nationality');
     const season = resolveNhlSeason(searchParams.get('season'));
 
-    // Team filtering needs the whole leaderboard (a club's best scorer may sit
-    // outside the league top 50); the league page only needs the top slice.
-    const limit = teamCode ? FULL_LIMIT : TOP_LIMIT;
+    // Both filters need the whole leaderboard; the league page only needs the
+    // top slice. Ranks are always league-wide, so a filtered row keeps the
+    // position it holds in the league, not in the filtered subset.
+    const wantsFull = Boolean(teamCode || nationality);
+    const limit = wantsFull ? FULL_LIMIT : TOP_LIMIT;
     const cacheKey = generateCacheKey(
-      teamCode ? 'nhl-players-full' : 'nhl-players-points',
+      wantsFull ? 'nhl-players-full' : 'nhl-players-points',
       { season: season.key },
     );
 
     const domainData = await getCachedData(
       cacheKey,
       async (): Promise<PlayerStatsData> => {
-        const response = await fetch(nhlSkaterStatsUrl(season.seasonId, limit));
+        const [response, rosters] = await Promise.all([
+          fetch(nhlSkaterStatsUrl(season.seasonId, limit)),
+          // Nationality, jersey number and birth data live only on the roster
+          // feed; an empty index just leaves those fields stubbed.
+          getRosterIndex(season.seasonId),
+        ]);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data: NhlStatsResponse<NhlSkaterSummary> = await response.json();
         const stats = (data.data || []).map((row, index) =>
-          translateNhlSkaterStatsToDomain(row, index + 1),
+          translateNhlSkaterStatsToDomain(
+            row,
+            index + 1,
+            rosters.get(String(row.playerId)),
+          ),
         );
 
         return {
@@ -65,14 +81,16 @@ export async function GET(request: Request) {
       },
     );
 
-    const result: PlayerStatsData = teamCode
-      ? {
-          ...domainData,
-          stats: domainData.stats.filter((p) =>
-            playsFor(p.info.team.code, teamCode),
-          ),
-        }
-      : domainData;
+    // Compare on alpha-2 so "SE" and "SWE" both work.
+    const wantedCountry = nationality ? countryCodeToAlpha2(nationality) : null;
+    const stats = domainData.stats.filter(
+      (p) =>
+        (!teamCode || playsFor(p.info.team.code, teamCode)) &&
+        (!wantedCountry || p.info.nationality === wantedCountry),
+    );
+
+    const result: PlayerStatsData =
+      teamCode || wantedCountry ? { ...domainData, stats } : domainData;
 
     return NextResponse.json(result);
   } catch (error) {

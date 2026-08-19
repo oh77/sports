@@ -59,6 +59,10 @@ src/app/
 - Node.js `Map`-based in-memory cache (`src/app/utils/cache.ts`)
 - TTL-based expiration (5 minutes for games, 15 minutes for standings/stats)
 - Cache inspection/clearing endpoints at `/api/cache/inspect` and `/api/cache/clear`
+- `getCachedData` keys via `generateCacheKey`, which stamps the current hour
+  into the key (so entries rotate hourly) and currently has its cache reads
+  commented out. Slow-moving data (NHL rosters) uses `getStableCachedData`
+  instead: caller-supplied stable key, reads served from memory, 24 h default.
 
 ## Key Features
 
@@ -89,6 +93,17 @@ src/app/
    - Top scorers (goals, assists, points)
    - Top goalies (save percentage, GAA)
    - Filterable by league
+   - NHL: filterable by nationality (`?nationality=SE`), e.g. the "Svenskar"
+     toggle on the statistics page
+
+5. **NHL Rosters** (`docs/endpoints/nhl-roster.md`)
+   - `api-web.nhle.com/v1/roster/{TEAM}/{SEASON_ID}`, cached 24 h per club
+   - The only NHL feed with nationality, jersey number, birth data and
+     headshots — joined onto the stats leaderboards by `playerId`, which is
+     what makes nationality flags and the Swedish filter possible
+   - NHL standings mark clubs that have Swedish players with a flag
+   - **LAG** nav section (`/nhl/<season>/teams`) — pick a club, see its full
+     roster; NHL-only, as no other league has a roster feed
 
 ## Code Conventions
 

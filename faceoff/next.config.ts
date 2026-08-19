@@ -33,6 +33,13 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/logos/**',
       },
+      {
+        // Player headshots on the NHL roster pages.
+        protocol: 'https',
+        hostname: 'assets.nhle.com',
+        port: '',
+        pathname: '/mugs/**',
+      },
     ],
   },
 };

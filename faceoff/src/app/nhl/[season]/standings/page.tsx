@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { NhlStandings } from '../../../components/standings/nhl-standings';
+import type { RosterData } from '../../../types/domain/roster';
 import type { StandingsData } from '../../../types/domain/standings';
 import { withSeason } from '../../../utils/leaguePaths';
 import { useSeason } from '../../../utils/useSeason';
@@ -9,6 +10,7 @@ import { useSeason } from '../../../utils/useSeason';
 export default function NHLStandingsPage() {
   const season = useSeason();
   const [standings, setStandings] = useState<StandingsData | null>(null);
+  const [swedes, setSwedes] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +32,34 @@ export default function NHLStandingsPage() {
     };
 
     loadStandings();
+  }, [season]);
+
+  // Fetched separately so the table is never held up by the roster sweep; the
+  // flags simply appear once it lands. A failure leaves the table unmarked.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        setSwedes({});
+        const response = await fetch(
+          withSeason('/api/nhl-rosters?country=SE', season),
+        );
+        if (!response.ok) return;
+        const data: RosterData = await response.json();
+        const byTeam: Record<string, string[]> = {};
+        for (const player of data.players ?? []) {
+          const names = byTeam[player.teamCode] ?? [];
+          names.push(player.fullName);
+          byTeam[player.teamCode] = names;
+        }
+        if (active) setSwedes(byTeam);
+      } catch (err) {
+        console.error('Failed to load NHL rosters:', err);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, [season]);
 
   const hasTeams = (standings?.stats?.length ?? 0) > 0;
@@ -55,7 +85,7 @@ export default function NHLStandingsPage() {
         )}
 
         {!loading && !error && hasTeams && standings && (
-          <NhlStandings standings={standings} />
+          <NhlStandings standings={standings} swedishPlayersByTeam={swedes} />
         )}
 
         {!loading && !error && !hasTeams && (

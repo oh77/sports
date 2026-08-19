@@ -68,6 +68,17 @@ export function nhlStandingsUrl(date: string): string {
   return `${NHL_API_BASE}/standings/${date}`;
 }
 
+/**
+ * Build a club's roster URL for a season.
+ *
+ * The roster is the only NHL feed carrying nationality, jersey number, birth
+ * data and headshots. It changes on transactions rather than on games, so it is
+ * cached for a full day (see `NHL_ROSTER_TTL_MS` in `services/nhlService.ts`).
+ */
+export function nhlRosterUrl(teamCode: string, seasonId: string): string {
+  return `${NHL_API_BASE}/roster/${teamCode.toUpperCase()}/${seasonId}`;
+}
+
 /** Build a club's full-season schedule URL. */
 export function nhlClubScheduleUrl(teamCode: string, seasonId: string): string {
   return `${NHL_API_BASE}/club-schedule-season/${teamCode.toUpperCase()}/${seasonId}`;

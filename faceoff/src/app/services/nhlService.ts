@@ -1,4 +1,10 @@
-import { nhlClubScheduleUrl, nhlScheduleUrl } from '../config/nhl';
+import {
+  nhlClubScheduleUrl,
+  nhlRosterUrl,
+  nhlScheduleUrl,
+} from '../config/nhl';
+import { NHL_TEAMS } from '../config/nhlTeams';
+import type { RosterPlayer } from '../types/domain/roster';
 import type {
   NHLGame,
   NHLGameStatus,
@@ -8,6 +14,9 @@ import type {
   NhlScheduleResponse,
   NhlScheduleTeam,
 } from '../types/nhl/game';
+import type { NhlRosterResponse } from '../types/nhl/roster';
+import { getStableCachedData } from '../utils/cache';
+import { translateNhlRosterToDomain } from '../utils/translators/nhlToDomain';
 
 /**
  * How many week-windows the service will walk in either direction from the
@@ -329,4 +338,132 @@ export function getNextGameDay(games: NHLGame[]): string | null {
     month: 'long',
     day: 'numeric',
   });
+}
+
+/* ------------------------------------------------------------------ rosters */
+
+/**
+ * Rosters change on transactions, not on games, so they are cached for a full
+ * day. Note this uses `getStableCachedData` rather than the usual
+ * `getCachedData`: the latter builds an hour-stamped key, which would rotate
+ * the entry every hour no matter the TTL.
+ */
+export const NHL_ROSTER_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Fetch and translate one club's roster. Unlike the rest of this service, the
+ * translation happens here rather than in the caller so the day-long cache
+ * holds the finished domain shape — re-translating ~750 players on every
+ * request would be pure waste.
+ */
+async function fetchTeamRoster(
+  teamCode: string,
+  seasonId: string,
+): Promise<RosterPlayer[]> {
+  const code = teamCode.toUpperCase();
+  const response = await fetch(nhlRosterUrl(code, seasonId));
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const data: NhlRosterResponse = await response.json();
+  return translateNhlRosterToDomain(data, code);
+}
+
+/** Cached club roster. Rejects on failure so callers can decide how to cope. */
+function cachedTeamRoster(
+  teamCode: string,
+  seasonId: string,
+): Promise<RosterPlayer[]> {
+  const code = teamCode.toUpperCase();
+  return getStableCachedData(
+    `nhl-roster-${seasonId}-${code}`,
+    () => fetchTeamRoster(code, seasonId),
+    NHL_ROSTER_TTL_MS,
+  );
+}
+
+/** One club's roster for a season; empty on failure. */
+export async function getTeamRoster(
+  teamCode: string,
+  seasonId: string,
+): Promise<RosterPlayer[]> {
+  try {
+    return await cachedTeamRoster(teamCode, seasonId);
+  } catch (error) {
+    console.error(`Error fetching NHL roster for ${teamCode}:`, error);
+    return [];
+  }
+}
+
+/**
+ * How many club rosters to fetch at once. All 32 in parallel hits the same host
+ * the schedule and standings use, and drew 429s from it — this keeps the sweep
+ * to a trickle. It only runs on a cold cache, so the added latency is paid once
+ * a day.
+ */
+const ROSTER_CONCURRENCY = 4;
+
+/** Run `task` over `items`, at most `limit` at a time. Never rejects. */
+async function settleWithLimit<T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<R>,
+): Promise<PromiseSettledResult<R>[]> {
+  const results: PromiseSettledResult<R>[] = new Array(items.length);
+  let cursor = 0;
+
+  const worker = async (): Promise<void> => {
+    while (cursor < items.length) {
+      const index = cursor++;
+      try {
+        results[index] = {
+          status: 'fulfilled',
+          value: await task(items[index]),
+        };
+      } catch (reason) {
+        results[index] = { status: 'rejected', reason };
+      }
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, worker),
+  );
+  return results;
+}
+
+/**
+ * Every club's roster for a season, flattened.
+ *
+ * Caching is per club, so a club that fails is simply missing from this sweep
+ * and is retried on the next request while the other 31 stay cached. A partial
+ * sweep is returned (and logged) rather than failing the whole call — the
+ * callers only use it to enrich data that already renders without it.
+ */
+export async function getLeagueRoster(
+  seasonId: string,
+): Promise<RosterPlayer[]> {
+  const results = await settleWithLimit(NHL_TEAMS, ROSTER_CONCURRENCY, (team) =>
+    cachedTeamRoster(team.code, seasonId),
+  );
+
+  const failed = results.filter((r) => r.status === 'rejected').length;
+  if (failed > 0) {
+    console.error(
+      `NHL roster sweep: ${failed}/${NHL_TEAMS.length} clubs failed for season ${seasonId}`,
+    );
+  }
+
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []));
+}
+
+/**
+ * Player-id → roster entry across the whole league, for joining onto the stats
+ * feeds (which carry no nationality, number or birth data).
+ */
+export async function getRosterIndex(
+  seasonId: string,
+): Promise<Map<string, RosterPlayer>> {
+  const players = await getLeagueRoster(seasonId);
+  return new Map(players.map((player) => [player.uuid, player]));
 }

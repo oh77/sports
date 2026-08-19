@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { CountryFlag } from '@/app/components/country-flag';
 import { getRankDisplay } from '@/app/components/standings/standingsUtils';
 import type { StandingsData, TeamStats } from '@/app/types/domain/standings';
 import { teamPath } from '@/app/utils/leaguePaths';
@@ -23,9 +24,18 @@ const MODES: { id: ViewMode; label: string }[] = [
 
 interface NhlStandingsProps {
   standings: StandingsData;
+  /**
+   * Swedish players per club code, from the roster feed. Clubs listed here get
+   * a Swedish flag next to their name. Omitted while the rosters load, or when
+   * they could not be fetched — the table renders fine without it.
+   */
+  swedishPlayersByTeam?: Record<string, string[]>;
 }
 
-export function NhlStandings({ standings }: NhlStandingsProps) {
+export function NhlStandings({
+  standings,
+  swedishPlayersByTeam,
+}: NhlStandingsProps) {
   const [mode, setMode] = useState<ViewMode>('division');
   const teams = standings.stats || [];
 
@@ -61,6 +71,7 @@ export function NhlStandings({ standings }: NhlStandingsProps) {
             title={group.title}
             teams={group.teams}
             playoffCount={group.playoffCount}
+            swedishPlayersByTeam={swedishPlayersByTeam}
           />
         ))}
       </div>
@@ -70,6 +81,10 @@ export function NhlStandings({ standings }: NhlStandingsProps) {
         <div className="flex items-center space-x-2">
           <div className="h-4 w-1.5 rounded bg-win" />
           <span>Slutspelsplats</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <CountryFlag country="SE" className="h-3.5 w-[22px]" />
+          <span>Svensk spelare i truppen</span>
         </div>
       </div>
     </div>
@@ -118,10 +133,12 @@ function StandingsGroup({
   title,
   teams,
   playoffCount,
+  swedishPlayersByTeam,
 }: {
   title: string;
   teams: TeamStats[];
   playoffCount: number;
+  swedishPlayersByTeam?: Record<string, string[]>;
 }) {
   const season = useSeason();
 
@@ -153,6 +170,7 @@ function StandingsGroup({
               const rank = index + 1;
               const diff = team.G - team.GA;
               const isPlayoff = playoffCount > 0 && rank <= playoffCount;
+              const swedes = swedishPlayersByTeam?.[team.info.code] ?? [];
 
               return (
                 <tr
@@ -187,8 +205,17 @@ function StandingsGroup({
                         )}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-ink">
-                          {team.info.short}
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-ink">
+                            {team.info.short}
+                          </span>
+                          {swedes.length > 0 && (
+                            <CountryFlag
+                              country="SE"
+                              label={`Svenskar i truppen: ${swedes.join(', ')}`}
+                              className="h-3.5 w-[22px] shrink-0"
+                            />
+                          )}
                         </div>
                         <div className="text-xs text-mute">
                           {team.info.full}

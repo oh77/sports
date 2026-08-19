@@ -140,6 +140,58 @@ export async function getCachedData<T>(
   }
 }
 
+/** Requests started but not yet settled, keyed like the cache itself. */
+const inFlight = new Map<string, Promise<unknown>>();
+
+/**
+ * Cache-first read under a caller-supplied **stable** key.
+ *
+ * Differs from {@link getCachedData} in two ways that matter for slow-moving
+ * data such as rosters:
+ *  - the key is passed in verbatim rather than built by {@link generateCacheKey},
+ *    which bakes the current hour into the key and so rotates it hourly
+ *    regardless of the TTL;
+ *  - cached values are actually read back, so a long TTL really is long.
+ *
+ * Use for data that changes on transactions rather than on games. Everything
+ * that must stay near-live should keep using {@link getCachedData}.
+ *
+ * @param key Stable cache key (no time component)
+ * @param fetcher Function that fetches fresh data on a miss
+ * @param ttlMs Time to live in milliseconds (default: 24 hours)
+ */
+export async function getStableCachedData<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  ttlMs: number = 24 * 60 * 60 * 1000,
+): Promise<T> {
+  const cached = cache.get<T>(key);
+  if (cached !== null) {
+    return cached;
+  }
+
+  // Concurrent callers share one request. Without this, two routes asking for
+  // the same key before either resolves each fire their own fetch — which is
+  // how a page that loads players + goalies at once doubled every upstream
+  // request and drew rate limits.
+  const pending = inFlight.get(key) as Promise<T> | undefined;
+  if (pending) {
+    return pending;
+  }
+
+  const request = fetcher()
+    .then((data) => {
+      cache.set(key, data, ttlMs);
+      return data;
+    })
+    .finally(() => {
+      inFlight.delete(key);
+    });
+
+  inFlight.set(key, request);
+  return request;
+}
+
 /**
  * Invalidate cache entries matching a pattern
  * @param pattern Pattern to match cache keys (supports wildcards)

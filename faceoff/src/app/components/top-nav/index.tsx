@@ -9,7 +9,7 @@ import { leagueMeta } from '@/app/theme/nhl';
 import type { League } from '@/app/types/domain/league';
 import { leagueBasePath, standingsPath } from '@/app/utils/leaguePaths';
 
-type Section = 'matcher' | 'tabell' | 'statistik';
+type Section = 'matcher' | 'tabell' | 'statistik' | 'lag';
 
 interface TopNavProps {
   league: League;
@@ -24,6 +24,7 @@ function activeSection(pathname: string): Section | null {
   const seg = pathname.split('/')[3] ?? '';
   if (seg === 'standings') return 'tabell';
   if (seg === 'stats') return 'statistik';
+  if (seg === 'teams') return 'lag';
   if (seg === '') return 'matcher';
   return null; // individual team / matchup pages have no section tab
 }
@@ -40,6 +41,11 @@ export function TopNav({ league, season }: TopNavProps) {
     { id: 'tabell', label: 'Tabell', href: standingsPath(league, season) },
     { id: 'statistik', label: 'Statistik', href: `${base}/stats` },
   ];
+
+  // Rosters only come from the NHL roster feed, so LAG is NHL-only for now.
+  if (league === 'nhl') {
+    items.push({ id: 'lag', label: 'Lag', href: `${base}/teams` });
+  }
 
   const { name, logo } = leagueMeta[league];
 
