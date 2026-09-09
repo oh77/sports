@@ -16,6 +16,12 @@ const DIVISION_ORDER = ['Atlantic', 'Metropolitan', 'Central', 'Pacific'];
 /** Display order for conferences. */
 const CONFERENCE_ORDER = ['Eastern', 'Western'];
 
+/**
+ * The win/loss breakdown, folded away on phones: it is the widest part of the
+ * table and the least useful there, where points and goals carry the story.
+ */
+const MOBILE_HIDDEN = new Set(['V', 'F', 'ÖF']);
+
 const MODES: { id: ViewMode; label: string }[] = [
   { id: 'division', label: 'Division' },
   { id: 'conference', label: 'Conference' },
@@ -151,13 +157,13 @@ function StandingsGroup({
         <table className="w-full">
           <thead className="border-b border-line bg-surface-2">
             <tr>
-              {['#', 'Lag', 'M', 'V', 'F', 'ÖF', 'P', 'G', 'GA', 'GM'].map(
+              {['#', 'Lag', 'M', 'V', 'F', 'ÖF', 'G', 'GA', 'GM', 'P'].map(
                 (col, i) => (
                   <th
                     key={col}
                     className={`display px-4 py-3 text-xs uppercase tracking-[0.06em] text-mute ${
                       i < 2 ? 'text-left' : 'text-center'
-                    }`}
+                    } ${MOBILE_HIDDEN.has(col) ? 'hidden md:table-cell' : ''}`}
                   >
                     {col}
                   </th>
@@ -226,17 +232,14 @@ function StandingsGroup({
                   <td className="num whitespace-nowrap px-4 py-4 text-center text-sm text-soft">
                     {team.GP}
                   </td>
-                  <td className="num whitespace-nowrap px-4 py-4 text-center text-sm font-medium text-soft">
+                  <td className="num hidden whitespace-nowrap px-4 py-4 text-center text-sm font-medium text-soft md:table-cell">
                     {team.W}
                   </td>
-                  <td className="num whitespace-nowrap px-4 py-4 text-center text-sm text-soft">
+                  <td className="num hidden whitespace-nowrap px-4 py-4 text-center text-sm text-soft md:table-cell">
                     {team.L}
                   </td>
-                  <td className="num whitespace-nowrap px-4 py-4 text-center text-sm text-soft">
+                  <td className="num hidden whitespace-nowrap px-4 py-4 text-center text-sm text-soft md:table-cell">
                     {team.OTL ?? 0}
-                  </td>
-                  <td className="display num whitespace-nowrap px-4 py-4 text-center text-lg font-bold text-ink">
-                    {team.Points}
                   </td>
                   <td className="num whitespace-nowrap px-4 py-4 text-center text-sm font-medium text-soft">
                     {team.G}
@@ -255,6 +258,9 @@ function StandingsGroup({
                   >
                     {diff > 0 ? '+' : ''}
                     {diff}
+                  </td>
+                  <td className="display num whitespace-nowrap px-4 py-4 text-center text-lg font-bold text-ink">
+                    {team.Points}
                   </td>
                 </tr>
               );

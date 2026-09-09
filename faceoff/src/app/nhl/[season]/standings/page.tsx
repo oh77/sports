@@ -1,15 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { NhlStandings } from '../../../components/standings/nhl-standings';
+import {
+  StandingsFilterBar,
+  useStandingsFilter,
+} from '../../../components/standings/standings-filter';
+import {
+  applyStandingsFilter,
+  getAvailableMonths,
+} from '../../../components/standings/standingsUtils';
+import type { GameInfo, LeagueResponse } from '../../../types/domain/game';
 import type { RosterData } from '../../../types/domain/roster';
 import type { StandingsData } from '../../../types/domain/standings';
 import { withSeason } from '../../../utils/leaguePaths';
 import { useSeason } from '../../../utils/useSeason';
 
-export default function NHLStandingsPage() {
+function NHLStandingsContent() {
   const season = useSeason();
+  const [filter, setFilter] = useStandingsFilter();
   const [standings, setStandings] = useState<StandingsData | null>(null);
+  const [games, setGames] = useState<GameInfo[]>([]);
   const [swedes, setSwedes] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +43,29 @@ export default function NHLStandingsPage() {
     };
 
     loadStandings();
+  }, [season]);
+
+  // Played games back the home/away and month tables. `type=season` sweeps the
+  // per-club schedules, as the weekly walk behind the other game types only
+  // reaches a few weeks back. Fetched separately so the league table is never
+  // held up by that sweep; the filters simply start working once it lands.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const response = await fetch(
+          withSeason('/api/nhl-games?type=season', season),
+        );
+        if (!response.ok) return;
+        const data: LeagueResponse = await response.json();
+        if (active) setGames(data.gameInfo || []);
+      } catch (err) {
+        console.error('Failed to load NHL games:', err);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, [season]);
 
   // Fetched separately so the table is never held up by the roster sweep; the
@@ -62,6 +96,12 @@ export default function NHLStandingsPage() {
     };
   }, [season]);
 
+  const months = useMemo(() => getAvailableMonths(games), [games]);
+  const displayStandings = useMemo(
+    () => applyStandingsFilter({ filter, league: 'nhl', standings, games }),
+    [filter, standings, games],
+  );
+
   const hasTeams = (standings?.stats?.length ?? 0) > 0;
 
   return (
@@ -84,8 +124,18 @@ export default function NHLStandingsPage() {
           </div>
         )}
 
-        {!loading && !error && hasTeams && standings && (
-          <NhlStandings standings={standings} swedishPlayersByTeam={swedes} />
+        {!loading && !error && hasTeams && displayStandings && (
+          <div className="mx-auto max-w-6xl">
+            <StandingsFilterBar
+              filter={filter}
+              onChange={setFilter}
+              months={months}
+            />
+            <NhlStandings
+              standings={displayStandings}
+              swedishPlayersByTeam={swedes}
+            />
+          </div>
         )}
 
         {!loading && !error && !hasTeams && (
@@ -101,5 +151,26 @@ export default function NHLStandingsPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function NHLStandingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="relative py-6 md:py-8">
+          <div className="container relative z-10 mx-auto px-4">
+            <h1 className="display mb-6 text-3xl font-bold uppercase tracking-[0.02em] text-ink">
+              NHL · Tabell
+            </h1>
+            <div className="mx-auto max-w-6xl animate-pulse">
+              <div className="h-96 rounded-lg bg-surface" />
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <NHLStandingsContent />
+    </Suspense>
   );
 }

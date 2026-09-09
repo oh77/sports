@@ -13,6 +13,7 @@ import {
   formatMonthLabel,
   formatMonthShortLabel,
   getAvailableMonths,
+  isMonthFilter,
 } from '../../../components/standings/standingsUtils';
 import { TrendTable } from '../../../components/standings/trend-table';
 import { UpcomingGamesTable } from '../../../components/standings/upcoming-games-table';
@@ -100,8 +101,8 @@ function SDHLStandingsContent() {
       const gameCount = filter === 'last5' ? 5 : filter === 'last10' ? 10 : 15;
       return calculateStandingsFromLastNGames(games, gameCount);
     }
-    // For month filters (format: "month01", "month02", etc.)
-    if (filter.startsWith('month') && availableMonths.includes(filter)) {
+    // For month filters (format: "2026-09")
+    if (isMonthFilter(filter) && availableMonths.includes(filter)) {
       return calculateStandingsForMonth(games, filter);
     }
     return standings;

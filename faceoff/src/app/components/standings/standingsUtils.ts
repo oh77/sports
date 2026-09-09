@@ -1,7 +1,35 @@
 import type { GameInfo } from '@/app/types/domain/game';
 import type { League } from '@/app/types/domain/league';
 import type { StandingsData, TeamStats } from '@/app/types/domain/standings';
+import type {
+  MonthFilter,
+  StandingsFilter,
+} from '@/app/types/domain/standingsFilter';
 import type { TeamInfo } from '@/app/types/domain/team';
+
+/**
+ * Points awarded for a team's record, which differs by league: the Swedish
+ * leagues and the CHL play 3-2-1-0 (regulation win, overtime win, overtime
+ * loss), the NHL 2-2-1-0.
+ */
+export type PointsRule = (stats: TeamStats) => number;
+
+const SWEDISH_POINTS: PointsRule = (s) =>
+  s.W * 3 + (s.OTW ?? 0) * 2 + (s.OTL ?? 0) * 1;
+
+const NHL_POINTS: PointsRule = (s) =>
+  (s.W + (s.OTW ?? 0)) * 2 + (s.OTL ?? 0) * 1;
+
+/** The points rule a league's computed tables should use. */
+export function pointsRuleFor(league: League): PointsRule {
+  return league === 'nhl' ? NHL_POINTS : SWEDISH_POINTS;
+}
+
+/** Options shared by the game-derived table builders. */
+type CalcOptions = {
+  /** Defaults to the 3-2-1-0 rule the Swedish leagues and the CHL use. */
+  points?: PointsRule;
+};
 
 export const getTeamCode = (team: TeamStats): string => team.info.code;
 
@@ -36,6 +64,7 @@ export const getRankBorderClass = (
 export function calculateStandingsFromGames(
   games: GameInfo[],
   filter: 'home' | 'away',
+  { points = SWEDISH_POINTS }: CalcOptions = {},
 ): StandingsData {
   // Filter games by finished state
   const finishedGames = games.filter((game) => game.state === 'finished');
@@ -114,8 +143,7 @@ export function calculateStandingsFromGames(
       }
     }
 
-    // Calculate points: win=3, overtime win=2, overtime loss=1
-    stats.Points = stats.W * 3 + (stats.OTW ?? 0) * 2 + (stats.OTL ?? 0) * 1;
+    stats.Points = points(stats);
   });
 
   // Convert to array and sort by points, then goal difference
@@ -144,6 +172,7 @@ export function calculateStandingsFromGames(
 export function calculateStandingsFromLastNGames(
   games: GameInfo[],
   n: number,
+  { points = SWEDISH_POINTS }: CalcOptions = {},
 ): StandingsData {
   // Filter games by finished state and sort by date (most recent first)
   const finishedGames = games
@@ -239,8 +268,7 @@ export function calculateStandingsFromLastNGames(
       }
     });
 
-    // Calculate points: win=3, overtime win=2, overtime loss=1
-    stats.Points = stats.W * 3 + (stats.OTW ?? 0) * 2 + (stats.OTL ?? 0) * 1;
+    stats.Points = points(stats);
   });
 
   // Convert to array and sort by points, then goal difference
@@ -266,25 +294,35 @@ export function calculateStandingsFromLastNGames(
   };
 }
 
-export function getAvailableMonths(games: GameInfo[]): string[] {
-  const finishedGames = games.filter((game) => game.state === 'finished');
+/** The `YYYY-MM` key a game belongs to. */
+function monthKeyOf(game: GameInfo): MonthFilter {
+  const date = new Date(game.startDateTime);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${date.getFullYear()}-${month}` as MonthFilter;
+}
 
-  const monthSet = new Set<number>();
-  finishedGames.forEach((game) => {
-    const date = new Date(game.startDateTime);
-    const monthNum = date.getMonth() + 1; // 1-12
-    monthSet.add(monthNum);
-  });
+/** True for a `YYYY-MM` month key, false for the fixed filters. */
+export function isMonthFilter(filter: string): filter is MonthFilter {
+  return /^\d{4}-\d{2}$/.test(filter);
+}
 
-  // Convert to month codes and sort chronologically (month01, month02, ..., month12)
-  return Array.from(monthSet)
-    .sort((a, b) => a - b)
-    .map((monthNum) => `month${String(monthNum).padStart(2, '0')}`);
+/**
+ * The months that have played games, oldest first.
+ *
+ * Keys carry the year, so a season running from September into March orders
+ * chronologically rather than putting January first.
+ */
+export function getAvailableMonths(games: GameInfo[]): MonthFilter[] {
+  const months = new Set<MonthFilter>();
+  for (const game of games) {
+    if (game.state === 'finished') months.add(monthKeyOf(game));
+  }
+  return Array.from(months).sort();
 }
 
 export function formatMonthLabel(monthKey: string): string {
-  // Extract month number from "month01", "month02", etc.
-  const monthNum = parseInt(monthKey.replace('month', ''), 10);
+  const [year, month] = monthKey.split('-');
+  const monthNum = parseInt(month, 10);
   const monthNames = [
     'Januari',
     'Februari',
@@ -299,12 +337,12 @@ export function formatMonthLabel(monthKey: string): string {
     'November',
     'December',
   ];
-  return monthNames[monthNum - 1];
+  return `${monthNames[monthNum - 1]} ${year}`;
 }
 
+/** Short month label; the year is left off, as a season never repeats a month. */
 export function formatMonthShortLabel(monthKey: string): string {
-  // Extract month number from "month01", "month02", etc.
-  const monthNum = parseInt(monthKey.replace('month', ''), 10);
+  const monthNum = parseInt(monthKey.split('-')[1], 10);
   const monthShortNames = [
     'JAN',
     'FEB',
@@ -324,17 +362,12 @@ export function formatMonthShortLabel(monthKey: string): string {
 
 export function calculateStandingsForMonth(
   games: GameInfo[],
-  monthKey: string,
+  monthKey: MonthFilter,
+  { points = SWEDISH_POINTS }: CalcOptions = {},
 ): StandingsData {
-  // Extract month number from "month01", "month02", etc.
-  const monthNum = parseInt(monthKey.replace('month', ''), 10);
-
-  // Filter games by finished state and specific month (regardless of year)
-  const finishedGames = games.filter((game) => {
-    if (game.state !== 'finished') return false;
-    const date = new Date(game.startDateTime);
-    return date.getMonth() + 1 === monthNum;
-  });
+  const finishedGames = games.filter(
+    (game) => game.state === 'finished' && monthKeyOf(game) === monthKey,
+  );
 
   // Extract unique teams from games
   const teamMap = new Map<string, TeamInfo>();
@@ -400,8 +433,7 @@ export function calculateStandingsForMonth(
         }
       }
 
-      homeStats.Points =
-        homeStats.W * 3 + (homeStats.OTW ?? 0) * 2 + (homeStats.OTL ?? 0) * 1;
+      homeStats.Points = points(homeStats);
     }
 
     // Process away team
@@ -429,8 +461,7 @@ export function calculateStandingsForMonth(
         }
       }
 
-      awayStats.Points =
-        awayStats.W * 3 + (awayStats.OTW ?? 0) * 2 + (awayStats.OTL ?? 0) * 1;
+      awayStats.Points = points(awayStats);
     }
   });
 
@@ -454,5 +485,66 @@ export function calculateStandingsForMonth(
   return {
     dataColumns: [],
     stats: teamStats,
+  };
+}
+
+/**
+ * The table a filter asks for: the league's own table for `season`, otherwise
+ * one computed from the played games.
+ *
+ * Computed rows are re-joined with the league table by team code, so the
+ * conference and division a club belongs to survive a filter that only knows
+ * about games.
+ */
+export function applyStandingsFilter({
+  filter,
+  league,
+  standings,
+  games,
+}: {
+  filter: StandingsFilter;
+  league: League;
+  standings: StandingsData | null;
+  games: GameInfo[];
+}): StandingsData | null {
+  if (filter === 'season' || games.length === 0) return standings;
+
+  const options = { points: pointsRuleFor(league) };
+  let computed: StandingsData | null = null;
+  if (filter === 'home' || filter === 'away') {
+    computed = calculateStandingsFromGames(games, filter, options);
+  } else if (filter === 'last5' || filter === 'last10' || filter === 'last15') {
+    const n = filter === 'last5' ? 5 : filter === 'last10' ? 10 : 15;
+    computed = calculateStandingsFromLastNGames(games, n, options);
+  } else if (isMonthFilter(filter)) {
+    computed = calculateStandingsForMonth(games, filter, options);
+  }
+  if (!computed) return standings;
+
+  return withLeagueTableInfo(computed, standings);
+}
+
+/** Carry club identity and grouping from the league table onto computed rows. */
+function withLeagueTableInfo(
+  computed: StandingsData,
+  standings: StandingsData | null,
+): StandingsData {
+  if (!standings) return computed;
+
+  const byCode = new Map(
+    standings.stats.map((team) => [team.info.code.toUpperCase(), team]),
+  );
+  return {
+    ...computed,
+    stats: computed.stats.map((team) => {
+      const listed = byCode.get(team.info.code.toUpperCase());
+      if (!listed) return team;
+      return {
+        ...team,
+        info: listed.info,
+        conference: listed.conference,
+        division: listed.division,
+      };
+    }),
   };
 }

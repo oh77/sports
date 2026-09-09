@@ -458,6 +458,58 @@ export async function getLeagueRoster(
 }
 
 /**
+ * How long a season-wide game sweep is kept. A finished result never changes,
+ * so an hour is ample mid-season, and it keeps the 32-request sweep off every
+ * request but the first.
+ */
+const SEASON_GAMES_TTL_MS = 60 * 60 * 1000;
+
+/** `gameType` of a regular-season game (1 = preseason, 3 = playoffs). */
+const REGULAR_SEASON = 2;
+
+/**
+ * Every game of a season, chronologically.
+ *
+ * The weekly walk behind `getAllGames` is capped at `MAX_WEEKS`, so it can only
+ * ever see a few weeks — not enough for tables computed over a whole season.
+ * The club-schedule endpoint returns a full season in a single request per
+ * club, so this sweeps all 32 (at the same trickle as the roster sweep) and
+ * dedupes, as every game appears on two clubs' schedules.
+ *
+ * Only regular-season games are kept — the league table is a regular-season
+ * standing, so preseason and playoff games have no place in a table computed
+ * from it.
+ *
+ * Cached as a unit rather than per club: a partial sweep would silently drop a
+ * club's games from every table built on it, which is worse than retrying.
+ */
+export async function getAllSeasonGames(seasonId: string): Promise<NHLGame[]> {
+  return getStableCachedData(
+    `nhl-season-games-${seasonId}`,
+    async () => {
+      const results = await settleWithLimit(
+        NHL_TEAMS,
+        ROSTER_CONCURRENCY,
+        (team) => getTeamSeasonGames(team.code, seasonId),
+      );
+
+      const seen = new Set<string>();
+      const games: NHLGame[] = [];
+      for (const result of results) {
+        if (result.status !== 'fulfilled') continue;
+        for (const game of result.value) {
+          if (game.gameType !== REGULAR_SEASON || seen.has(game.id)) continue;
+          seen.add(game.id);
+          games.push(game);
+        }
+      }
+      return games.sort((a, b) => a.startDate.localeCompare(b.startDate));
+    },
+    SEASON_GAMES_TTL_MS,
+  );
+}
+
+/**
  * Player-id → roster entry across the whole league, for joining onto the stats
  * feeds (which carry no nationality, number or birth data).
  */

@@ -61,17 +61,14 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   M
                 </th>
-                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
+                <th className="hidden md:table-cell px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   V
                 </th>
-                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
+                <th className="hidden md:table-cell px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   O
                 </th>
-                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
+                <th className="hidden md:table-cell px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   F
-                </th>
-                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
-                  P
                 </th>
                 <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   G
@@ -81,6 +78,9 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                 </th>
                 <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
                   GM
+                </th>
+                <th className="px-4 py-3 text-center text-xs text-mute display uppercase tracking-[0.06em]">
+                  P
                 </th>
               </tr>
             </thead>
@@ -152,23 +152,18 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                       </td>
 
                       {/* Wins */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center font-medium">
+                      <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm num text-soft text-center font-medium">
                         {wins}
                       </td>
 
                       {/* Overtime wins */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center">
+                      <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm num text-soft text-center">
                         {tiesText}
                       </td>
 
                       {/* Losses */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm num text-soft text-center">
+                      <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm num text-soft text-center">
                         {losses}
-                      </td>
-
-                      {/* Points */}
-                      <td className="px-4 py-4 whitespace-nowrap display num font-bold text-ink text-lg text-center">
-                        {points}
                       </td>
 
                       {/* Goals For */}
@@ -193,6 +188,11 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                       >
                         {goalDifference > 0 ? '+' : ''}
                         {goalDifference}
+                      </td>
+
+                      {/* Points */}
+                      <td className="px-4 py-4 whitespace-nowrap display num font-bold text-ink text-lg text-center">
+                        {points}
                       </td>
                     </tr>
                   );

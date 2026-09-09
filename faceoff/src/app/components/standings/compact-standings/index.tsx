@@ -175,10 +175,10 @@ export function CompactStandings({
                 M
               </th>
               <th className="px-3 py-2 text-center text-xs text-mute display uppercase tracking-[0.06em]">
-                P
+                GM
               </th>
               <th className="px-3 py-2 text-center text-xs text-mute display uppercase tracking-[0.06em]">
-                GM
+                P
               </th>
             </tr>
           </thead>
@@ -236,15 +236,15 @@ export function CompactStandings({
                     {gamesPlayed}
                   </td>
 
-                  {/* Points */}
-                  <td className="px-3 py-3 whitespace-nowrap display num font-bold text-ink text-lg text-center">
-                    {points}
-                  </td>
-
                   {/* Goal Difference */}
                   <td className="px-3 py-3 whitespace-nowrap text-sm num text-center font-medium text-dim">
                     {goalDifference > 0 ? '+' : ''}
                     {goalDifference}
+                  </td>
+
+                  {/* Points */}
+                  <td className="px-3 py-3 whitespace-nowrap display num font-bold text-ink text-lg text-center">
+                    {points}
                   </td>
                 </tr>
               );

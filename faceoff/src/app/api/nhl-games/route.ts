@@ -3,6 +3,7 @@ import { resolveNhlSeason } from '../../config/nhl';
 import {
   getAllGames,
   getAllRecentGames,
+  getAllSeasonGames,
   getAllUpcomingGames,
   getCurrentPlayoffEnd,
   getFinalsGames,
@@ -48,6 +49,11 @@ export async function GET(request: NextRequest) {
           break;
         case 'all':
           games = await getAllGames(season.gamesAnchor);
+          break;
+        // The whole season, swept from the per-club schedules. Unlike
+        // 'all'/'all-recent' this is not bound by the weekly walk window.
+        case 'season':
+          games = await getAllSeasonGames(season.seasonId);
           break;
         case 'finals': {
           // Past season: its configured playoff end. Ongoing season: the live
