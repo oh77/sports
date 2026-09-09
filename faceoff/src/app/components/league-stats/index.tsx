@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { leagueMeta } from '@/app/theme/nhl';
 import type {
   GoalieStats,
@@ -12,9 +12,13 @@ import type {
   PlayerStats,
   PlayerStatsData,
 } from '@/app/types/domain/player-stats';
+import type { TeamInfo } from '@/app/types/domain/team';
 import { withSeason } from '@/app/utils/leaguePaths';
+import { fetchLeagueTeams, indexTeamsByCode } from '@/app/utils/leagueTeams';
 import { useSeason } from '@/app/utils/useSeason';
 import { PlayerCard } from '../player-card';
+import { Tabs } from '../tabs';
+import { buildGoaliePairs, type GoaliePair } from './goaliePairs';
 
 /** A selectable nationality filter, e.g. `{ code: 'SE', label: 'Svenskar' }`. */
 export interface NationalityFilter {
@@ -33,13 +37,29 @@ interface LeagueStatsProps {
   nationalityFilters?: NationalityFilter[];
 }
 
-/** STATISTIK page: league-wide top scorers and goalies. */
-export function LeagueStats({ league, nationalityFilters }: LeagueStatsProps) {
+/**
+ * STATISTIK page: league-wide top scorers and goalies.
+ *
+ * The tabs read their selection from the `tab` query param, so the page needs a
+ * Suspense boundary around the client tree that calls `useSearchParams`.
+ */
+export function LeagueStats(props: LeagueStatsProps) {
+  return (
+    <Suspense fallback={<StatsFallback league={props.league} />}>
+      <LeagueStatsContent {...props} />
+    </Suspense>
+  );
+}
+
+function LeagueStatsContent({ league, nationalityFilters }: LeagueStatsProps) {
   const season = useSeason();
   const [nationality, setNationality] = useState<string | null>(null);
   const [scorers, setScorers] = useState<PlayerStats[]>([]);
   const [goalies, setGoalies] = useState<GoalieStats[]>([]);
+  const [pairs, setPairs] = useState<GoaliePair[]>([]);
+  const [clubs, setClubs] = useState<Map<string, TeamInfo>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [pairsLoading, setPairsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,7 +85,7 @@ export function LeagueStats({ league, nationalityFilters }: LeagueStatsProps) {
           const goalieData: GoalieStatsData = await gRes.json();
           topGoalies = [...eligibleGoalies(goalieData.stats, nationality)]
             .sort((a, b) => Number(b.SVSPerc) - Number(a.SVSPerc))
-            .slice(0, 6);
+            .slice(0, 12);
         }
         if (active) {
           setScorers(topPlayers);
@@ -82,6 +102,49 @@ export function LeagueStats({ league, nationalityFilters }: LeagueStatsProps) {
       active = false;
     };
   }, [league, season, nationality]);
+
+  // Pairs are club-wide, so they ignore the nationality filter and need the
+  // full leaderboard rather than the top slice the other lists are built from.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        setPairsLoading(true);
+        const res = await fetch(
+          withSeason(`/api/${league}-goalies?full=1`, season),
+        );
+        if (!res.ok) throw new Error('goalies');
+        const data: GoalieStatsData = await res.json();
+        if (active) setPairs(buildGoaliePairs(data.stats));
+      } catch (err) {
+        console.error('Failed to load goalie pairs:', err);
+        if (active) setPairs([]);
+      } finally {
+        if (active) setPairsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [league, season]);
+
+  // Club logos and full names: the goalie feeds carry only a team code (and for
+  // NHL, only the abbrev as its "name").
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const teams = await fetchLeagueTeams(league, season);
+        if (active) setClubs(indexTeamsByCode(teams));
+      } catch (err) {
+        console.error('Failed to load club list:', err);
+        if (active) setClubs(new Map());
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [league, season]);
 
   const activeLabel = nationalityFilters?.find(
     (f) => f.code === nationality,
@@ -118,59 +181,91 @@ export function LeagueStats({ league, nationalityFilters }: LeagueStatsProps) {
       {error && <p className="text-dim">{error}</p>}
 
       {loading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
-              key={i}
-              className="h-[52px] animate-pulse rounded-lg border border-line bg-surface"
-            />
-          ))}
-        </div>
+        <StatsSkeleton />
       ) : (
-        <>
-          <Section title="Poängliga">
-            {scorers.length === 0 ? (
-              <p className="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-dim">
-                Inga spelare att visa.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {scorers.map((p) => (
-                  <PlayerCard
-                    key={`${p.Player}-${p.info.uuid}`}
-                    playerName={p.info.fullName}
-                    playerNumber={p.info.number}
-                    primaryValue={`${p.TP} p`}
-                    secondaryValue={`${p.G}+${p.A}`}
-                    rank={p.Rank}
-                    nationality={p.info.nationality}
-                    club={p.info.team.name}
-                  />
-                ))}
-              </div>
-            )}
-          </Section>
-
-          {goalies.length > 0 && (
-            <Section title="Målvakter">
-              <div className="flex flex-col gap-2">
-                {goalies.map((g) => (
-                  <PlayerCard
-                    key={`${g.Player}-${g.info.uuid}`}
-                    playerName={g.info.fullName}
-                    playerNumber={g.info.number}
-                    primaryValue={`${g.SVSPerc}%`}
-                    secondaryValue={`${g.GAA} GAA`}
-                    rank={g.Rank}
-                    nationality={g.info.nationality}
-                    club={g.info.team.name}
-                  />
-                ))}
-              </div>
-            </Section>
-          )}
-        </>
+        <Tabs
+          tabs={[
+            {
+              id: 'skaters',
+              label: 'Utespelare',
+              content: (
+                <Panel title="Poängliga" empty={scorers.length === 0}>
+                  {scorers.map((p) => (
+                    <PlayerCard
+                      key={`${p.Player}-${p.info.uuid}`}
+                      playerName={p.info.fullName}
+                      playerNumber={p.info.number}
+                      primaryValue={`${p.TP} p`}
+                      secondaryValue={`${p.G}+${p.A}`}
+                      rank={p.Rank}
+                      nationality={p.info.nationality}
+                      club={p.info.team.name}
+                    />
+                  ))}
+                </Panel>
+              ),
+            },
+            {
+              id: 'goalies',
+              label: 'Målvakter',
+              content: (
+                <Panel title="Målvakter" empty={goalies.length === 0}>
+                  {goalies.map((g) => (
+                    <PlayerCard
+                      key={`${g.Player}-${g.info.uuid}`}
+                      playerName={g.info.fullName}
+                      playerNumber={g.info.number}
+                      primaryValue={`${g.SVSPerc}%`}
+                      secondaryValue={`${g.GAA} GAA`}
+                      rank={g.Rank}
+                      nationality={g.info.nationality}
+                      club={g.info.team.name}
+                    />
+                  ))}
+                </Panel>
+              ),
+            },
+            {
+              id: 'pairs',
+              label: 'Målvaktspar',
+              content: pairsLoading ? (
+                <StatsSkeleton />
+              ) : (
+                <Panel
+                  title="Målvaktspar"
+                  empty={pairs.length === 0}
+                  emptyMessage="Inga målvaktspar att visa."
+                >
+                  {pairs.map((pair, index) => {
+                    const club = clubs.get(pair.teamKey.toUpperCase());
+                    const teamName = club?.full || pair.teamName;
+                    // The pair *is* the subject here, so the card's player slot
+                    // carries the club and its club line the two goalies.
+                    return (
+                      <PlayerCard
+                        key={pair.teamKey}
+                        playerName={teamName}
+                        playerNumber={0}
+                        logo={
+                          club?.logo
+                            ? { src: club.logo, alt: teamName }
+                            : undefined
+                        }
+                        primaryValue={`${pair.savePercentage.toFixed(2)}%`}
+                        secondaryValue={`${pair.goalsAgainstAverage.toFixed(2)} GAA`}
+                        rank={index + 1}
+                        nationality=""
+                        club={pair.goalies
+                          .map((g) => `${g.info.fullName} (${g.GP})`)
+                          .join(' · ')}
+                      />
+                    );
+                  })}
+                </Panel>
+              ),
+            },
+          ]}
+        />
       )}
     </div>
   );
@@ -219,13 +314,56 @@ function FilterButton({
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+/**
+ * One tab's list. The heading repeats the tab label for screen readers, which
+ * otherwise get an unlabelled run of player cards.
+ */
+function Panel({
+  title,
+  empty,
+  emptyMessage = 'Inga spelare att visa.',
+  children,
+}: {
+  title: string;
+  empty: boolean;
+  emptyMessage?: string;
+  children: ReactNode;
+}) {
   return (
-    <section className="mb-10">
-      <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.06em] text-ink">
-        {title}
-      </h2>
-      {children}
+    <section>
+      <h2 className="sr-only">{title}</h2>
+      {empty ? (
+        <p className="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-dim">
+          {emptyMessage}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2">{children}</div>
+      )}
     </section>
+  );
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="flex flex-col gap-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
+          key={i}
+          className="h-[52px] animate-pulse rounded-lg border border-line bg-surface"
+        />
+      ))}
+    </div>
+  );
+}
+
+function StatsFallback({ league }: { league: League }) {
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <h1 className="display mb-6 text-3xl font-bold uppercase tracking-[0.02em] text-ink">
+        {leagueMeta[league].name} · Statistik
+      </h1>
+      <StatsSkeleton />
+    </div>
   );
 }

@@ -18,11 +18,23 @@ export type StatnetResource =
 type FetchOptions = {
   /** Season key (e.g. "25-26"); defaults to the current season. */
   season?: string;
-  /** Result count for the players resource. */
+  /** Result count for the players and goalies resources. */
   count?: number;
   /** Schedule phase for the games/teams resources; defaults to regular season. */
   gameType?: GameType;
 };
+
+/**
+ * Result count that pulls the whole goalie leaderboard rather than the default
+ * top slice. The goalie-pair view needs every club's backup, not just the
+ * save-percentage leaders.
+ */
+export const FULL_GOALIE_COUNT = 100;
+
+/** True when the request asks for a full leaderboard (`?full=1`). */
+export function wantsFullList(request: Request): boolean {
+  return new URL(request.url).searchParams.get('full') !== null;
+}
 
 /** Read the `season` query param from a request, if present. */
 export function getSeasonParam(request: Request): string | undefined {
@@ -55,7 +67,7 @@ export function buildStatnetUrl(
     case 'standings':
       return `${base}/statistics-v2/stats-info/standings_standings?count=25&ssgtUuid=${ssgtUuid}&provider=${provider}`;
     case 'goalies':
-      return `${base}/statistics-v2/stats-info/goalkeepers_summary?count=25&ssgtUuid=${ssgtUuid}&provider=${provider}`;
+      return `${base}/statistics-v2/stats-info/goalkeepers_summary?count=${count ?? 25}&ssgtUuid=${ssgtUuid}&provider=${provider}`;
     case 'players':
       return `${base}/statistics-v2/stats-info/players_point?count=${count ?? 50}&ssgtUuid=${ssgtUuid}&provider=${provider}&state=active&moduleType=summary`;
   }

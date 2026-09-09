@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { NHL_TEAMS } from '@/app/config/nhlTeams';
 import type { League } from '@/app/types/domain/league';
 import { leagueBasePath, teamPath } from '@/app/utils/leaguePaths';
+import { fetchLeagueTeams } from '@/app/utils/leagueTeams';
 import { useSeason } from '@/app/utils/useSeason';
-import { StatnetService } from '../../services/statnetService';
 import type { TeamInfo } from '../../types/domain/team';
 
 interface LeagueFooterProps {
@@ -41,17 +40,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
       try {
         setLoading(true);
 
-        // NHL is not a Statnet league; its clubs are a static config list.
-        if (league === 'nhl') {
-          setTeams(NHL_TEAMS);
-          return;
-        }
-
-        // Use LeagueService to handle API call and transformation
-        const leagueService = new StatnetService(league, season);
-        const teamList = await leagueService.fetchTeams();
-
-        setTeams(teamList);
+        setTeams(await fetchLeagueTeams(league, season));
       } catch (err) {
         console.error('Failed to load team list:', err);
       } finally {

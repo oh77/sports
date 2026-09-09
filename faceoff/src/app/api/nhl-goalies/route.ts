@@ -40,8 +40,11 @@ export async function GET(request: Request) {
     const nationality = searchParams.get('nationality');
     const season = resolveNhlSeason(searchParams.get('season'));
 
-    // Both filters need the whole leaderboard; the league page only the top.
-    const wantsFull = Boolean(teamCode || nationality);
+    // Both filters — and the goalie-pair view (`full`) — need the whole
+    // leaderboard; the league page only the top.
+    const wantsFull = Boolean(
+      teamCode || nationality || searchParams.get('full') !== null,
+    );
     const limit = wantsFull ? FULL_LIMIT : TOP_LIMIT;
     const cacheKey = generateCacheKey(
       wantsFull ? 'nhl-goalies-full' : 'nhl-goalies-summary',

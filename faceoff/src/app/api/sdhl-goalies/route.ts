@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { fetchStatnet, getSeasonParam } from '../../utils/statnetSource';
+import {
+  fetchStatnet,
+  FULL_GOALIE_COUNT,
+  getSeasonParam,
+  wantsFullList,
+} from '../../utils/statnetSource';
 import { transformGoalies } from '../../utils/statnetTransforms';
 
 export async function GET(request: Request) {
@@ -7,6 +12,7 @@ export async function GET(request: Request) {
     const teamCode = new URL(request.url).searchParams.get('teamCode');
     const raw = await fetchStatnet('sdhl', 'goalies', {
       season: getSeasonParam(request),
+      count: wantsFullList(request) ? FULL_GOALIE_COUNT : undefined,
     });
     return NextResponse.json(transformGoalies(raw, teamCode));
   } catch (error) {

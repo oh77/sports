@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import type React from 'react';
 
 interface PlayerCardProps {
@@ -10,6 +11,12 @@ interface PlayerCardProps {
   rank: number | null;
   nationality: string;
   club?: string;
+  /**
+   * Club logo, shown in the jersey badge's slot. For rows whose subject is a
+   * club rather than a single player (the goalie pairs), where a jersey number
+   * would mean nothing.
+   */
+  logo?: { src: string; alt: string };
 }
 
 /**
@@ -53,6 +60,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   rank,
   nationality,
   club,
+  logo,
 }) => (
   <div className="flex items-center gap-3 rounded-lg border border-line bg-surface px-3 py-2.5 transition-colors hover:border-line-strong">
     {/* Rank with medal accent bar */}
@@ -67,12 +75,24 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
       )}
     </span>
 
-    {/* Jersey number badge (hidden when unknown, e.g. an NHL player with no
-        current roster entry) */}
-    {playerNumber > 0 && (
-      <span className="display num inline-flex h-[26px] min-w-[34px] items-center justify-center rounded-md bg-surface-3 px-1.5 text-[13px] font-bold text-soft">
-        #{playerNumber}
+    {/* Club logo, or the jersey number badge (hidden when unknown, e.g. an NHL
+        player with no current roster entry) */}
+    {logo ? (
+      <span className="inline-flex h-[26px] w-[34px] items-center justify-center">
+        <Image
+          src={logo.src}
+          alt={logo.alt}
+          width={26}
+          height={26}
+          className="h-[26px] w-[26px] object-contain"
+        />
       </span>
+    ) : (
+      playerNumber > 0 && (
+        <span className="display num inline-flex h-[26px] min-w-[34px] items-center justify-center rounded-md bg-surface-3 px-1.5 text-[13px] font-bold text-soft">
+          #{playerNumber}
+        </span>
+      )
     )}
 
     {/* Name + club */}
