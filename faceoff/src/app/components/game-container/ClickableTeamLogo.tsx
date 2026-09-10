@@ -8,22 +8,33 @@ import type { TeamInfo } from '@/app/types/domain/team';
 import { teamPath } from '@/app/utils/leaguePaths';
 import { useSeason } from '@/app/utils/useSeason';
 
+/** lg — hero cards; md — game rows; sm — the dense rows of previous days. */
+export type LogoSize = 'lg' | 'md' | 'sm';
+
 interface ClickableTeamLogoProps {
   league: League;
   teamInfo: TeamInfo;
-  compact?: boolean;
+  size?: LogoSize;
 }
 
 const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
   league,
   teamInfo,
-  compact = false,
+  size = 'md',
 }) => {
   const season = useSeason();
-  const containerSize = 'w-16 h-16';
-  const logoSize = league === 'shl' ? 'w-12 h-12' : 'w-16 h-16';
-  const logoPx = league === 'shl' ? 48 : 64;
-  const marginBottom = compact ? 'mb-0' : 'mb-3';
+  const small = size === 'sm';
+  const containerSize = small ? 'w-10 h-10' : 'w-16 h-16';
+  // SHL logos carry their own padding, so they sit a size down inside the well.
+  const logoSize = small
+    ? league === 'shl'
+      ? 'w-7 h-7'
+      : 'w-9 h-9'
+    : league === 'shl'
+      ? 'w-12 h-12'
+      : 'w-16 h-16';
+  const logoPx = small ? 36 : league === 'shl' ? 48 : 64;
+  const marginBottom = size === 'lg' ? 'mb-3' : 'mb-0';
 
   return (
     <Link
@@ -44,7 +55,7 @@ const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
           />
         ) : (
           <span
-            className={`display text-mute ${compact ? 'text-sm' : 'text-xl'}`}
+            className={`display text-mute ${size === 'lg' ? 'text-xl' : small ? 'text-xs' : 'text-sm'}`}
           >
             {teamInfo.code}
           </span>

@@ -1,37 +1,45 @@
-'use client';
-
 import type React from 'react';
 import type { League } from '@/app/types/domain/league';
 import type { GameInfo } from '../../types/domain/game';
-import { PreviousGame } from '../previous-game';
+import { GameGroup } from '../game-group';
 
 interface PreviousGameDayProps {
-  date: string;
   games: GameInfo[];
   league: League;
 }
 
+/**
+ * A past game day: every game of that day in a single box, under a centered
+ * date rule. It borrows the upcoming list's time-group header instead of its
+ * left-aligned day header, so a finished day reads as a different thing at a
+ * glance.
+ */
 export const PreviousGameDay: React.FC<PreviousGameDayProps> = ({
-  date,
   games,
   league,
 }) => {
-  return (
-    <div className="mb-4">
-      {/* Date Header */}
-      <div className="mb-2 text-center">
-        <h2 className="text-lg font-bold text-gray-800">{date}</h2>
-      </div>
+  if (games.length === 0) return null;
 
-      {/* Games in one container with dividers */}
-      <div
-        className="rounded-lg shadow-lg divide-y divide-gray-200"
-        style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
-      >
-        {games.map((game, index) => (
-          <PreviousGame key={game.uuid || index} game={game} league={league} />
-        ))}
-      </div>
-    </div>
+  const byStartTime = [...games].sort(
+    (a, b) =>
+      new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime(),
+  );
+
+  return (
+    <GameGroup
+      label={formatDayLabel(new Date(byStartTime[0].startDateTime))}
+      games={byStartTime}
+      league={league}
+      dense
+    />
   );
 };
+
+/** Date rule label, e.g. "9 september 2026". */
+function formatDayLabel(date: Date): string {
+  return date.toLocaleDateString('sv-SE', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}

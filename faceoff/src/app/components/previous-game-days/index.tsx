@@ -19,48 +19,46 @@ export const PreviousGameDays: React.FC<PreviousGameDaysProps> = ({
 
   return (
     <div className="mb-8">
-      {/* Thin row with toggle */}
+      {/* Toggle row, styled like the day headers it reveals. */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full focus:outline-none mb-4"
+        aria-expanded={isExpanded}
+        className="group mb-4 flex w-full items-center gap-3 focus:outline-none"
       >
-        <div className="flex flex-col items-center py-2 border-b border-line">
-          <span className="display text-sm font-medium uppercase tracking-[0.04em] text-soft mb-1">
-            Tidigare matcher
-          </span>
-          <svg
-            className={`w-4 h-4 text-dim transition-transform ${
-              isExpanded ? 'transform rotate-180' : ''
-            }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <title>Tidigare Matcher</title>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </div>
+        <span className="display text-base font-bold uppercase tracking-[0.08em] text-dim transition-colors group-hover:text-ink">
+          Tidigare matcher
+        </span>
+        <svg
+          className={`h-4 w-4 shrink-0 text-dim transition-transform group-hover:text-ink ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+        <span className="h-px flex-1 bg-line" aria-hidden="true" />
       </button>
 
-      {/* All previous game days in one container */}
-      {isExpanded && (
-        <div className="space-y-6">
-          {previousGameDays.map((previousDay) => (
+      {/* Oldest first, so the days flow chronologically into today's list. */}
+      {isExpanded &&
+        [...previousGameDays]
+          .reverse()
+          .map((previousDay) => (
             <PreviousGameDay
               key={previousDay.date}
-              date={previousDay.date}
               games={previousDay.games}
               league={league}
             />
           ))}
-        </div>
-      )}
     </div>
   );
 };

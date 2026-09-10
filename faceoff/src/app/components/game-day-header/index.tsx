@@ -42,10 +42,15 @@ function dayLabel(date: Date): string {
     .toUpperCase();
 }
 
-/** Date with full month, no weekday, e.g. "20 december". */
+/**
+ * Date with full month, no weekday, e.g. "20 december" — with the year when it
+ * isn't the current one, as on past-season pages.
+ */
 function formatDate(date: Date): string {
+  const showYear = date.getFullYear() !== new Date().getFullYear();
   return date.toLocaleDateString('sv-SE', {
     day: 'numeric',
     month: 'long',
+    ...(showYear ? { year: 'numeric' } : {}),
   });
 }

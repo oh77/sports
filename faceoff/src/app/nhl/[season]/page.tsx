@@ -10,6 +10,7 @@ import { SeasonChampion } from '../../components/season-champion';
 import { CURRENT_NHL_SEASON } from '../../config/nhl';
 import type { GameInfo, LeagueResponse } from '../../types/domain/game';
 import type { TeamInfo } from '../../types/domain/team';
+import { groupGamesByTime } from '../../utils/gameGrouping';
 import { withSeason } from '../../utils/leaguePaths';
 import {
   buildFinalSeries,
@@ -83,42 +84,6 @@ export default function NHLPage() {
     loadGames();
   }, [season]);
 
-  const formatGameTime = (startDate: string) => {
-    const date = new Date(startDate);
-    return date.toLocaleTimeString('sv-SE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  };
-
-  // Group games by time
-  const groupGamesByTime = (games: GameInfo[]) => {
-    const grouped = games.reduce(
-      (acc, game) => {
-        const time = formatGameTime(game.startDateTime);
-        if (!acc[time]) {
-          acc[time] = [];
-        }
-        acc[time].push(game);
-        return acc;
-      },
-      {} as Record<string, GameInfo[]>,
-    );
-
-    // Sort times
-    const sortedTimes = Object.keys(grouped).sort((a, b) => {
-      const [aHour, aMin] = a.split(':').map(Number);
-      const [bHour, bMin] = b.split(':').map(Number);
-      return aHour * 60 + aMin - (bHour * 60 + bMin);
-    });
-
-    return sortedTimes.map((time) => ({
-      time,
-      games: grouped[time],
-    }));
-  };
-
   if (loading) {
     return (
       <main className="relative py-6 md:py-8" aria-busy="true">
@@ -183,7 +148,7 @@ export default function NHLPage() {
                 {groupGamesByTime(day.games).map((group) => (
                   <GameGroup
                     key={group.time}
-                    time={group.time}
+                    label={group.time}
                     games={group.games}
                     league="nhl"
                   />

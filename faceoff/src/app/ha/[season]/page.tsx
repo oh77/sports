@@ -11,6 +11,7 @@ import { SeasonChampion } from '../../components/season-champion';
 import { StatnetService } from '../../services/statnetService';
 import type { GameInfo } from '../../types/domain/game';
 import type { TeamInfo } from '../../types/domain/team';
+import { groupGamesByTime } from '../../utils/gameGrouping';
 import {
   buildFinalSeries,
   buildPreviousGameDays,
@@ -84,42 +85,6 @@ export default function HAPage() {
 
     loadGames();
   }, [season]);
-
-  const formatGameTime = (startDateTime: string) => {
-    const date = new Date(startDateTime);
-    return date.toLocaleTimeString('sv-SE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  };
-
-  // Group games by time
-  const groupGamesByTime = (games: GameInfo[]) => {
-    const grouped = games.reduce(
-      (acc, game) => {
-        const time = formatGameTime(game.startDateTime);
-        if (!acc[time]) {
-          acc[time] = [];
-        }
-        acc[time].push(game);
-        return acc;
-      },
-      {} as Record<string, GameInfo[]>,
-    );
-
-    // Sort times
-    const sortedTimes = Object.keys(grouped).sort((a, b) => {
-      const [aHour, aMin] = a.split(':').map(Number);
-      const [bHour, bMin] = b.split(':').map(Number);
-      return aHour * 60 + aMin - (bHour * 60 + bMin);
-    });
-
-    return sortedTimes.map((time) => ({
-      time,
-      games: grouped[time],
-    }));
-  };
 
   if (loading) {
     return (
@@ -230,7 +195,7 @@ export default function HAPage() {
               {groupGamesByTime(day.games).map((group) => (
                 <GameGroup
                   key={group.time}
-                  time={group.time}
+                  label={group.time}
                   games={group.games}
                   league="ha"
                 />
