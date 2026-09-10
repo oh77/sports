@@ -65,8 +65,10 @@ export function translateCHLGameToDomain(chlGame: CHLGame): GameInfo {
     venueInfo: {
       name: chlGame.venue,
     },
-    overtime: false, // CHL doesn't provide overtime info in the current structure
-    shootout: false, // CHL doesn't provide shootout info in the current structure
+    // The feed marks how a finished game was decided: "F" fulltime,
+    // "F/OT" overtime, "F/SO" shootout.
+    overtime: chlGame.stateShort === 'F/OT',
+    shootout: chlGame.stateShort === 'F/SO',
   };
 }
 

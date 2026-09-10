@@ -132,6 +132,8 @@ export interface CHLGame {
     away: number;
   };
   state: string;
+  /** Result marker from the CHL feed: "F" fulltime, "F/OT", "F/SO". */
+  stateShort: string;
   round: string;
   group: string;
 }

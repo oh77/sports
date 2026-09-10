@@ -68,6 +68,7 @@ function transformMatchToGame(
         }
       : undefined,
     state: match.state?.name || 'n/a',
+    stateShort: match.state?.shortName || 'n/a',
     round: match.stage?.round?.name || 'n/a',
     group: match.stage?.group?.name || 'n/a',
   };
