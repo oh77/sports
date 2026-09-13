@@ -1,0 +1,38 @@
+{
+  "name": "gameday",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:all": "concurrently --kill-others-on-fail --names gameday,kickoff,faceoff --prefix-colors blue,yellow,magenta \"KICKOFF_BASE_URL=http://localhost:3001 FACEOFF_BASE_URL=http://localhost:3002 next dev -p 3000\" \"yarn --cwd ../kickoff dev -p 3001\" \"yarn --cwd ../faceoff dev -p 3002\"",
+    "build": "next build",
+    "start": "next start",
+    "eslint": "eslint",
+    "eslint:fix": "eslint --fix",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "biome": "biome check",
+    "biome:fix": "biome check --write"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^2.0.0",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.2",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "concurrently": "^10.0.5",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "packageManager": "yarn@1.22.22"
+}
