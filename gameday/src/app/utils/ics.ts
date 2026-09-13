@@ -66,11 +66,9 @@ function event(game: Game, stamp: string): string[] {
   ];
 }
 
-/** "Malmö FF – AIK", or with the score once the game has started. */
-function summary({ state, home, away }: Game): string {
-  return state === 'not-started'
-    ? `${home.name} – ${away.name}`
-    : `${home.name} ${home.score}–${away.score} ${away.name}`;
+/** "Malmö FF – AIK" — never the score, so the calendar holds no results. */
+function summary({ home, away }: Game): string {
+  return `${home.name} – ${away.name}`;
 }
 
 /** 20260913T170000Z */
