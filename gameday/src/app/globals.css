@@ -53,6 +53,43 @@
   --font-display: var(--font-saira), var(--font-archivo), system-ui, sans-serif;
 }
 
+@theme {
+  /* A game row added by progressive loading: slides in, then its league
+     accent fades out of the background. */
+  --animate-row-in: row-in 1600ms ease-out backwards;
+  /* A league chip's game count appearing. */
+  --animate-pop: pop 300ms ease-out backwards;
+  /* A transient status message: stays a few seconds, then fades away. */
+  --animate-fade-out: fade-out 800ms ease-in 3s forwards;
+
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  @keyframes row-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-6px);
+      background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    20% {
+      opacity: 1;
+      transform: none;
+      background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+  }
+
+  @keyframes pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+}
+
 * {
   box-sizing: border-box;
 }

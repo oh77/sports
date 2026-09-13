@@ -19,10 +19,17 @@ type Props = {
    */
   days?: string[];
   emptyText?: string;
+  /** Slide in and briefly highlight rows as they mount (progressive loading). */
+  animateIn?: boolean;
 };
 
 /** Games grouped under Swedish-local day headings, favorites highlighted. */
-export function GameList({ games, days, emptyText = 'Inga matcher' }: Props) {
+export function GameList({
+  games,
+  days,
+  emptyText = 'Inga matcher',
+  animateIn = false,
+}: Props) {
   const byDay = new Map<string, Game[]>();
   for (const game of games) {
     const day = dateKeyFromString(game.startDateTime);
@@ -53,7 +60,11 @@ export function GameList({ games, days, emptyText = 'Inga matcher' }: Props) {
             ) : (
               <ul className="divide-y divide-line-soft overflow-hidden rounded-lg border border-line bg-surface">
                 {dayGames.map((game) => (
-                  <GameRow key={`${game.league}-${game.id}`} game={game} />
+                  <GameRow
+                    key={`${game.league}-${game.id}`}
+                    game={game}
+                    animateIn={animateIn}
+                  />
                 ))}
               </ul>
             )}
@@ -64,7 +75,7 @@ export function GameList({ games, days, emptyText = 'Inga matcher' }: Props) {
   );
 }
 
-function GameRow({ game }: { game: Game }) {
+function GameRow({ game, animateIn }: { game: Game; animateIn: boolean }) {
   const favorite = favoriteSides(game);
   const isFavorite = favorite.home || favorite.away;
 
@@ -75,7 +86,7 @@ function GameRow({ game }: { game: Game }) {
         isFavorite
           ? 'bg-accent/[0.07] shadow-[inset_3px_0_0_var(--accent)]'
           : ''
-      }`}
+      } ${animateIn ? 'animate-row-in motion-reduce:animate-none' : ''}`}
     >
       <LeagueBadge league={game.league} />
       <TeamCell team={game.home} favorite={favorite.home} side="home" />

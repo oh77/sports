@@ -31,7 +31,9 @@ export function gamesWindowToDomain(
         id: game.uuid,
         sport,
         league,
-        startDateTime: game.startDateTime,
+        // Sources differ in offset style (Z, +02:00, no millis); normalize to
+        // UTC so string order is chronological order.
+        startDateTime: new Date(game.startDateTime).toISOString(),
         state: STATES.find((s) => s === game.state) ?? 'not-started',
         home: team(game.homeTeamInfo, baseUrl),
         away: team(game.awayTeamInfo, baseUrl),

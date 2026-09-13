@@ -1,4 +1,4 @@
-import { SPORTS, UPSTREAMS } from '@/app/config/upstreams';
+import { SPORTS, upstreamBaseUrl } from '@/app/config/upstreams';
 import type { League, Sport } from '@/app/types/domain/league';
 import type { Team } from '@/app/types/domain/team';
 import type { TeamsResponse } from '@/app/types/upstream/teams';
@@ -29,7 +29,7 @@ export async function getTeamsByLeague(): Promise<
 async function fetchTeams(
   sport: Sport,
 ): Promise<Partial<Record<League, Team[]>>> {
-  const { baseUrl } = UPSTREAMS[sport];
+  const baseUrl = upstreamBaseUrl(sport);
   const url = `${baseUrl}/api/teams`;
   const response = await fetch(url, {
     cache: 'no-store',

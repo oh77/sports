@@ -1,12 +1,9 @@
 import Link from 'next/link';
-import { GameList } from '@/app/components/game-list';
+import { LiveSchedule } from '@/app/components/live-schedule';
 import { SiteHeader } from '@/app/components/site-header';
-import { SourceNotice } from '@/app/components/source-notice';
-import { getSchedule } from '@/app/services/scheduleService';
 import { addDays, todayDateKey } from '@/app/utils/dateUtils';
-import { isFavoriteGame } from '@/app/utils/favorites';
 
-// Schedules are time-relative and fetched live; render per request.
+// The day window is relative to today; render per request.
 export const dynamic = 'force-dynamic';
 
 /** Calendar days shown, starting today. */
@@ -23,8 +20,6 @@ export default async function Home({ searchParams }: Props) {
   const days = Array.from({ length: UPCOMING_DAYS }, (_, i) =>
     addDays(today, i),
   );
-  const { games, failed } = await getSchedule(days[0], days[days.length - 1]);
-  const shown = onlyFavorites ? games.filter(isFavoriteGame) : games;
 
   return (
     <div className="min-h-screen bg-bg text-ink">
@@ -51,14 +46,9 @@ export default async function Home({ searchParams }: Props) {
           </nav>
         </div>
 
-        <SourceNotice failed={failed} />
-        <GameList
-          games={shown}
-          days={days}
-          emptyText={
-            onlyFavorites ? 'Inga matcher för favoritlagen' : 'Inga matcher'
-          }
-        />
+        {/* Keyed by day so a new day starts from a clean slate; switching the
+            filter keeps the loaded leagues. */}
+        <LiveSchedule key={today} days={days} onlyFavorites={onlyFavorites} />
       </main>
     </div>
   );

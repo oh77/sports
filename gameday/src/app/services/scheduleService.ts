@@ -1,6 +1,7 @@
-import { SPORTS, UPSTREAMS } from '@/app/config/upstreams';
+import { LEAGUES } from '@/app/config/leagues';
+import { SPORTS, upstreamBaseUrl } from '@/app/config/upstreams';
 import type { Game } from '@/app/types/domain/game';
-import type { Sport } from '@/app/types/domain/league';
+import type { League, Sport } from '@/app/types/domain/league';
 import type { GamesWindowResponse } from '@/app/types/upstream/games-window';
 import { gamesWindowToDomain } from '@/app/utils/translators/upstreamToDomain';
 
@@ -39,13 +40,29 @@ export async function getSchedule(from: string, to: string): Promise<Schedule> {
   };
 }
 
+/**
+ * One league's games on `from`..`to`, chronological. Throws when the league's
+ * upstream app (or its provider) is unavailable.
+ */
+export async function getLeagueGames(
+  league: League,
+  from: string,
+  to: string,
+): Promise<Game[]> {
+  const games = await fetchWindow(LEAGUES[league].sport, from, to, league);
+  // An upstream that predates the `league` filter answers with every league.
+  return games.filter((game) => game.league === league);
+}
+
 async function fetchWindow(
   sport: Sport,
   from: string,
   to: string,
+  league?: League,
 ): Promise<Game[]> {
-  const { baseUrl } = UPSTREAMS[sport];
-  const url = `${baseUrl}/api/games-window?from=${from}&to=${to}`;
+  const baseUrl = upstreamBaseUrl(sport);
+  let url = `${baseUrl}/api/games-window?from=${from}&to=${to}`;
+  if (league) url += `&league=${league}`;
   const response = await fetch(url, {
     cache: 'no-store',
     signal: AbortSignal.timeout(TIMEOUT_MS),

@@ -18,7 +18,7 @@ export interface Game {
   id: string;
   sport: Sport;
   league: League;
-  /** Start time, ISO 8601. */
+  /** Start time, UTC ISO 8601 (`toISOString()`), so string order is chronological. */
   startDateTime: string;
   state: GameState;
   home: GameTeam;
