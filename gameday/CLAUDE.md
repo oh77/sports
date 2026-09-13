@@ -18,7 +18,7 @@ faceoff  GET /api/games-window?from&to ─┴→ scheduleService → upstreamToD
 - `games-window` returns `{ from, to, games: { league, game }[] }` — every game whose start falls on a Swedish calendar day in `from..to` (inclusive), in each app's own domain shape (kickoff `MatchInfo`, faceoff `GameInfo`). Max span 120 days.
 - `src/app/types/upstream/games-window.ts` declares only the fields gameday reads; `utils/translators/upstreamToDomain.ts` maps them into gameday's contract (`types/domain/`). Components never import upstream types.
 - Upstream base URLs: `KICKOFF_BASE_URL`, `FACEOFF_BASE_URL` (see `.env.example`), read per request via `upstreamBaseUrl()`. Locally they default to `localhost:3001` / `:3002`; on Vercel (`VERCEL` set) a missing variable throws, which surfaces as that sport failing plus a log line naming the variable.
-- `games-window` also takes an optional `league` — a single league, answering 502 when that league's provider fails. The home page uses it: `components/live-schedule` (client) fetches every league in parallel from gameday's `GET /api/games?league&from&to` and merges each into the list as it arrives, with a status chip per league (`components/league-progress`) and new rows animated in. `/favoriter` and `/calendar.ics` still use `getSchedule()` (one request per sport).
+- `games-window` also takes an optional `league` — a single league, answering 502 when that league's provider fails. The home page uses it: `components/live-schedule` (client) fetches every league in parallel from gameday's `GET /api/games?league&from&to` and merges each into the list as it arrives, with a status chip per league (`components/league-progress`) and new rows animated in. `/favorites` and `/calendar.ics` still use `getSchedule()` (one request per sport).
 - A failing upstream is reported per sport (`Schedule.failed`), never fatal for pages. `/calendar.ics` returns 502 instead, so subscribers keep their previous copy rather than losing a sport's events.
 
 ## Project Structure
@@ -27,7 +27,7 @@ faceoff  GET /api/games-window?from&to ─┴→ scheduleService → upstreamToD
 src/app/
 ├── page.tsx                  # Kommande matcher: today + 2 days, ?visa=favoriter filter, loads per league
 ├── api/games/route.ts        # one league's games for the browser (proxies games-window?league=)
-├── favoriter/page.tsx        # favorites list, calendar subscribe links, next 14 days
+├── favorites/page.tsx        # favorites list, calendar subscribe links, next 14 days
 ├── lag/page.tsx              # all teams per league with their codes (GET /api/teams in kickoff/faceoff)
 ├── calendar.ics/route.ts     # iCalendar feed of favorites' games (-7 .. +14 days)
 ├── components/               # folder per component, index.tsx

@@ -1,10 +1,10 @@
 import Link from 'next/link';
 
-type Section = 'matcher' | 'favoriter' | 'lag';
+type Section = 'matcher' | 'favorites' | 'lag';
 
 const LINKS: { section: Section; href: string; label: string }[] = [
   { section: 'matcher', href: '/', label: 'Matcher' },
-  { section: 'favoriter', href: '/favoriter', label: 'Favoriter' },
+  { section: 'favorites', href: '/favorites', label: 'Favoriter' },
   { section: 'lag', href: '/lag', label: 'Lag' },
 ];
 

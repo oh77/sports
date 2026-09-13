@@ -28,7 +28,7 @@ export default async function FavoritesPage() {
 
   return (
     <div className="min-h-screen bg-bg text-ink">
-      <SiteHeader current="favoriter" />
+      <SiteHeader current="favorites" />
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6">
         <h1 className="display text-3xl font-bold uppercase tracking-[0.08em]">
