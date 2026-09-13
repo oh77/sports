@@ -66,9 +66,12 @@ function event(game: Game, stamp: string): string[] {
   ];
 }
 
-/** "Malmö FF – AIK" — never the score, so the calendar holds no results. */
-function summary({ home, away }: Game): string {
-  return `${home.name} – ${away.name}`;
+/**
+ * "[SDHL] Frölunda – Brynäs" — never the score, so the calendar holds no
+ * results.
+ */
+function summary({ league, home, away }: Game): string {
+  return `[${LEAGUES[league].shortName}] ${home.name} – ${away.name}`;
 }
 
 /** 20260913T170000Z */

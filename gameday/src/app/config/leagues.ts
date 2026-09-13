@@ -2,6 +2,8 @@ import type { League, Sport } from '@/app/types/domain/league';
 
 export type LeagueMeta = {
   name: string;
+  /** Compact label, e.g. the `[SDHL]` prefix on calendar events. */
+  shortName: string;
   sport: Sport;
   /** Row accent, matching the league's accent in kickoff/faceoff. */
   accent: string;
@@ -16,6 +18,7 @@ const LIGHT_CHIP = 'rgba(255,255,255,0.9)';
 export const LEAGUES: Record<League, LeagueMeta> = {
   allsvenskan: {
     name: 'Allsvenskan',
+    shortName: 'Allsvenskan',
     sport: 'football',
     accent: '#facc15',
     logo: 'https://allsvenskan.se/wp-content/themes/sef-leagues/images/allsvenskan/allsvenskan-logo.svg',
@@ -23,6 +26,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   superettan: {
     name: 'Superettan',
+    shortName: 'Superettan',
     sport: 'football',
     accent: '#2f9e5e',
     logo: 'https://superettan.se/wp-content/themes/sef-leagues/images/superettan/SE2026.png',
@@ -30,6 +34,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   shl: {
     name: 'SHL',
+    shortName: 'SHL',
     sport: 'hockey',
     accent: '#2f7bf6',
     logo: 'https://sportality.cdn.s8y.se/team-logos/shl1_shl.svg',
@@ -37,6 +42,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   sdhl: {
     name: 'SDHL',
+    shortName: 'SDHL',
     sport: 'hockey',
     accent: '#2dd4bf',
     logo: 'https://sportality.cdn.s8y.se/team-logos/sdhl1_sdhl.svg',
@@ -44,6 +50,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   ha: {
     name: 'HockeyAllsvenskan',
+    shortName: 'HA',
     sport: 'hockey',
     accent: '#6366f1',
     logo: 'https://sportality.cdn.s8y.se/team-logos/ha1_ha.svg',
@@ -51,6 +58,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   pl: {
     name: 'Premier League',
+    shortName: 'PL',
     sport: 'football',
     accent: '#a78bfa',
     logo: '/assets/PL_LOGO_COMPACT_DARK_RGB.png',
@@ -58,6 +66,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   cl: {
     name: 'Champions League',
+    shortName: 'CL',
     sport: 'football',
     accent: '#3b82f6',
     logo: 'https://img.uefa.com/imgml/uefacom/elements/logos/competitions/color/full/1.svg',
@@ -65,6 +74,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   el: {
     name: 'Europa League',
+    shortName: 'EL',
     sport: 'football',
     accent: '#f97316',
     logo: '/assets/europa-league-logo.svg',
@@ -72,6 +82,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   col: {
     name: 'Conference League',
+    shortName: 'ECL',
     sport: 'football',
     accent: '#34d399',
     logo: '/assets/conference-league-logo.svg',
@@ -79,6 +90,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   chl: {
     name: 'Champions Hockey League',
+    shortName: 'CHL',
     sport: 'hockey',
     accent: '#3b82f6',
     logo: 'https://www.chl.hockey/static/img/logo.png',
@@ -86,6 +98,7 @@ export const LEAGUES: Record<League, LeagueMeta> = {
   },
   nhl: {
     name: 'NHL',
+    shortName: 'NHL',
     sport: 'hockey',
     accent: '#e5352b',
     logo: 'https://assets.nhle.com/logos/nhl/svg/NHL_light.svg',
