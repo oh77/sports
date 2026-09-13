@@ -23,7 +23,7 @@ export default async function StatsPage({
 
   const tabs: Tab[] = [
     {
-      id: 'skyttar',
+      id: 'scorers',
       label: 'Skyttar',
       content: (
         <StatsTable
@@ -34,7 +34,7 @@ export default async function StatsPage({
       ),
     },
     {
-      id: 'assist',
+      id: 'assists',
       label: 'Assist',
       content: (
         <StatsTable
@@ -45,7 +45,7 @@ export default async function StatsPage({
       ),
     },
     {
-      id: 'kort',
+      id: 'cards',
       label: 'Kort',
       content: (
         <StatsTable
@@ -61,7 +61,7 @@ export default async function StatsPage({
 
   if (keepers) {
     tabs.push({
-      id: 'malvakter',
+      id: 'goalkeepers',
       label: 'Målvakter',
       content: (
         <StatsTable

@@ -1,11 +1,11 @@
 import Link from 'next/link';
 
-type Section = 'matcher' | 'favorites' | 'lag';
+type Section = 'games' | 'favorites' | 'teams';
 
 const LINKS: { section: Section; href: string; label: string }[] = [
-  { section: 'matcher', href: '/', label: 'Matcher' },
+  { section: 'games', href: '/', label: 'Matcher' },
   { section: 'favorites', href: '/favorites', label: 'Favoriter' },
-  { section: 'lag', href: '/lag', label: 'Lag' },
+  { section: 'teams', href: '/teams', label: 'Lag' },
 ];
 
 export function SiteHeader({ current }: { current: Section }) {

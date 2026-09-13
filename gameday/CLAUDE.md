@@ -25,10 +25,10 @@ faceoff  GET /api/games-window?from&to ─┴→ scheduleService → upstreamToD
 
 ```
 src/app/
-├── page.tsx                  # Kommande matcher: today + 2 days, ?visa=favoriter filter, loads per league
+├── page.tsx                  # Kommande matcher: today + 2 days, ?show=favorites filter, loads per league
 ├── api/games/route.ts        # one league's games for the browser (proxies games-window?league=)
 ├── favorites/page.tsx        # favorites list, calendar subscribe links, next 14 days
-├── lag/page.tsx              # all teams per league with their codes (GET /api/teams in kickoff/faceoff)
+├── teams/page.tsx            # all teams per league with their codes (GET /api/teams in kickoff/faceoff)
 ├── calendar.ics/route.ts     # iCalendar feed of favorites' games (-7 .. +14 days)
 ├── components/               # folder per component, index.tsx
 ├── config/

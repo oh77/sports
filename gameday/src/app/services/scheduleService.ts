@@ -68,7 +68,10 @@ async function fetchWindow(
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (!response.ok) {
-    throw new Error(`${url} responded ${response.status}`);
+    const body = (await response.text().catch(() => '')).trim().slice(0, 200);
+    throw new Error(
+      `${url} responded ${response.status}${body ? `: ${body}` : ''}`,
+    );
   }
   const data: GamesWindowResponse = await response.json();
   return gamesWindowToDomain(sport, baseUrl, data);

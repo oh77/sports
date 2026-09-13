@@ -41,8 +41,15 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error(`Failed to fetch ${league} games:`, error);
     return NextResponse.json(
-      { error: `${league} is unavailable` },
+      { error: `${league} is unavailable`, detail: describeError(error) },
       { status: 502 },
     );
   }
+}
+
+/** Error message plus its cause, e.g. `fetch failed (connect ECONNREFUSED …)`. */
+function describeError(error: unknown): string {
+  if (!(error instanceof Error)) return String(error);
+  const cause = error.cause instanceof Error ? ` (${error.cause.message})` : '';
+  return `${error.message}${cause}`;
 }

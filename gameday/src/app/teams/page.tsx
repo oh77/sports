@@ -22,7 +22,7 @@ export default async function TeamsPage() {
 
   return (
     <div className="min-h-screen bg-bg text-ink">
-      <SiteHeader current="lag" />
+      <SiteHeader current="teams" />
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6">
         <h1 className="display text-3xl font-bold uppercase tracking-[0.08em]">
@@ -42,7 +42,7 @@ export default async function TeamsPage() {
             {LEAGUE_ORDER.map((league) => (
               <li key={league}>
                 <a
-                  href={`#liga-${league}`}
+                  href={`#league-${league}`}
                   className="inline-block rounded-md bg-surface-3 px-2.5 py-1 text-soft transition-colors hover:text-ink"
                 >
                   {LEAGUES[league].name}
@@ -65,10 +65,10 @@ export default async function TeamsPage() {
 }
 
 function LeagueTeams({ league, teams }: { league: League; teams?: Team[] }) {
-  const headingId = `liga-${league}-rubrik`;
+  const headingId = `league-${league}-heading`;
   return (
     <section
-      id={`liga-${league}`}
+      id={`league-${league}`}
       aria-labelledby={headingId}
       className="mt-10 scroll-mt-4"
     >

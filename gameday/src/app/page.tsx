@@ -10,11 +10,11 @@ export const dynamic = 'force-dynamic';
 const UPCOMING_DAYS = 3;
 
 type Props = {
-  searchParams: Promise<{ visa?: string }>;
+  searchParams: Promise<{ show?: string }>;
 };
 
 export default async function Home({ searchParams }: Props) {
-  const onlyFavorites = (await searchParams).visa === 'favoriter';
+  const onlyFavorites = (await searchParams).show === 'favorites';
 
   const today = todayDateKey();
   const days = Array.from({ length: UPCOMING_DAYS }, (_, i) =>
@@ -23,7 +23,7 @@ export default async function Home({ searchParams }: Props) {
 
   return (
     <div className="min-h-screen bg-bg text-ink">
-      <SiteHeader current="matcher" />
+      <SiteHeader current="games" />
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -40,7 +40,7 @@ export default async function Home({ searchParams }: Props) {
             <FilterLink href="/" active={!onlyFavorites}>
               Alla
             </FilterLink>
-            <FilterLink href="/?visa=favoriter" active={onlyFavorites}>
+            <FilterLink href="/?show=favorites" active={onlyFavorites}>
               Favoriter
             </FilterLink>
           </nav>

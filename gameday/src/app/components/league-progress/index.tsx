@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { type CSSProperties, useState } from 'react';
 import { LeagueBadge } from '@/app/components/league-badge';
 import { LEAGUES } from '@/app/config/leagues';
 import type { League } from '@/app/types/domain/league';
@@ -10,22 +10,31 @@ export type LeagueLoad = {
   count: number;
   /** Whether the league's games are shown in the list. */
   visible: boolean;
+  /** Log line of the failure, when `state` is `'failed'`. */
+  error?: string;
 };
 
 type Props = {
   leagues: LeagueLoad[];
   onToggle: (league: League) => void;
   onShowAll: () => void;
+  onRetry: (leagues: League[]) => void;
 };
 
 /**
  * Per-league loading status — spinner while pending, then count or failure —
  * doubling as toggles for showing or hiding each league's games.
  */
-export function LeagueProgress({ leagues, onToggle, onShowAll }: Props) {
+export function LeagueProgress({
+  leagues,
+  onToggle,
+  onShowAll,
+  onRetry,
+}: Props) {
   const total = leagues.length;
   const settled = leagues.filter((l) => l.state !== 'loading').length;
-  const failed = leagues.filter((l) => l.state === 'failed').length;
+  const failures = leagues.filter((l) => l.state === 'failed');
+  const failed = failures.length;
   const anyHidden = leagues.some((l) => !l.visible);
 
   const allDone = settled === total;
@@ -84,7 +93,71 @@ export function LeagueProgress({ leagues, onToggle, onShowAll }: Props) {
           </li>
         ))}
       </ul>
+      {failed > 0 && <LoadErrors failures={failures} onRetry={onRetry} />}
     </section>
+  );
+}
+
+/** Failed leagues with an expandable log line each, retryable. */
+function LoadErrors({
+  failures,
+  onRetry,
+}: {
+  failures: LeagueLoad[];
+  onRetry: (leagues: League[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const retryButton =
+    'cursor-pointer rounded-md border border-line-strong px-2 py-0.5 text-xs font-semibold text-soft transition-colors hover:border-accent hover:text-ink';
+
+  return (
+    <div className="mt-3 rounded-lg border border-live/50 bg-live/10 px-3 py-2 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((prev) => !prev)}
+          className="flex cursor-pointer items-center gap-1.5 text-soft hover:text-ink"
+        >
+          <span
+            aria-hidden="true"
+            className={`inline-block transition-transform motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}
+          >
+            ▸
+          </span>
+          {open ? 'Dölj logg' : 'Visa logg'}
+        </button>
+        <button
+          type="button"
+          onClick={() => onRetry(failures.map((f) => f.league))}
+          className={retryButton}
+        >
+          {failures.length > 1 ? 'Försök igen med alla' : 'Försök igen'}
+        </button>
+      </div>
+      {open && (
+        <ul className="mt-2 space-y-2 border-t border-live/30 pt-2">
+          {failures.map(({ league, error }) => (
+            <li key={league} className="flex items-start gap-2">
+              <LeagueBadge league={league} />
+              <code className="min-w-0 flex-1 break-all pt-0.5 text-xs text-soft">
+                {error}
+              </code>
+              {failures.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => onRetry([league])}
+                  className={retryButton}
+                >
+                  Försök igen
+                  <span className="sr-only"> med {LEAGUES[league].name}</span>
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
