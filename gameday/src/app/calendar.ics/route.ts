@@ -5,7 +5,7 @@ import { buildCalendar } from '@/app/utils/ics';
 
 export const dynamic = 'force-dynamic';
 
-/** Keep recent results in the calendar for a week after the game. */
+/** Keep past games (without scores) in the calendar for a week. */
 const PAST_DAYS = 7;
 /**
  * How far ahead to publish. Kept within the NHL schedule walk in faceoff
@@ -13,6 +13,10 @@ const PAST_DAYS = 7;
  */
 const FUTURE_DAYS = 14;
 
+/**
+ * Refresh hint for calendar clients (`REFRESH-INTERVAL`/`X-PUBLISHED-TTL`).
+ * Google ignores it. Server-side caching is the `Cache-Control` header below.
+ */
 const REFRESH_HOURS = 6;
 
 /**
