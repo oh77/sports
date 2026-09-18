@@ -12,16 +12,13 @@ interface UpcomingGamesTableProps {
   games: GameInfo[];
 }
 
-/** Normalize a datetime string to a YYYY-MM-DD date key */
-function toDateKey(dateTimeStr: string): string {
-  return dateTimeStr.slice(0, 10);
-}
+/** How many upcoming games to show per team. */
+const GAME_COUNT = 10;
 
 interface UpcomingEntry {
   opponent: TeamInfo;
   isHome: boolean;
-  dateKey: string;
-  date: string;
+  startDateTime: string;
 }
 
 export function UpcomingGamesTable({
@@ -41,8 +38,8 @@ export function UpcomingGamesTable({
     );
   }, [games]);
 
-  // Build per-team upcoming map keyed by date
-  const { rows, dateCols, padCount } = useMemo(() => {
+  // Each team's next games in order; columns are game slots, not dates.
+  const rows = useMemo(() => {
     const upcomingGames = games
       .filter((g) => g.state === 'not-started')
       .sort(
@@ -51,46 +48,26 @@ export function UpcomingGamesTable({
           new Date(b.startDateTime).getTime(),
       );
 
-    // Collect all unique date keys from upcoming games, sorted chronologically
-    const dateSet = new Set<string>();
-    for (const g of upcomingGames) {
-      dateSet.add(toDateKey(g.startDateTime));
-    }
-    const allDates = Array.from(dateSet).sort();
-
-    // For each team, build a map of dateKey -> entry
-    const teamRows = teams.map((team) => {
-      const entryMap = new Map<string, UpcomingEntry>();
+    return teams.map((team) => {
+      const entries: UpcomingEntry[] = [];
       for (const g of upcomingGames) {
+        if (entries.length === GAME_COUNT) break;
         const isHome = g.homeTeamInfo.teamInfo.code === team.code;
         const isAway = g.awayTeamInfo.teamInfo.code === team.code;
         if (!isHome && !isAway) continue;
-
-        const dateKey = toDateKey(g.startDateTime);
-        if (entryMap.has(dateKey)) continue; // one game per date per team
-        entryMap.set(dateKey, {
+        entries.push({
           opponent: isHome ? g.awayTeamInfo.teamInfo : g.homeTeamInfo.teamInfo,
           isHome,
-          dateKey,
-          date: g.startDateTime,
+          startDateTime: g.startDateTime,
         });
       }
-      return { team, entryMap };
+      return { team, entries };
     });
-
-    // Limit to dates where at least one team has a game, take first N
-    // To keep the table reasonable, find the date by which every team has at least 10 games
-    // or just cap at a reasonable number of date columns
-    const MAX_DATE_COLS = 20;
-    const limitedDates = allDates.slice(0, MAX_DATE_COLS);
-
-    const padCount = Math.max(0, MAX_DATE_COLS - limitedDates.length);
-    return { rows: teamRows, dateCols: limitedDates, padCount };
   }, [games, teams]);
 
-  const padKeys = Array.from({ length: padCount }, (_, i) => `pad-${i}`);
+  const slots = Array.from({ length: GAME_COUNT }, (_, i) => i);
 
-  if (teams.length === 0 || dateCols.length === 0) {
+  if (rows.every((row) => row.entries.length === 0)) {
     return (
       <div className="max-w-6xl mx-auto">
         <div className="rounded-lg border border-line bg-surface overflow-hidden">
@@ -124,21 +101,18 @@ export function UpcomingGamesTable({
                 <th className="px-4 py-3 text-left text-xs text-mute display uppercase tracking-[0.06em] w-16 sticky left-0 bg-surface-2 z-10">
                   Lag
                 </th>
-                {dateCols.map((dateKey) => (
+                {slots.map((slot) => (
                   <th
-                    key={dateKey}
-                    className="px-2 py-3 text-center text-[10px] num text-mute tracking-wider whitespace-nowrap"
+                    key={slot}
+                    className="px-1.5 py-3 text-center text-[10px] num text-mute tracking-wider"
                   >
-                    {formatShortDateFromString(dateKey)}
+                    {slot + 1}
                   </th>
-                ))}
-                {padKeys.map((key) => (
-                  <th key={key} className="px-2 py-3" />
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-line-soft">
-              {rows.map(({ team, entryMap }) => (
+              {rows.map(({ team, entries }) => (
                 <tr
                   key={team.code}
                   className="hover:bg-white/[0.03] transition-colors"
@@ -162,36 +136,36 @@ export function UpcomingGamesTable({
                       )}
                     </div>
                   </td>
-                  {/* Opponent logos per date */}
-                  {dateCols.map((dateKey) => {
-                    const entry = entryMap.get(dateKey);
+                  {/* Opponent logos, next games in order */}
+                  {slots.map((slot) => {
+                    const entry = entries[slot];
                     if (!entry) {
                       return (
-                        <td key={dateKey} className="px-2 py-2 text-center">
-                          <div className="w-10 h-10 mx-auto" />
+                        <td key={slot} className="px-1.5 py-2 text-center">
+                          <div className="w-8 h-8 mx-auto" />
                         </td>
                       );
                     }
                     return (
-                      <td key={dateKey} className="px-2 py-2 text-center">
+                      <td key={slot} className="px-1.5 py-2 text-center">
                         <div
-                          className={`w-10 h-10 mx-auto flex items-center justify-center rounded-full overflow-hidden ${
+                          className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full overflow-hidden ${
                             entry.isHome
                               ? 'border-3 border-accent'
                               : 'border-3 border-otl'
                           }`}
-                          title={`${entry.isHome ? 'Hemma' : 'Borta'} mot ${entry.opponent.long}`}
+                          title={`${formatShortDateFromString(entry.startDateTime)}: ${entry.isHome ? 'Hemma' : 'Borta'} mot ${entry.opponent.long}`}
                         >
                           {entry.opponent.logo ? (
                             <Image
                               src={entry.opponent.logo}
                               alt={entry.opponent.full}
-                              width={32}
-                              height={32}
-                              className="w-8 h-8 object-contain"
+                              width={24}
+                              height={24}
+                              className="w-6 h-6 object-contain"
                             />
                           ) : (
-                            <span className="text-xs font-semibold text-dim">
+                            <span className="text-[10px] font-semibold text-dim">
                               {entry.opponent.short}
                             </span>
                           )}
@@ -199,9 +173,6 @@ export function UpcomingGamesTable({
                       </td>
                     );
                   })}
-                  {padKeys.map((key) => (
-                    <td key={key} className="px-2 py-2" />
-                  ))}
                 </tr>
               ))}
             </tbody>
