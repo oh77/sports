@@ -91,6 +91,14 @@ export const CURRENT_SEASON: SeasonConfig =
   STATNET_SEASONS.find((s) => s.current) ?? STATNET_SEASONS[0];
 
 /**
+ * Seasons available for a league. HA left Statnet in 2026 and its site only
+ * exposes the current season, so earlier seasons are not offered for it.
+ */
+export function statnetSeasonsFor(league: StatnetLeague): SeasonConfig[] {
+  return league === 'ha' ? [CURRENT_SEASON] : STATNET_SEASONS;
+}
+
+/**
  * Resolve a season key to its config, falling back to the current season for
  * missing or unknown keys.
  */

@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CHL_SEASONS } from '@/app/config/chl';
 import { NHL_SEASONS } from '@/app/config/nhl';
-import { STATNET_SEASONS } from '@/app/config/statnet';
+import { type StatnetLeague, statnetSeasonsFor } from '@/app/config/statnet';
 import { seasonLabel } from '@/app/utils/seasonLabel';
 import { useSeason } from '@/app/utils/useSeason';
 
@@ -28,7 +28,7 @@ export function SeasonSwitcher() {
       ? CHL_SEASONS
       : league === 'nhl'
         ? NHL_SEASONS
-        : STATNET_SEASONS;
+        : statnetSeasonsFor(league as StatnetLeague);
 
   const goTo = (key: string) => {
     setOpen(false);

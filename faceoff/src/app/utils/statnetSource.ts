@@ -6,6 +6,7 @@ import {
   type StatnetLeague,
 } from '../config/statnet';
 import { generateCacheKey, getCachedData } from './cache';
+import { assertHaSeason, fetchHaSchedule, fetchHaStandings } from './haSource';
 
 /** Statnet resources exposed through the per-league API routes. */
 export type StatnetResource =
@@ -97,21 +98,61 @@ export async function fetchStatnet<T = unknown>(
   opts: FetchOptions = {},
 ): Promise<T> {
   const season = resolveSeason(opts.season);
-  const url = buildStatnetUrl(league, resource, season, {
-    count: opts.count,
-    gameType: opts.gameType,
-  });
-
   const params: Record<string, string> = { season: season.key };
   if (opts.count != null) params.count = String(opts.count);
   if (opts.gameType) params.gameType = opts.gameType;
   const cacheKey = generateCacheKey(`${league}-${resource}`, params);
 
+  if (league === 'ha') {
+    return getCachedData<T>(
+      cacheKey,
+      async () => (await fetchHa(resource, season, opts.gameType)) as T,
+    );
+  }
+
+  const url = buildStatnetUrl(league, resource, season, {
+    count: opts.count,
+    gameType: opts.gameType,
+  });
+
   return getCachedData<T>(cacheKey, async () => {
     const response = await fetch(url, { headers: statnetHeaders(league) });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status} (${url})`);
+    }
+    // Statnet hosts answer some bad requests with an HTML page and a 200, so
+    // check the payload type before parsing to get a useful error.
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.includes('json')) {
+      const body = (await response.text()).slice(0, 200);
+      throw new Error(
+        `Expected JSON but got "${contentType}" from ${response.url || url}: ${body}`,
+      );
     }
     return (await response.json()) as T;
   });
+}
+
+/**
+ * HA left the Statnet API; its data is scraped from hockeyallsvenskan.se and
+ * returned in the same raw shapes the Statnet endpoints used.
+ */
+async function fetchHa(
+  resource: StatnetResource,
+  season: SeasonConfig,
+  gameType?: GameType,
+): Promise<unknown> {
+  assertHaSeason(season.key);
+  switch (resource) {
+    case 'games':
+    case 'teams':
+      return fetchHaSchedule(gameType);
+    case 'standings':
+      return fetchHaStandings();
+    case 'players':
+    case 'goalies':
+      // The new site's leaderboards are empty until games are played, so
+      // their shape is unknown yet. The transforms treat [] as "no stats".
+      return [];
+  }
 }

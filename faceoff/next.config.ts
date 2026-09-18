@@ -34,6 +34,13 @@ const nextConfig: NextConfig = {
         pathname: '/logos/**',
       },
       {
+        // HA team logos (Strapi media on the hockeyallsvenskan.se CMS).
+        protocol: 'https',
+        hostname: 'ha-media.hadigital.se',
+        port: '',
+        pathname: '/**',
+      },
+      {
         // Player headshots on the NHL roster pages.
         protocol: 'https',
         hostname: 'assets.nhle.com',
