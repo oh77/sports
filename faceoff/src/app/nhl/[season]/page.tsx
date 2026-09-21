@@ -140,6 +140,7 @@ export default function NHLPage() {
           height={400}
           className="opacity-[0.06] transform rotate-12"
           role="presentation"
+          unoptimized
         />
       </div>
 

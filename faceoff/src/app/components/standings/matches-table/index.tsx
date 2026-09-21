@@ -90,6 +90,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
               width={32}
               height={32}
               className="w-8 h-8 object-contain"
+              unoptimized
             />
           ) : (
             <span className="text-mute text-sm">🏒</span>
@@ -111,6 +112,7 @@ export function MatchesTable({ league: _league, games }: MatchesTableProps) {
               width={32}
               height={32}
               className="w-8 h-8 object-contain"
+              unoptimized
             />
           ) : (
             <span className="text-mute text-sm">🏒</span>

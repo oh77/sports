@@ -98,6 +98,7 @@ export function NhlRoster() {
                     width={32}
                     height={32}
                     className="h-8 w-8 object-contain"
+                    unoptimized
                   />
                   <span
                     className={`display text-[11px] font-bold uppercase tracking-[0.06em] ${
@@ -127,6 +128,7 @@ export function NhlRoster() {
                 width={64}
                 height={64}
                 className="h-14 w-14 object-contain md:h-16 md:w-16"
+                unoptimized
               />
               <div>
                 <h2 className="display text-xl font-bold uppercase tracking-[0.04em] text-ink">

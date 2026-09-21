@@ -46,6 +46,7 @@ export const HeadToHeadCircle: React.FC<HeadToHeadCircleProps> = ({ game }) => {
         width={48}
         height={48}
         className="w-10 h-10 object-contain"
+        unoptimized
       />
     );
   }

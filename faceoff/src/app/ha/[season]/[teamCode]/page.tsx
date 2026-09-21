@@ -143,6 +143,7 @@ export default function TeamPage({
             height={1200}
             className="opacity-[0.05] w-full h-full object-contain"
             role="presentation"
+            unoptimized
           />
         </div>
       )}
@@ -157,6 +158,7 @@ export default function TeamPage({
               width={80}
               height={80}
               className="w-16 h-16 md:w-20 md:h-20 object-contain"
+              unoptimized
             />
           ) : (
             <div className="w-16 h-16 md:w-20 md:h-20 bg-surface-3 rounded-full flex items-center justify-center">

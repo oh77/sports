@@ -95,6 +95,7 @@ export function LeagueTiles() {
                   width={300}
                   height={300}
                   className="h-full w-full object-contain"
+                  unoptimized
                 />
               </div>
               {/* Next game date, integrated as a footer strip */}

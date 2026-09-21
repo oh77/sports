@@ -57,6 +57,7 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({
                         width={24}
                         height={24}
                         className="w-6 h-6 object-contain"
+                        unoptimized
                       />
                     ) : (
                       <span className="text-mute text-xs">🏒</span>

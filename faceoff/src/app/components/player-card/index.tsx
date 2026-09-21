@@ -85,6 +85,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
           width={26}
           height={26}
           className="h-[26px] w-[26px] object-contain"
+          unoptimized
         />
       </span>
     ) : (

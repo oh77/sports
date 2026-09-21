@@ -90,6 +90,7 @@ const FirstGame: React.FC<FirstGameProps> = ({ league = 'shl' }) => {
                 width={48}
                 height={48}
                 className="w-12 h-12 object-contain"
+                unoptimized
               />
             ) : (
               <span className="text-gray-400 text-xs">🏒</span>
@@ -113,6 +114,7 @@ const FirstGame: React.FC<FirstGameProps> = ({ league = 'shl' }) => {
                 width={48}
                 height={48}
                 className="w-12 h-12 object-contain"
+                unoptimized
               />
             ) : (
               <span className="text-gray-400 text-xs">🏒</span>

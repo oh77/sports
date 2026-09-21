@@ -186,6 +186,7 @@ export default function NhlTeamPage({
             height={400}
             className="w-96 h-96 object-contain transform rotate-12"
             role="presentation"
+            unoptimized
           />
         </div>
       </div>
@@ -200,6 +201,7 @@ export default function NhlTeamPage({
               width={64}
               height={64}
               className="w-16 h-16 object-contain"
+              unoptimized
             />
           </div>
           <h1 className="display text-3xl md:text-5xl font-bold text-ink uppercase tracking-[0.04em] text-center md:text-left">

@@ -71,6 +71,7 @@ export function TopNav({ league, season }: TopNavProps) {
                   width={28}
                   height={28}
                   className="h-6 w-6 object-contain"
+                  unoptimized
                 />
               </span>
               <span className="display text-[17px] font-bold uppercase tracking-[0.1em] text-ink">

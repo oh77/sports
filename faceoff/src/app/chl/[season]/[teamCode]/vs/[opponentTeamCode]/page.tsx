@@ -271,6 +271,7 @@ export default function TeamPage({
             height={400}
             className="w-96 h-96 object-contain transform rotate-12"
             role="presentation"
+            unoptimized
           />
         </div>
       </div>
@@ -285,6 +286,7 @@ export default function TeamPage({
               width={64}
               height={64}
               className="w-16 h-16 object-contain"
+              unoptimized
             />
           </div>
           <div className="flex items-center gap-3">

@@ -139,6 +139,7 @@ export function GoalDistributionTable({
                             width={24}
                             height={24}
                             className="w-6 h-6 object-contain"
+                            unoptimized
                           />
                         )}
                         <span className="text-sm font-semibold text-ink">

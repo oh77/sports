@@ -140,6 +140,7 @@ export function UpcomingAllLeagues({ limit = 10 }: { limit?: number }) {
                       width={24}
                       height={24}
                       className="h-5 w-5 object-contain"
+                      unoptimized
                     />
                   </div>
 
@@ -208,6 +209,7 @@ function TeamLogo({ logo, name }: { logo: string; name: string }) {
       width={20}
       height={20}
       className="h-5 w-5 shrink-0 object-contain"
+      unoptimized
     />
   );
 }

@@ -122,6 +122,7 @@ export default function HAPage() {
             height={400}
             className="opacity-[0.06] transform rotate-12"
             role="presentation"
+            unoptimized
           />
         </div>
 
@@ -148,6 +149,7 @@ export default function HAPage() {
             height={400}
             className="opacity-[0.06] transform rotate-12"
             role="presentation"
+            unoptimized
           />
         </div>
 
@@ -183,6 +185,7 @@ export default function HAPage() {
           height={400}
           className="opacity-[0.06] transform rotate-12"
           role="presentation"
+          unoptimized
         />
       </div>
 

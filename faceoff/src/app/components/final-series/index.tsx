@@ -66,6 +66,7 @@ function TeamLogo({
       width={32}
       height={32}
       className={`h-7 w-7 object-contain ${className}`}
+      unoptimized
     />
   );
 }

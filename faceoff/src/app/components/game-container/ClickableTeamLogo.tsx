@@ -52,6 +52,7 @@ const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
             width={logoPx}
             height={logoPx}
             className={`object-contain ${logoSize}`}
+            unoptimized
           />
         ) : (
           <span

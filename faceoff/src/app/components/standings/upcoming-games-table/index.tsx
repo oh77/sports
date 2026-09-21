@@ -128,6 +128,7 @@ export function UpcomingGamesTable({
                           width={40}
                           height={40}
                           className="w-10 h-10 object-contain"
+                          unoptimized
                         />
                       ) : (
                         <span className="text-sm font-semibold text-dim">
@@ -163,6 +164,7 @@ export function UpcomingGamesTable({
                               width={24}
                               height={24}
                               className="w-6 h-6 object-contain"
+                              unoptimized
                             />
                           ) : (
                             <span className="text-[10px] font-semibold text-dim">

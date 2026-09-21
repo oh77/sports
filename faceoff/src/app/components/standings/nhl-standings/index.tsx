@@ -205,6 +205,7 @@ function StandingsGroup({
                             width={32}
                             height={32}
                             className="h-8 w-8 object-contain"
+                            unoptimized
                           />
                         ) : (
                           <span className="text-sm text-mute">🏒</span>

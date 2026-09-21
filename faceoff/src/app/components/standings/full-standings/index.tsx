@@ -130,6 +130,7 @@ export function FullStandings({ standings, league }: FullStandingsProps) {
                                 width={32}
                                 height={32}
                                 className="w-8 h-8 object-contain"
+                                unoptimized
                               />
                             ) : (
                               <span className="text-mute text-sm">🏒</span>

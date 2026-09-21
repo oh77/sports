@@ -139,6 +139,7 @@ const LeagueFooter: React.FC<LeagueFooterProps> = ({
                     width={48}
                     height={48}
                     className="w-12 h-12 object-contain"
+                    unoptimized
                   />
                 ) : (
                   <span className="text-gray-400 text-lg">🏒</span>

@@ -59,6 +59,7 @@ export function SeasonChampion({ team, season }: SeasonChampionProps) {
               width={144}
               height={144}
               className="h-20 w-20 object-contain md:h-24 md:w-24"
+              unoptimized
             />
           ) : (
             <span className="text-4xl text-mute">🏒</span>

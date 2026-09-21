@@ -109,6 +109,7 @@ function TeamColumn({ team, accent }: { team: GameTeamInfo; accent: RGB }) {
             width={112}
             height={112}
             className="h-16 w-16 object-contain md:h-20 md:w-20"
+            unoptimized
           />
         ) : (
           <span className="text-4xl text-mute">🏒</span>
