@@ -1,18 +1,25 @@
 import type React from 'react';
+import { GamePhaseTag } from '@/app/components/game-phase-tag';
+import type { GamePhase } from '@/app/types/domain/game';
 
 interface GameDayHeaderProps {
   /** Any date that falls on the game day (e.g. the first game's start time). */
   date: Date;
+  /** The day's season phase. Tagged when it isn't the regular season. */
+  phase?: GamePhase;
 }
 
 /**
  * NHL-style day/date header for game listings on league landing pages.
  * Renders a left-aligned row: a condensed uppercase relative label, a muted
- * full date, and a divider rule, e.g.
+ * full date, a tag for a non-regular-season day, and a divider rule, e.g.
  *
  *   IDAG  20 december ────────────────
  */
-export const GameDayHeader: React.FC<GameDayHeaderProps> = ({ date }) => (
+export const GameDayHeader: React.FC<GameDayHeaderProps> = ({
+  date,
+  phase,
+}) => (
   <h2 className="mb-3 flex items-center gap-3">
     <span className="display text-base font-bold uppercase tracking-[0.08em] text-ink">
       {dayLabel(date)}
@@ -20,6 +27,7 @@ export const GameDayHeader: React.FC<GameDayHeaderProps> = ({ date }) => (
     <span className="text-sm font-semibold uppercase tracking-[0.04em] text-dim">
       {formatDate(date)}
     </span>
+    <GamePhaseTag phase={phase} />
     <span className="h-px flex-1 bg-line" aria-hidden="true" />
   </h2>
 );

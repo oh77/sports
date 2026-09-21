@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FinalSeries } from '../../components/final-series';
 import { GameDayHeader } from '../../components/game-day-header';
 import { GameGroup } from '../../components/game-group';
@@ -20,18 +20,23 @@ import {
   getGameWinner,
   getLastFinishedGame,
 } from '../../utils/seasonEnd';
+import { buildTeamFormIndex } from '../../utils/teamForm';
 import { useSeason } from '../../utils/useSeason';
 
 export default function HAPage() {
   const season = useSeason();
   const [gameDays, setGameDays] = useState<GameDayGroup[]>([]);
   const [previousGameDays, setPreviousGameDays] = useState<GameDayGroup[]>([]);
+  const [allGames, setAllGames] = useState<GameInfo[]>([]);
   const [champion, setChampion] = useState<{
     team: TeamInfo;
     series: GameInfo[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Recent results per team, for the form markers under the logos.
+  const teamForm = useMemo(() => buildTeamFormIndex(allGames), [allGames]);
 
   useEffect(() => {
     const loadGames = async () => {
@@ -41,6 +46,7 @@ export default function HAPage() {
 
         // Fetch games from API (cached server-side)
         const games = await leagueService.fetchGames();
+        setAllGames(games);
 
         // Show the next game day(s) — keep adding whole dates until at least
         // 3 games are displayed.
@@ -184,7 +190,11 @@ export default function HAPage() {
         <div className="max-w-4xl mx-auto">
           {/* Previous Game Days */}
           {previousGameDays.length > 0 && (
-            <PreviousGameDays previousGameDays={previousGameDays} league="ha" />
+            <PreviousGameDays
+              previousGameDays={previousGameDays}
+              league="ha"
+              form={teamForm}
+            />
           )}
 
           {/* Upcoming game day(s) — enough dates to show at least 3 games */}
@@ -198,6 +208,7 @@ export default function HAPage() {
                   label={group.time}
                   games={group.games}
                   league="ha"
+                  form={teamForm}
                 />
               ))}
             </div>

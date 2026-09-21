@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type React from 'react';
+import { GamePhaseTag } from '@/app/components/game-phase-tag';
 import { ScoreOrStatus } from '@/app/components/previous-games/scoreOrStatus';
 import type { League } from '@/app/types/domain/league';
 import { teamPath } from '@/app/utils/leaguePaths';
@@ -64,6 +65,7 @@ const PreviousGames: React.FC<PreviousGamesProps> = ({
                   >
                     {opponentInfo.teamInfo.short} ({isHomeTeam ? 'H' : 'A'})
                   </Link>
+                  <GamePhaseTag phase={prevGame.phase} />
                 </div>
 
                 <div className="text-center">

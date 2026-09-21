@@ -1,5 +1,9 @@
+'use client';
+
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { TeamForm } from '@/app/components/team-form';
+import { buildTeamFormIndex } from '@/app/utils/teamForm';
 import type { GameInfo } from '../../types/domain/game';
 
 interface TrendMarkersProps {
@@ -8,17 +12,11 @@ interface TrendMarkersProps {
   awayTeamCode: string;
 }
 
-type GameResult = 'win' | 'win-ot' | 'loss' | 'loss-ot';
-
-interface TeamGameResult {
-  uuid: string;
-  result: GameResult;
-  opponent: string;
-  location: 'H' | 'B';
-  teamScore: number;
-  opponentScore: number;
-}
-
+/**
+ * The two sides' recent form above a hero game card: home to the left, away to
+ * the right, each oldest to newest. A wider window than a listing row's, so
+ * the run of a season reads here rather than just the last few nights.
+ */
 export const TrendMarkers: React.FC<TrendMarkersProps> = ({
   games,
   homeTeamCode,
@@ -37,112 +35,32 @@ export const TrendMarkers: React.FC<TrendMarkersProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const getTeamResults = (
-    teamCode: string,
-    limit: number,
-  ): TeamGameResult[] => {
-    return games
-      .filter((game) => game.state === 'finished')
-      .filter(
-        (game) =>
-          game.homeTeamInfo.teamInfo.code === teamCode ||
-          game.awayTeamInfo.teamInfo.code === teamCode,
-      )
-      .sort(
-        (a, b) =>
-          new Date(b.startDateTime).getTime() -
-          new Date(a.startDateTime).getTime(),
-      )
-      .slice(0, limit)
-      .reverse()
-      .map((game) => {
-        const isHomeTeam = game.homeTeamInfo.teamInfo.code === teamCode;
-        const teamScore = isHomeTeam
-          ? game.homeTeamInfo.score
-          : game.awayTeamInfo.score;
-        const opponentScore = isHomeTeam
-          ? game.awayTeamInfo.score
-          : game.homeTeamInfo.score;
-        const opponent = isHomeTeam
-          ? game.awayTeamInfo.teamInfo.short
-          : game.homeTeamInfo.teamInfo.short;
-
-        const won = teamScore > opponentScore;
-        const afterRegulation = game.overtime || game.shootout;
-
-        let result: GameResult;
-        if (won) {
-          result = afterRegulation ? 'win-ot' : 'win';
-        } else {
-          result = afterRegulation ? 'loss-ot' : 'loss';
-        }
-
-        return {
-          uuid: game.uuid,
-          result,
-          opponent,
-          location: isHomeTeam ? 'H' : 'B',
-          teamScore,
-          opponentScore,
-        };
-      });
-  };
+  const form = useMemo(() => buildTeamFormIndex(games), [games]);
 
   // Mobile: 7 games, Desktop: 10 games
   const limit = isMobile ? 7 : 10;
 
-  const homeResults = getTeamResults(homeTeamCode, limit);
-  const awayResults = getTeamResults(awayTeamCode, limit);
+  const homeResults = form.formFor(homeTeamCode, limit);
+  const awayResults = form.formFor(awayTeamCode, limit);
 
   // Hide if no games played
   if (homeResults.length === 0 && awayResults.length === 0) {
     return null;
   }
 
-  const getResultColor = (result: GameResult): string => {
-    switch (result) {
-      case 'win':
-        return 'bg-win';
-      case 'win-ot':
-        return 'bg-win/60';
-      case 'loss':
-        return 'bg-loss';
-      case 'loss-ot':
-        return 'bg-loss/60';
-    }
-  };
-
-  const renderTrend = (results: TeamGameResult[], align: 'left' | 'right') => {
-    if (results.length === 0) {
-      return (
-        <div
-          className={`text-xs text-mute ${align === 'left' ? 'text-left' : 'text-right'}`}
-        >
-          Inga matcher
-        </div>
-      );
-    }
-
-    return (
-      <div
-        className={`flex gap-1.5 ${align === 'left' ? 'justify-start' : 'justify-end'}`}
-      >
-        {results.map((gameResult) => (
-          <div
-            key={gameResult.uuid}
-            className={`w-3 h-3 rounded-md ${getResultColor(gameResult.result)}`}
-            title={`${gameResult.opponent} (${gameResult.location}) ${gameResult.teamScore}-${gameResult.opponentScore}`}
-          />
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="mt-4 pt-4">
       <div className="flex justify-between items-center px-2 md:px-4">
-        <div>{renderTrend(homeResults, 'left')}</div>
-        <div>{renderTrend(awayResults, 'right')}</div>
+        {homeResults.length > 0 ? (
+          <TeamForm entries={homeResults} size="md" align="start" />
+        ) : (
+          <div className="text-xs text-mute text-left">Inga matcher</div>
+        )}
+        {awayResults.length > 0 ? (
+          <TeamForm entries={awayResults} size="md" align="end" />
+        ) : (
+          <div className="text-xs text-mute text-right">Inga matcher</div>
+        )}
       </div>
     </div>
   );

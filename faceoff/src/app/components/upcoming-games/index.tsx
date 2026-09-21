@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type React from 'react';
+import { GamePhaseTag } from '@/app/components/game-phase-tag';
 import type { League } from '@/app/types/domain/league';
 import {
   formatLongDateFromString,
@@ -67,6 +68,7 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({
                   >
                     {opponentInfo.teamInfo.short} ({isHomeTeam ? 'H' : 'A'})
                   </Link>
+                  <GamePhaseTag phase={upcomingGame.phase} />
                 </div>
 
                 <div className="text-center">

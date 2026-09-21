@@ -1,12 +1,25 @@
 import type { GameInfo } from '@/app/types/domain/game';
 
+/**
+ * A drawn game is its own result, not a loss: a CHL playoff leg is settled on
+ * aggregate, so a level leg breaks both a winning and a losing run.
+ */
+export type StreakType = 'win' | 'loss' | 'draw';
+
+/** A finished game's result for one team. */
+function resultFor(teamScore: number, opponentScore: number): StreakType {
+  if (teamScore > opponentScore) return 'win';
+  if (teamScore < opponentScore) return 'loss';
+  return 'draw';
+}
+
 export interface TeamStreak {
   teamCode: string;
   teamName: string;
   teamFullName: string;
   teamLogo: string | null;
   streak: number;
-  streakType: 'win' | 'loss';
+  streakType: StreakType;
   longestWinStreak: number;
   longestLossStreak: number;
 }
@@ -33,7 +46,7 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
   >();
 
   // Map to track games per team (most recent first)
-  const teamGames = new Map<string, Array<{ won: boolean }>>();
+  const teamGames = new Map<string, StreakType[]>();
 
   // Collect all team info and their game results
   sortedGames.forEach((game) => {
@@ -68,8 +81,8 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
       teamGames.set(awayCode, []);
     }
 
-    teamGames.get(homeCode)?.push({ won: homeScore > awayScore });
-    teamGames.get(awayCode)?.push({ won: awayScore > homeScore });
+    teamGames.get(homeCode)?.push(resultFor(homeScore, awayScore));
+    teamGames.get(awayCode)?.push(resultFor(awayScore, homeScore));
   });
 
   // Calculate streaks for each team
@@ -82,17 +95,13 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
       return;
     }
 
-    // Count consecutive wins or losses from the most recent game (current streak)
-    const firstResult = games[0];
+    // Count consecutive same results from the most recent game (current streak)
     let streak = 1;
-    const streakType: 'win' | 'loss' = firstResult.won ? 'win' : 'loss';
+    const streakType = games[0];
 
     // Continue counting backwards until streak breaks
     for (let i = 1; i < games.length; i++) {
-      const currentResult = games[i];
-      const currentType = currentResult.won ? 'win' : 'loss';
-
-      if (currentType === streakType) {
+      if (games[i] === streakType) {
         streak++;
       } else {
         break; // Streak broken
@@ -105,19 +114,23 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
     let currentWinStreak = 0;
     let currentLossStreak = 0;
 
-    games.forEach((game) => {
-      if (game.won) {
+    games.forEach((result) => {
+      if (result === 'win') {
         currentWinStreak++;
         currentLossStreak = 0;
         if (currentWinStreak > longestWinStreak) {
           longestWinStreak = currentWinStreak;
         }
-      } else {
+      } else if (result === 'loss') {
         currentLossStreak++;
         currentWinStreak = 0;
         if (currentLossStreak > longestLossStreak) {
           longestLossStreak = currentLossStreak;
         }
+      } else {
+        // A draw ends both runs without starting one of its own.
+        currentWinStreak = 0;
+        currentLossStreak = 0;
       }
     });
 
@@ -135,15 +148,17 @@ export function calculateStreaks(games: GameInfo[]): TeamStreak[] {
     }
   });
 
-  // Sort: win streaks first (by length descending), then loss streaks (by length ascending - smaller losses rank higher)
+  // Sort: win streaks first (by length descending), then draws, then loss
+  // streaks (by length ascending - smaller losses rank higher)
+  const typeRank: Record<StreakType, number> = { win: 0, draw: 1, loss: 2 };
   streaks.sort((a, b) => {
-    // Wins always come before losses
+    // Wins always come before draws, which come before losses
     if (a.streakType !== b.streakType) {
-      return a.streakType === 'win' ? -1 : 1;
+      return typeRank[a.streakType] - typeRank[b.streakType];
     }
     // If same type
-    if (a.streakType === 'win') {
-      // Win streaks: sort by length descending (largest first)
+    if (a.streakType === 'win' || a.streakType === 'draw') {
+      // Sort by length descending (largest first)
       if (b.streak !== a.streak) {
         return b.streak - a.streak;
       }

@@ -3,17 +3,21 @@
 import type React from 'react';
 import { useState } from 'react';
 import type { League } from '@/app/types/domain/league';
+import type { TeamFormIndex } from '@/app/utils/teamForm';
 import type { GameInfo } from '../../types/domain/game';
 import { PreviousGameDay } from '../previous-game-day';
 
 interface PreviousGameDaysProps {
   previousGameDays: Array<{ date: string; games: GameInfo[] }>;
   league: League;
+  /** Recent games to read each side's form from. */
+  form?: TeamFormIndex;
 }
 
 export const PreviousGameDays: React.FC<PreviousGameDaysProps> = ({
   previousGameDays,
   league,
+  form,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -57,6 +61,7 @@ export const PreviousGameDays: React.FC<PreviousGameDaysProps> = ({
               key={previousDay.date}
               games={previousDay.games}
               league={league}
+              form={form}
             />
           ))}
     </div>

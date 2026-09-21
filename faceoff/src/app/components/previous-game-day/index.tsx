@@ -1,11 +1,14 @@
 import type React from 'react';
 import type { League } from '@/app/types/domain/league';
+import type { TeamFormIndex } from '@/app/utils/teamForm';
 import type { GameInfo } from '../../types/domain/game';
 import { GameGroup } from '../game-group';
 
 interface PreviousGameDayProps {
   games: GameInfo[];
   league: League;
+  /** Recent games to read each side's form from. */
+  form?: TeamFormIndex;
 }
 
 /**
@@ -17,6 +20,7 @@ interface PreviousGameDayProps {
 export const PreviousGameDay: React.FC<PreviousGameDayProps> = ({
   games,
   league,
+  form,
 }) => {
   if (games.length === 0) return null;
 
@@ -31,6 +35,7 @@ export const PreviousGameDay: React.FC<PreviousGameDayProps> = ({
       games={byStartTime}
       league={league}
       dense
+      form={form}
     />
   );
 };

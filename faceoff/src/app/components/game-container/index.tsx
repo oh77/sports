@@ -1,9 +1,14 @@
 import type React from 'react';
 import ClickableTeamLogo from '@/app/components/game-container/ClickableTeamLogo';
 import { StadiumIcon } from '@/app/components/icons/stadium-icon';
+import { TeamForm } from '@/app/components/team-form';
 import type { League } from '@/app/types/domain/league';
 import { isDateTimePassed } from '@/app/utils/dateUtils';
+import type { TeamFormIndex } from '@/app/utils/teamForm';
 import type { GameInfo } from '../../types/domain/game';
+
+/** How many recent results the markers under a listed team's logo show. */
+const FORM_GAMES = 3;
 
 /**
  * card — standalone game card; row — a row in a game-day box;
@@ -15,12 +20,15 @@ interface GameContainerProps {
   game: GameInfo;
   league: League;
   variant?: GameVariant;
+  /** Recent games to read each side's form from. Omitted = no form markers. */
+  form?: TeamFormIndex;
 }
 
 export const GameContainer: React.FC<GameContainerProps> = ({
   game,
   league,
   variant = 'row',
+  form,
 }) => {
   const isGameLive = (game: GameInfo) => {
     return (
@@ -42,15 +50,34 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 
   const score = getScore(game);
 
+  // Form as it stood going into this game, so a finished row shows the three
+  // games before it rather than counting itself.
+  const homeForm =
+    form?.formFor(
+      game.homeTeamInfo.teamInfo.code,
+      FORM_GAMES,
+      game.startDateTime,
+    ) ?? [];
+  const awayForm =
+    form?.formFor(
+      game.awayTeamInfo.teamInfo.code,
+      FORM_GAMES,
+      game.startDateTime,
+    ) ?? [];
+  const showForm = homeForm.length > 0 || awayForm.length > 0;
+
   return (
     <div className={wrapperClass}>
       <div className="flex items-center">
         <div className={`flex-1 flex justify-end ${dense ? 'pr-5' : 'pr-8'}`}>
-          <ClickableTeamLogo
-            league={league}
-            teamInfo={game.homeTeamInfo.teamInfo}
-            size={variant === 'card' ? 'lg' : dense ? 'sm' : 'md'}
-          />
+          <div className="flex flex-col items-center">
+            <ClickableTeamLogo
+              league={league}
+              teamInfo={game.homeTeamInfo.teamInfo}
+              size={variant === 'card' ? 'lg' : dense ? 'sm' : 'md'}
+            />
+            {showForm && <TeamForm entries={homeForm} className="mt-1.5" />}
+          </div>
         </div>
 
         <div className={`text-center shrink-0 ${dense ? 'w-28' : 'w-40'}`}>
@@ -71,11 +98,14 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         </div>
 
         <div className={`flex-1 flex justify-start ${dense ? 'pl-5' : 'pl-8'}`}>
-          <ClickableTeamLogo
-            league={league}
-            teamInfo={game.awayTeamInfo.teamInfo}
-            size={variant === 'card' ? 'lg' : dense ? 'sm' : 'md'}
-          />
+          <div className="flex flex-col items-center">
+            <ClickableTeamLogo
+              league={league}
+              teamInfo={game.awayTeamInfo.teamInfo}
+              size={variant === 'card' ? 'lg' : dense ? 'sm' : 'md'}
+            />
+            {showForm && <TeamForm entries={awayForm} className="mt-1.5" />}
+          </div>
         </div>
       </div>
 

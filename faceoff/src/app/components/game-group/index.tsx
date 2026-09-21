@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { League } from '@/app/types/domain/league';
+import type { TeamFormIndex } from '@/app/utils/teamForm';
 import type { GameInfo } from '../../types/domain/game';
 import { GameContainer } from '../game-container';
 
@@ -10,6 +11,8 @@ interface GameGroupProps {
   league: League;
   /** Tighter rows, used for previous game days. */
   dense?: boolean;
+  /** Recent games to read each side's form from, passed on to every row. */
+  form?: TeamFormIndex;
 }
 
 export const GameGroup: React.FC<GameGroupProps> = ({
@@ -17,6 +20,7 @@ export const GameGroup: React.FC<GameGroupProps> = ({
   games,
   league,
   dense = false,
+  form,
 }) => (
   <div className={dense ? 'mb-4' : 'mb-6'}>
     {label && (
@@ -36,6 +40,7 @@ export const GameGroup: React.FC<GameGroupProps> = ({
           game={game}
           league={league}
           variant={dense ? 'dense' : 'row'}
+          form={form}
         />
       ))}
     </div>

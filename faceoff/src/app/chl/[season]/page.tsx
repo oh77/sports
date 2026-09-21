@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FinalSeries } from '../../components/final-series';
 import { GameDayHeader } from '../../components/game-day-header';
 import { GameGroup } from '../../components/game-group';
@@ -20,18 +20,23 @@ import {
   getGameWinner,
   getLastFinishedGame,
 } from '../../utils/seasonEnd';
+import { buildTeamFormIndex } from '../../utils/teamForm';
 import { useSeason } from '../../utils/useSeason';
 
 export default function CHLPage() {
   const season = useSeason();
   const [gameDays, setGameDays] = useState<GameDayGroup[]>([]);
   const [previousGameDays, setPreviousGameDays] = useState<GameDayGroup[]>([]);
+  const [games, setGames] = useState<GameInfo[]>([]);
   const [champion, setChampion] = useState<{
     team: TeamInfo;
     series: GameInfo[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Recent results per team, for the form markers under the logos.
+  const teamForm = useMemo(() => buildTeamFormIndex(games), [games]);
 
   useEffect(() => {
     const loadGames = async () => {
@@ -45,6 +50,7 @@ export default function CHLPage() {
         }
         const data: LeagueResponse = await response.json();
         const allGames = data.gameInfo || [];
+        setGames(allGames);
 
         // Show the next game day(s) — keep adding whole dates until at least
         // 3 games are displayed.
@@ -142,6 +148,7 @@ export default function CHLPage() {
               <PreviousGameDays
                 previousGameDays={previousGameDays}
                 league="chl"
+                form={teamForm}
               />
             )}
 
@@ -155,6 +162,7 @@ export default function CHLPage() {
                     label={group.time}
                     games={group.games}
                     league="chl"
+                    form={teamForm}
                   />
                 ))}
               </div>

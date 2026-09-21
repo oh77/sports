@@ -63,9 +63,18 @@ export function TrendTable({ league, games }: TrendTableProps) {
   const getString = (team: TeamStreak) => {
     if (team.streakType === 'win') {
       return team.streak === 1 ? 'vinst' : 'vinster';
-    } else {
-      return team.streak === 1 ? 'förlust' : 'förluster';
     }
+    if (team.streakType === 'draw') {
+      return team.streak === 1 ? 'oavgjord' : 'oavgjorda';
+    }
+    return team.streak === 1 ? 'förlust' : 'förluster';
+  };
+
+  /** A drawn run is neither good nor bad, so it reads neutral. */
+  const streakClass = (team: TeamStreak) => {
+    if (team.streakType === 'win') return 'text-win';
+    if (team.streakType === 'draw') return 'text-dim';
+    return 'text-loss';
   };
 
   return (
@@ -154,11 +163,7 @@ export function TrendTable({ league, games }: TrendTableProps) {
 
                   {/* Current Streak */}
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
-                    <span
-                      className={`font-medium ${
-                        team.streakType === 'win' ? 'text-win' : 'text-loss'
-                      }`}
-                    >
+                    <span className={`font-medium ${streakClass(team)}`}>
                       {team.streak} {getString(team)}
                     </span>
                   </td>

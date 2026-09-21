@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FinalSeries } from '../../components/final-series';
 import { GameDayHeader } from '../../components/game-day-header';
 import { GameGroup } from '../../components/game-group';
@@ -19,6 +19,7 @@ import {
   getGameWinner,
   getLastFinishedGame,
 } from '../../utils/seasonEnd';
+import { buildTeamFormIndex } from '../../utils/teamForm';
 import { useSeason } from '../../utils/useSeason';
 
 type Champion = { team: TeamInfo; series: GameInfo[] };
@@ -34,9 +35,13 @@ function championFrom(games: GameInfo[]): Champion | null {
 export default function NHLPage() {
   const season = useSeason();
   const [gameDays, setGameDays] = useState<GameDayGroup[]>([]);
+  const [allGames, setAllGames] = useState<GameInfo[]>([]);
   const [champion, setChampion] = useState<Champion | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Recent results per team, for the form markers under the logos.
+  const teamForm = useMemo(() => buildTeamFormIndex(allGames), [allGames]);
 
   useEffect(() => {
     const fetchGames = async (type: string): Promise<GameInfo[]> => {
@@ -54,6 +59,7 @@ export default function NHLPage() {
       try {
         setLoading(true);
         setGameDays([]);
+        setAllGames([]);
         setChampion(null);
 
         const isCurrent = season === CURRENT_NHL_SEASON.key;
@@ -66,9 +72,9 @@ export default function NHLPage() {
 
         // Ongoing season: the next game day(s); once the season is over the
         // finals fetch surfaces the champion instead.
-        const upcoming = buildUpcomingGameDays(await fetchGames('all'), {
-          minGames: 3,
-        });
+        const games = await fetchGames('all');
+        setAllGames(games);
+        const upcoming = buildUpcomingGameDays(games, { minGames: 3 });
         if (upcoming.length > 0) {
           setGameDays(upcoming);
           return;
@@ -143,7 +149,10 @@ export default function NHLPage() {
           <div className="max-w-4xl mx-auto">
             {gameDays.map((day) => (
               <div key={day.date} className="mb-10">
-                <GameDayHeader date={new Date(day.games[0].startDateTime)} />
+                <GameDayHeader
+                  date={new Date(day.games[0].startDateTime)}
+                  phase={day.games[0].phase}
+                />
 
                 {groupGamesByTime(day.games).map((group) => (
                   <GameGroup
@@ -151,6 +160,7 @@ export default function NHLPage() {
                     label={group.time}
                     games={group.games}
                     league="nhl"
+                    form={teamForm}
                   />
                 ))}
               </div>

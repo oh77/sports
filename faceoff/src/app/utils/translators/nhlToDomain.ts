@@ -1,5 +1,6 @@
 import type {
   GameInfo,
+  GamePhase,
   GameState,
   LeagueResponse,
 } from '../../types/domain/game';
@@ -28,6 +29,20 @@ function translateNHLTeam(team: NHLGameTeam): TeamInfo {
   };
 }
 
+/** NHL `gameType` (1 = preseason, 2 = regular, 3 = playoffs) as a domain phase. */
+function translateNhlPhase(gameType: number): GamePhase | undefined {
+  switch (gameType) {
+    case 1:
+      return 'preseason';
+    case 2:
+      return 'regular';
+    case 3:
+      return 'playoffs';
+    default:
+      return undefined;
+  }
+}
+
 export function translateNHLGameToDomain(nhlGame: NHLGame): GameInfo {
   const state: GameState =
     nhlGame.status === 'finished'
@@ -53,6 +68,7 @@ export function translateNHLGameToDomain(nhlGame: NHLGame): GameInfo {
     },
     overtime: nhlGame.overtime ?? false,
     shootout: nhlGame.shootout ?? false,
+    phase: translateNhlPhase(nhlGame.gameType),
   };
 }
 
