@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { TeamInfo } from '@/app/types/domain/team';
+import { skipsOptimizer } from '@/app/utils/images';
 
 type Props = {
   team: TeamInfo;
@@ -25,6 +26,7 @@ export function TeamBadge({ team, size = 'md' }: Props) {
         height={px}
         className="shrink-0 object-contain"
         style={{ width: px, height: px }}
+        unoptimized={skipsOptimizer(team.logo)}
       />
     );
   }

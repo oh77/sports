@@ -16,6 +16,7 @@ import {
   formatTimeFromString,
 } from '@/app/utils/dateUtils';
 import { outcomeFor } from '@/app/utils/form';
+import { skipsOptimizer } from '@/app/utils/images';
 import { matchupPath } from '@/app/utils/leaguePaths';
 
 type Props = {
@@ -318,6 +319,7 @@ function LeagueChip({ league }: { league: League }) {
           fill
           sizes="36px"
           className="object-contain p-0.5"
+          unoptimized={skipsOptimizer(logo)}
         />
       </span>
     );

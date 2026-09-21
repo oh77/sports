@@ -12,6 +12,7 @@ import {
   formatRelativeWeekdayDateFromString,
   todayDateKey,
 } from '@/app/utils/dateUtils';
+import { skipsOptimizer } from '@/app/utils/images';
 import {
   leagueBasePath,
   standingsPath,
@@ -156,6 +157,9 @@ export default async function Home() {
                           fill
                           sizes="32px"
                           className="object-contain p-1"
+                          unoptimized={skipsOptimizer(
+                            leagueMeta[league].logo as string,
+                          )}
                         />
                       </span>
                     )}
@@ -258,6 +262,9 @@ export default async function Home() {
                         fill
                         sizes="44px"
                         className="object-contain p-1.5"
+                        unoptimized={skipsOptimizer(
+                          leagueMeta[league].logo as string,
+                        )}
                       />
                     </span>
                   )}

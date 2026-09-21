@@ -8,6 +8,7 @@ import { SeasonSwitcher } from '@/app/components/season-switcher';
 import { ALL_LEAGUES } from '@/app/config/leagues';
 import { leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
+import { skipsOptimizer } from '@/app/utils/images';
 import {
   leagueBasePath,
   standingsPath,
@@ -71,6 +72,7 @@ export function TopNav({ league, season }: TopNavProps) {
                   fill
                   sizes="32px"
                   className="object-contain p-1"
+                  unoptimized={skipsOptimizer(logo)}
                 />
               </span>
             ) : (

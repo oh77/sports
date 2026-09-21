@@ -129,7 +129,11 @@ function TeamHero({ team }: { team: TeamInfo }) {
   );
 }
 
-/** Flag + country name. The name is the text alternative, so the flag is decorative. */
+/**
+ * Flag + country name. The name is the text alternative, so the flag is
+ * decorative. UEFA serves these as 70x70 PNGs — small enough that the
+ * optimizer would cost more than it saves at this size.
+ */
 function CountryLabel({ country }: { country: TeamCountry }) {
   return (
     <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-dim">
@@ -141,6 +145,7 @@ function CountryLabel({ country }: { country: TeamCountry }) {
         height={16}
         className="shrink-0 object-contain"
         style={{ width: 16, height: 'auto' }}
+        unoptimized
       />
       {country.name}
     </span>
