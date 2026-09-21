@@ -63,6 +63,11 @@ Until an API is provided, keep that part of the UI running on fixture data.
 - Tailwind utility-first, mobile-first (`sm:`, `md:`, `lg:`)
 - Dark theme, distinct accent per league: Allsvenskan blue/yellow, PL purple, CL dark blue
 - Accessibility: `<main>` landmarks, table `<caption>`s, ARIA tabs, `alt`/`aria-hidden` on decorative images, no color-only indicators
+- Images: Vercel bills per transformation, so pass `unoptimized` for anything
+  the optimizer can't improve — SVGs (via `skipsOptimizer()` in
+  `utils/images.ts`) and sources already under ~10 KB, like the 70x70 UEFA
+  flags. PNG team logos and the local PL logo stay optimized. Config caps
+  live in `next.config.ts` (`minimumCacheTTL`, `qualities`, size allowlists)
 
 ## Commands
 

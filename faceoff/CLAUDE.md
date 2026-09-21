@@ -236,7 +236,14 @@ See [Accessibility audit and remediation plan for Gameday frontend.md](fleet-fil
 - Check `src/app/utils/cache.ts` for TTL settings
 
 ## Performance Considerations
-- **Image optimization:** Use Next.js `Image` component
+- **Image optimization:** Use Next.js `Image` component, but pass `unoptimized`
+  for logos. Vercel bills per transformation and every league/team logo we
+  render is already in its best form — SHL/SDHL/NHL serve SVG, HA serves WebP,
+  CHL serves Cloudinary output that is already transformed. NHL player
+  headshots (PNG mugs) are the one source that still goes through the
+  optimizer. `useDominantColor` builds its own `/_next/image` URL, so it needs
+  `dangerouslyAllowSVG`, `w=64` in `imageSizes` and `q=75` in `qualities` to
+  stay in `next.config.ts`
 - **Code splitting:** Automatic with Next.js App Router
 - **Caching:** In-memory cache reduces API calls
 - **Turbopack:** Fast development builds
