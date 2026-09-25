@@ -88,6 +88,14 @@ export const LEAGUES: Record<League, LeagueMeta> = {
     logo: '/assets/conference-league-logo.svg',
     chipBg: LIGHT_CHIP,
   },
+  nl: {
+    name: 'Nations League',
+    shortName: 'UNL',
+    sport: 'football',
+    accent: '#22d3ee',
+    logo: 'https://img.uefa.com/imgml/uefacom/elements/logos/competitions/color/full/2014.svg',
+    chipBg: LIGHT_CHIP,
+  },
   chl: {
     name: 'Champions Hockey League',
     shortName: 'CHL',

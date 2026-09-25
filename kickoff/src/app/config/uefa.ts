@@ -5,7 +5,7 @@
 
 export const UEFA_MATCH_API = 'https://match.uefa.com/v5';
 export const UEFA_STANDINGS_API = 'https://standings.uefa.com/v1';
-export const UEFA_COMPSTATS_API = 'https://compstats.uefa.com/v1';
+export const UEFA_COMPSTATS_API = 'https://compstats.uefa.com/v2';
 
 /** compstats/comp hosts only answer requests carrying this Origin header. */
 export const UEFA_ORIGIN = 'https://www.uefa.com';
@@ -13,13 +13,16 @@ export const UEFA_ORIGIN = 'https://www.uefa.com';
 export const UCL_COMPETITION_ID = '1';
 export const UEL_COMPETITION_ID = '14';
 export const UECL_COMPETITION_ID = '2019';
+export const UNL_COMPETITION_ID = '2014';
 
-/** player-ranking `stats` codes per stats view. */
-export const UCL_PLAYER_STATS = {
-  goals: 'goals',
-  assists: 'assists',
-  yellowCards: 'yellow_cards',
-  redCards: 'red_cards',
+/**
+ * player-ranking `stats` codes per stats view. One request returns every
+ * listed metric per player, ranked by the first one.
+ */
+export const UEFA_RANKING_STATS = {
+  goals: ['goals', 'assists', 'matches_appearance'],
+  assists: ['assists', 'goals', 'matches_appearance'],
+  cards: ['yellow_cards', 'red_cards', 'matches_appearance'],
 } as const;
 
 export function uefaPlayerPhotoUrl(

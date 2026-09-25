@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { StandingsTable } from '@/app/components/standings-table';
-import { isLeague } from '@/app/config/leagues';
+import { hasStandingsAndStats, isLeague } from '@/app/config/leagues';
 import { getStandings } from '@/app/services/leagueData';
 import { leagueMeta } from '@/app/theme/pitch';
 
@@ -10,7 +10,7 @@ export default async function StandingsPage({
   params: Promise<{ league: string; season: string }>;
 }) {
   const { league, season } = await params;
-  if (!isLeague(league)) notFound();
+  if (!isLeague(league) || !hasStandingsAndStats(league)) notFound();
 
   const standings = await getStandings(league, season);
 

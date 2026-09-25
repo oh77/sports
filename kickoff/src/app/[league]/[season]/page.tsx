@@ -4,7 +4,7 @@ import { MatchList } from '@/app/components/match-list';
 import { SeasonChampion } from '@/app/components/season-champion';
 import { StandingsTable } from '@/app/components/standings-table';
 import { StatsTable } from '@/app/components/stats-table';
-import { isLeague } from '@/app/config/leagues';
+import { hasStandingsAndStats, isLeague } from '@/app/config/leagues';
 import {
   getMatches,
   getPlayerStats,
@@ -22,10 +22,17 @@ export default async function LeagueOverviewPage({
   const { league, season } = await params;
   if (!isLeague(league)) notFound();
 
+  // Matches-only leagues have no table/scorers sidebar; the schedule spans
+  // the full width instead, and never waits on (or fails with) standings or
+  // player stats.
+  const showSidebar = hasStandingsAndStats(league);
+
   const [{ matches }, standings, playerStats] = await Promise.all([
     getMatches(league, season),
-    getStandings(league, season),
-    getPlayerStats(league, season, 'goals'),
+    showSidebar ? getStandings(league, season) : { dataColumns: [], stats: [] },
+    showSidebar
+      ? getPlayerStats(league, season, 'goals')
+      : { dataColumns: [], stats: [] },
   ]);
 
   const live = matches.filter((m) => m.state === 'live');
@@ -46,7 +53,9 @@ export default async function LeagueOverviewPage({
       <h1 className="sr-only">{leagueMeta[league].name} – Matcher</h1>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        <div className="flex flex-col gap-8 lg:col-span-2">
+        <div
+          className={`flex flex-col gap-8 ${showSidebar ? 'lg:col-span-2' : 'lg:col-span-3'}`}
+        >
           {live.length > 0 && (
             <section>
               <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.08em] text-ink">
@@ -83,50 +92,52 @@ export default async function LeagueOverviewPage({
           </section>
         </div>
 
-        <aside className="flex flex-col gap-8">
-          <section className="rounded-xl border border-line bg-surface p-4">
-            <div className="mb-2 flex items-baseline justify-between">
-              <h2 className="display text-lg font-bold uppercase tracking-[0.08em] text-ink">
-                Tabell
-              </h2>
-              <Link
-                href={standingsPath(league, season)}
-                className="text-sm text-accent transition-colors hover:text-ink"
-              >
-                Hela tabellen
-              </Link>
-            </div>
-            <StandingsTable
-              data={standings}
-              league={league}
-              season={season}
-              caption={`Tabell, ${leagueMeta[league].name}`}
-              compact
-            />
-          </section>
+        {showSidebar && (
+          <aside className="flex flex-col gap-8">
+            <section className="rounded-xl border border-line bg-surface p-4">
+              <div className="mb-2 flex items-baseline justify-between">
+                <h2 className="display text-lg font-bold uppercase tracking-[0.08em] text-ink">
+                  Tabell
+                </h2>
+                <Link
+                  href={standingsPath(league, season)}
+                  className="text-sm text-accent transition-colors hover:text-ink"
+                >
+                  Hela tabellen
+                </Link>
+              </div>
+              <StandingsTable
+                data={standings}
+                league={league}
+                season={season}
+                caption={`Tabell, ${leagueMeta[league].name}`}
+                compact
+              />
+            </section>
 
-          <section className="rounded-xl border border-line bg-surface p-4">
-            <div className="mb-2 flex items-baseline justify-between">
-              <h2 className="display text-lg font-bold uppercase tracking-[0.08em] text-ink">
-                Skytteliga
-              </h2>
-              <Link
-                href={statsPath(league, season)}
-                className="text-sm text-accent transition-colors hover:text-ink"
-              >
-                All statistik
-              </Link>
-            </div>
-            <StatsTable
-              dataColumns={playerStats.dataColumns.filter((c) =>
-                ['GP', 'G'].includes(c.name),
-              )}
-              stats={playerStats.stats}
-              caption={`Skytteliga, ${leagueMeta[league].name}`}
-              limit={5}
-            />
-          </section>
-        </aside>
+            <section className="rounded-xl border border-line bg-surface p-4">
+              <div className="mb-2 flex items-baseline justify-between">
+                <h2 className="display text-lg font-bold uppercase tracking-[0.08em] text-ink">
+                  Skytteliga
+                </h2>
+                <Link
+                  href={statsPath(league, season)}
+                  className="text-sm text-accent transition-colors hover:text-ink"
+                >
+                  All statistik
+                </Link>
+              </div>
+              <StatsTable
+                dataColumns={playerStats.dataColumns.filter((c) =>
+                  ['GP', 'G'].includes(c.name),
+                )}
+                stats={playerStats.stats}
+                caption={`Skytteliga, ${leagueMeta[league].name}`}
+                limit={5}
+              />
+            </section>
+          </aside>
+        )}
       </div>
     </main>
   );

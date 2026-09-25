@@ -7,10 +7,24 @@ export const ALL_LEAGUES: League[] = [
   'cl',
   'el',
   'col',
+  'nl',
 ];
 
 export function isLeague(value: string): value is League {
   return (ALL_LEAGUES as string[]).includes(value);
+}
+
+/**
+ * Leagues integrated for the schedule only — no standings pages or player
+ * stats yet. Their Tabell/Statistik views are hidden and those routes 404;
+ * team and matchup pages may still show a table excerpt from
+ * `getStandings`, which callers there already treat as optional.
+ */
+const MATCHES_ONLY_LEAGUES: League[] = ['nl'];
+
+/** True if the league has standings and player stats (not matches only). */
+export function hasStandingsAndStats(league: League): boolean {
+  return !MATCHES_ONLY_LEAGUES.includes(league);
 }
 
 /** Per-season configuration. */
@@ -76,6 +90,9 @@ export const LEAGUE_SEASONS: Record<League, SeasonConfig[]> = {
     { key: '24-25', externalId: '2025' },
     { key: '23-24', externalId: '2024' },
   ],
+  // Nations League editions run every other season on the same UEFA API
+  // (seasonYear = end year). Only the 2026/27 edition is verified so far.
+  nl: [{ key: '26-27', externalId: '2027' }],
 };
 
 /**

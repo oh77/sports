@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { SeasonSwitcher } from '@/app/components/season-switcher';
-import { ALL_LEAGUES } from '@/app/config/leagues';
+import { ALL_LEAGUES, hasStandingsAndStats } from '@/app/config/leagues';
 import { leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
 import { skipsOptimizer } from '@/app/utils/images';
@@ -40,8 +40,20 @@ export function TopNav({ league, season }: TopNavProps) {
 
   const items: { id: Section; label: string; href: string }[] = [
     { id: 'matcher', label: 'Matcher', href: leagueBasePath(league, season) },
-    { id: 'tabell', label: 'Tabell', href: standingsPath(league, season) },
-    { id: 'statistik', label: 'Statistik', href: statsPath(league, season) },
+    ...(hasStandingsAndStats(league)
+      ? [
+          {
+            id: 'tabell' as const,
+            label: 'Tabell',
+            href: standingsPath(league, season),
+          },
+          {
+            id: 'statistik' as const,
+            label: 'Statistik',
+            href: statsPath(league, season),
+          },
+        ]
+      : []),
   ];
 
   const { name, short, logo, logoOnDark } = leagueMeta[league];

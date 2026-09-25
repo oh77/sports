@@ -12,11 +12,15 @@ Captured live on **2026‑07‑08**. All examples use the **2025/26 season** (`s
 | UEFA Champions League | `1` |
 | UEFA Europa League | `14` |
 | UEFA Europa Conference League | `2019` |
-| UEFA Nations League | `3` |
+| UEFA Nations League | `2014` |
 
 `seasonYear` is the year the season **ends** (2025/26 → `2026`).
 
 > **App usage:** the same hosts serve the **Conference League** (`col` league, `competitionId=2019`) — the app runs both through `uefaService`/`uefaToDomain`, switching only the competition id (confirmed against a `seasonYear=2027` sample for the 2026/27 season).
+>
+> The **Nations League** (`nl` league, `competitionId=2014`) is wired for **matches only** — standings and player stats are not integrated yet. Verified request for the 2026/27 edition (`seasonYear=2027`):
+> `https://match.uefa.com/v5/matches?competitionId=2014&fromDate=2026-09-24&limit=50&offset=0&order=ASC&phase=ALL&seasonYear=2027&toDate=2026-09-24&utcOffset=2`
+> The app pages the full season with the same query as the other competitions (no `fromDate`/`toDate`).
 
 ## Host quick‑reference
 
@@ -28,7 +32,7 @@ Captured live on **2026‑07‑08**. All examples use the **2025/26 season** (`s
 | Match lineups | `https://match.uefa.com/v5/matches/{matchId}/lineups` | ✅ works |
 | Standings / league table | `https://standings.uefa.com/v1/standings` | ✅ works |
 | Team match statistics | `https://matchstats.uefa.com/v1/team-statistics/{matchId}` | ✅ works |
-| Player ranking (goals/assists/cards leaderboards) | `https://compstats.uefa.com/v1/player-ranking` | ⚠️ Origin‑locked |
+| Player ranking (goals/assists/cards leaderboards) | `https://compstats.uefa.com/v2/player-ranking` | ⚠️ Origin‑locked |
 | Players list | `https://comp.uefa.com/v2/players` | ⚠️ Origin‑locked |
 | Teams list | `https://comp.uefa.com/v2/teams` | ⚠️ Origin‑locked |
 | Competitions | `https://comp.uefa.com/v2/competitions` | ⚠️ Origin‑locked |
@@ -179,19 +183,62 @@ Returns an **array of group objects**, each with an `items[]` array of ranked te
 
 There are two ways to get this; the aggregate leaderboard endpoint is the direct one, but it is origin‑locked.
 
-### 3a. Aggregate leaderboards (official stats page source)
+### 3a. Aggregate leaderboards (official stats page source) — v2
+
+The app uses **v2**, which returns several metrics per player in one request. (v1 took a single `stats` code and returned `{ player, team, value, rank }` rows.)
+
 ```
-GET https://compstats.uefa.com/v1/player-ranking
-    ?competitionId=1
-    &seasonYear=2026
+GET https://compstats.uefa.com/v2/player-ranking
+    ?competitionId=2014
+    &seasonYear=2027
     &phase=TOURNAMENT
-    &stats=goals            # goals | assists | yellow_cards | red_cards | ...
-    &limit=10
+    &stats=goals,assists,matches_appearance   # ranked by the FIRST code
+    &limit=50
     &offset=0
     &order=DESC
     &optionalFields=PLAYER,TEAM
 ```
-⚠️ This host only responds when the request carries `Origin: https://www.uefa.com` (and/or `Referer`). From a normal server request it returns an empty body — so capture it **in the browser** (DevTools → Network) or add that header. The response is a ranked array of `{ player, team, value, rank }` objects. Valid `stats` names match the metric codes listed in §4 (e.g. `goals`, `assists`, `yellow_cards`, `red_cards`, `attempts_on_target`, `passes_accuracy`, `saves`, `ball_possession`).
+⚠️ This host only responds when the request carries `Origin: https://www.uefa.com` (and/or `Referer`). From a normal server request it returns an empty body — so capture it **in the browser** (DevTools → Network) or add that header.
+
+**The order of `stats` is the sort order**: rows are ranked by the first code (`assists,goals,…` gives the assist leaderboard). Other codes seen on uefa.com: `minutes_played_official`, `top_speed`, `distance_covered`; `yellow_cards`/`red_cards` are the v1 codes, used by the app's cards view. Valid names otherwise match the metric codes in §4.
+
+Response (captured 2026‑09‑25, Nations League 2026/27 with `stats=minutes_played_official,matches_appearance,goals,assists,top_speed,distance_covered` — sorted by `top_speed` on that request; one row shown, `translations` trimmed):
+```json
+[
+  {
+    "idProvider": "FAME",
+    "playerId": "250130221",
+    "player": {
+      "id": "250130221",
+      "internationalName": "Rasmus Højlund",
+      "countryCode": "DEN",
+      "fieldPosition": "FORWARD",
+      "imageUrl": "https://img.uefa.com/imgml/TP/players/2014/2027/324x324/250130221.jpg",
+      "nationalTeamId": "35",
+      "clubId": "50136"
+    },
+    "statistics": [
+      { "name": "top_speed", "unit": "KILOMETER_PER_HOUR", "value": "36.14" },
+      { "name": "minutes_played_official", "unit": "MINUTE", "value": "82" },
+      { "name": "matches_appearance", "value": "1" },
+      { "name": "goals", "value": "1" },
+      { "name": "assists", "value": "0" },
+      { "name": "distance_covered", "unit": "KILOMETER", "value": "9.5" }
+    ],
+    "teamId": "35",
+    "team": {
+      "id": "35",
+      "teamCode": "DEN",
+      "countryCode": "DEN",
+      "internationalName": "Denmark",
+      "logoUrl": "https://img.uefa.com/imgml/flags/70x70/DEN.png",
+      "mediumLogoUrl": "https://img.uefa.com/imgml/flags/240x240/DEN.png",
+      "typeTeam": "NATIONAL"
+    }
+  }
+]
+```
+Notes: **values are strings**; there is **no `rank` field** (the array order is the rank); national-team `logoUrl`s are the flag PNGs.
 
 ### 3b. Per‑match events (verified working, no origin lock)
 ```
@@ -283,5 +330,5 @@ https://img.uefa.com/imgml/referees/75x75/{personId}.jpg
 | `match.uefa.com/v5/matches/{id}/events` | ✅ full JSON returned |
 | `standings.uefa.com/v1/standings` | ✅ full JSON returned |
 | `matchstats.uefa.com/v1/team-statistics/{id}` | ✅ full JSON returned |
-| `compstats.uefa.com/v1/player-ranking` | ⚠️ empty without browser `Origin` header |
+| `compstats.uefa.com/v2/player-ranking` | ⚠️ empty without browser `Origin` header |
 | `comp.uefa.com/v2/{players,teams,competitions}` | ⚠️ empty without browser `Origin` header |

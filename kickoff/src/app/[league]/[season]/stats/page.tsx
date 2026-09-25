@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { StatsTable } from '@/app/components/stats-table';
 import { type Tab, Tabs } from '@/app/components/tabs';
-import { isLeague } from '@/app/config/leagues';
+import { hasStandingsAndStats, isLeague } from '@/app/config/leagues';
 import { getKeeperStats, getPlayerStats } from '@/app/services/leagueData';
 import { leagueMeta } from '@/app/theme/pitch';
 
@@ -11,7 +11,7 @@ export default async function StatsPage({
   params: Promise<{ league: string; season: string }>;
 }) {
   const { league, season } = await params;
-  if (!isLeague(league)) notFound();
+  if (!isLeague(league) || !hasStandingsAndStats(league)) notFound();
 
   const leagueName = leagueMeta[league].name;
   const [byGoals, byAssists, byCards, keepers] = await Promise.all([

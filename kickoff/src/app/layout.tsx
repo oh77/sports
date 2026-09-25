@@ -18,7 +18,7 @@ const sairaCondensed = Saira_Condensed({
 export const metadata: Metadata = {
   title: 'Matchday',
   description:
-    'Spelscheman, tabeller och statistik för Allsvenskan, Superettan, Premier League, Champions League, Europa League och Conference League',
+    'Spelscheman, tabeller och statistik för Allsvenskan, Superettan, Premier League, Champions League, Europa League, Conference League och Nations League',
 };
 
 export default function RootLayout({

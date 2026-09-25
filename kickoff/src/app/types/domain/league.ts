@@ -4,4 +4,5 @@ export type League =
   | 'pl'
   | 'cl'
   | 'el'
-  | 'col';
+  | 'col'
+  | 'nl';

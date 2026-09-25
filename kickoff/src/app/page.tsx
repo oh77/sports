@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import { MatchList } from '@/app/components/match-list';
-import { ALL_LEAGUES } from '@/app/config/leagues';
+import { ALL_LEAGUES, hasStandingsAndStats } from '@/app/config/leagues';
 import { getMatches } from '@/app/services/leagueData';
 import { leagueAccent, leagueMeta } from '@/app/theme/pitch';
 import type { League } from '@/app/types/domain/league';
@@ -125,7 +125,7 @@ export default async function Home() {
         </h1>
         <p className="mt-2 max-w-xl text-soft">
           Spelscheman, tabeller och statistik för Allsvenskan, Premier League,
-          Champions League, Europa League och Conference League.
+          Champions League, Europa League, Conference League och Nations League.
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -203,18 +203,22 @@ export default async function Home() {
                   >
                     Matcher
                   </Link>
-                  <Link
-                    href={standingsPath(league)}
-                    className="text-soft transition-colors hover:text-accent"
-                  >
-                    Tabell
-                  </Link>
-                  <Link
-                    href={statsPath(league)}
-                    className="text-soft transition-colors hover:text-accent"
-                  >
-                    Statistik
-                  </Link>
+                  {hasStandingsAndStats(league) && (
+                    <>
+                      <Link
+                        href={standingsPath(league)}
+                        className="text-soft transition-colors hover:text-accent"
+                      >
+                        Tabell
+                      </Link>
+                      <Link
+                        href={statsPath(league)}
+                        className="text-soft transition-colors hover:text-accent"
+                      >
+                        Statistik
+                      </Link>
+                    </>
+                  )}
                 </nav>
               </div>
             );

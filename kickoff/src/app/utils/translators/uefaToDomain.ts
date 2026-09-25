@@ -3,7 +3,6 @@ import {
   uefaCountryName,
   uefaPlayerPhotoUrl,
 } from '@/app/config/uefa';
-import type { DataColumn } from '@/app/types/domain/data-table';
 import type {
   MatchesData,
   MatchInfo,
@@ -27,7 +26,7 @@ import type {
 } from '@/app/types/uefa/matches';
 import type { UefaPlayerRankingRow } from '@/app/types/uefa/players';
 import type { UefaStandingsGroup } from '@/app/types/uefa/standings';
-import { STANDINGS_COLUMNS } from '@/app/utils/footballColumns';
+import { playerColumns, STANDINGS_COLUMNS } from '@/app/utils/footballColumns';
 import { lastFiveForm, sideRecordFor } from '@/app/utils/form';
 
 export function clTeamToDomain(team: UefaTeam): TeamInfo {
@@ -269,6 +268,7 @@ function clZone(
 export function clStandingsToDomain(
   groups: UefaStandingsGroup[],
   matchesData?: MatchesData,
+  { zones = true }: { zones?: boolean } = {},
 ): StandingsData {
   const multipleGroups = groups.length > 1;
 
@@ -285,11 +285,13 @@ export function clStandingsToDomain(
         GA: item.goalsAgainst,
         GD: item.goalDifference,
         Points: item.points,
-        zone: clZone(
-          item.rank,
-          group.group.teamsQualifiedNumber ?? 8,
-          group.items.length,
-        ),
+        zone: zones
+          ? clZone(
+              item.rank,
+              group.group.teamsQualifiedNumber ?? 8,
+              group.items.length,
+            )
+          : undefined,
         ...(multipleGroups
           ? { group: group.group.translations?.name?.EN }
           : {}),
@@ -314,11 +316,12 @@ function clPlayerInfo(
   seasonYear: string,
 ): PlayerInfo {
   const p = row.player ?? {};
+  const id = p.id ?? row.playerId;
   const name = p.internationalName ?? 'Okänd spelare';
   const [firstName, ...rest] = name.split(' ');
   const team = row.team;
   return {
-    uuid: p.id ?? '',
+    uuid: id ?? '',
     fullName: name,
     firstName,
     lastName: rest.join(' '),
@@ -326,9 +329,9 @@ function clPlayerInfo(
     position: p.fieldPosition,
     photo:
       p.imageUrl ??
-      (p.id ? uefaPlayerPhotoUrl(competitionId, p.id, seasonYear) : undefined),
+      (id ? uefaPlayerPhotoUrl(competitionId, id, seasonYear) : undefined),
     team: {
-      externalId: team?.id ?? '',
+      externalId: team?.id ?? row.teamId ?? '',
       name: team?.internationalName ?? '',
       code: team?.teamCode?.toLowerCase() ?? '',
       logo: team?.logoUrl,
@@ -336,74 +339,57 @@ function clPlayerInfo(
   };
 }
 
-function singleStatColumn(name: string): DataColumn[] {
-  return [{ name, type: 'number', highlighted: true, group: '' }];
+/** A metric from the row's `statistics`, 0 when absent or unparseable. */
+function statValue(row: UefaPlayerRankingRow, name: string): number {
+  const value = Number(row.statistics?.find((s) => s.name === name)?.value);
+  return Number.isFinite(value) ? value : 0;
 }
 
+const RANKING_COLUMNS: Record<'G' | 'A' | 'YC', string[]> = {
+  G: ['GP', 'G', 'A', 'TP'],
+  A: ['GP', 'G', 'A', 'TP'],
+  YC: ['GP', 'YC', 'RC'],
+};
+
 /**
- * The ranking endpoint returns one metric per request, so a CL stats view
- * shows just that metric's column.
+ * A player-ranking response (several metrics per row) in the application
+ * contract. Rows arrive ranked by the view's leading metric, so the provider
+ * order is the rank; the cards view is re-ranked with a red card weighing two
+ * yellows. Columns are limited to the metrics the view requested.
  */
 export function clRankingToPlayers(
   rows: UefaPlayerRankingRow[],
-  metric: 'G' | 'A',
+  highlight: 'G' | 'A' | 'YC',
   competitionId: string,
   seasonYear: string,
 ): PlayerStatsData {
-  const stats: PlayerStats[] = rows
-    .filter((row) => row.player?.id)
-    .map((row, i) => ({
-      Rank: row.rank ?? i + 1,
-      GP: 0,
-      G: metric === 'G' ? (row.value ?? 0) : 0,
-      A: metric === 'A' ? (row.value ?? 0) : 0,
-      TP: row.value ?? 0,
-      YC: 0,
-      RC: 0,
-      info: clPlayerInfo(row, competitionId, seasonYear),
-    }));
+  const players: PlayerStats[] = rows
+    .filter((row) => row.player?.id ?? row.playerId)
+    .map((row) => {
+      const G = statValue(row, 'goals');
+      const A = statValue(row, 'assists');
+      return {
+        Rank: null,
+        GP: statValue(row, 'matches_appearance'),
+        G,
+        A,
+        TP: G + A,
+        YC: statValue(row, 'yellow_cards'),
+        RC: statValue(row, 'red_cards'),
+        info: clPlayerInfo(row, competitionId, seasonYear),
+      };
+    });
+
+  const ranked =
+    highlight === 'YC'
+      ? players.sort((a, b) => b.YC + b.RC * 2 - (a.YC + a.RC * 2))
+      : players;
 
   return {
-    dataColumns: singleStatColumn(metric),
-    defaultSortKey: { name: metric, order: 'desc' },
-    stats,
-  };
-}
-
-/** Cards view: merge the yellow- and red-card rankings by player id. */
-export function clCardsToPlayers(
-  yellowRows: UefaPlayerRankingRow[],
-  redRows: UefaPlayerRankingRow[],
-  competitionId: string,
-  seasonYear: string,
-): PlayerStatsData {
-  const redByPlayer = new Map(
-    redRows
-      .filter((row) => row.player?.id)
-      .map((row) => [row.player?.id, row.value ?? 0]),
-  );
-
-  const stats: PlayerStats[] = yellowRows
-    .filter((row) => row.player?.id)
-    .map((row) => ({
-      Rank: null,
-      GP: 0,
-      G: 0,
-      A: 0,
-      TP: 0,
-      YC: row.value ?? 0,
-      RC: redByPlayer.get(row.player?.id) ?? 0,
-      info: clPlayerInfo(row, competitionId, seasonYear),
-    }))
-    .sort((a, b) => b.YC + b.RC * 2 - (a.YC + a.RC * 2))
-    .map((row, i) => ({ ...row, Rank: i + 1 }));
-
-  return {
-    dataColumns: [
-      { name: 'YC', type: 'number', highlighted: true, group: '' },
-      { name: 'RC', type: 'number', highlighted: false, group: '' },
-    ],
-    defaultSortKey: { name: 'YC', order: 'desc' },
-    stats,
+    dataColumns: playerColumns(highlight).filter((c) =>
+      RANKING_COLUMNS[highlight].includes(c.name),
+    ),
+    defaultSortKey: { name: highlight, order: 'desc' },
+    stats: ranked.map((row, i) => ({ ...row, Rank: i + 1 })),
   };
 }

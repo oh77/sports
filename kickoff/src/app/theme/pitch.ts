@@ -32,6 +32,7 @@ export const leagueAccent: Record<League, string> = {
   cl: '#3b82f6', // Champions League blue
   el: '#f97316', // Europa League orange
   col: '#34d399', // Conference League green
+  nl: '#22d3ee', // Nations League cyan
 };
 
 /**
@@ -73,6 +74,11 @@ export const leagueMeta: Record<
     name: 'Conference League',
     short: 'UECL',
     logo: '/assets/conference-league-logo.svg',
+  },
+  nl: {
+    name: 'Nations League',
+    short: 'UNL',
+    logo: 'https://img.uefa.com/imgml/uefacom/elements/logos/competitions/color/full/2014.svg',
   },
 };
 

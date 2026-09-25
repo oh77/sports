@@ -17,6 +17,7 @@ export type FavoriteTeam = {
 export const FAVORITES: FavoriteTeam[] = [
   { name: 'IFK Göteborg', codes: { allsvenskan: 'gbg' } },
   { name: 'Liverpool', codes: { pl: 'liv', cl: 'liv' } },
+  { name: 'Sverige', codes: { nl: 'swe' } },
   { name: 'Frölunda HC', codes: { shl: 'FHC', chl: 'FHC', sdhl: 'FHC' } },
   { name: 'Leksands IF', codes: { ha: 'LIF' } },
   { name: 'Buffalo Sabres', codes: { nhl: 'BUF' } },

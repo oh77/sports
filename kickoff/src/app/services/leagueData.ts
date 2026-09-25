@@ -1,4 +1,4 @@
-import { resolveSeason } from '@/app/config/leagues';
+import { hasStandingsAndStats, resolveSeason } from '@/app/config/leagues';
 import { PL_PLAYER_SORT } from '@/app/config/pulselive';
 import {
   ALLSVENSKAN_LEAGUE_NAME,
@@ -6,9 +6,10 @@ import {
 } from '@/app/config/sportomedia';
 import {
   UCL_COMPETITION_ID,
-  UCL_PLAYER_STATS,
   UECL_COMPETITION_ID,
+  UEFA_RANKING_STATS,
   UEL_COMPETITION_ID,
+  UNL_COMPETITION_ID,
 } from '@/app/config/uefa';
 import type { KeeperStatsData } from '@/app/types/domain/keeper-stats';
 import type { League } from '@/app/types/domain/league';
@@ -33,7 +34,6 @@ import {
   sportomediaTeamToDomain,
 } from '@/app/utils/translators/sportomediaToDomain';
 import {
-  clCardsToPlayers,
   clMatchesToDomain,
   clRankingToPlayers,
   clStandingsToDomain,
@@ -105,8 +105,12 @@ function uefaSeasonYear(league: League, seasonKey?: string | null): string {
   return season.externalId ?? season.key;
 }
 
-/** UEFA competition id for a UEFA league (Champions/Europa/Conference League). */
+/**
+ * UEFA competition id for a UEFA league (Champions/Europa/Conference/Nations
+ * League).
+ */
 function uefaCompetitionId(league: League): string {
+  if (league === 'nl') return UNL_COMPETITION_ID;
   if (league === 'col') return UECL_COMPETITION_ID;
   if (league === 'el') return UEL_COMPETITION_ID;
   return UCL_COMPETITION_ID;
@@ -165,15 +169,19 @@ export async function getStandings(
     fetchClStandings(competitionId, year),
     fetchClMatches(competitionId, year),
   ]);
-  // UEFA supplies no form; derive it from the schedule.
-  return clStandingsToDomain(groups, clMatchesToDomain(matches));
+  // UEFA supplies no form; derive it from the schedule. Zones follow the
+  // club competitions' format, so matches-only leagues (the Nations League,
+  // with promotion/relegation between leagues) get none.
+  return clStandingsToDomain(groups, clMatchesToDomain(matches), {
+    zones: hasStandingsAndStats(league),
+  });
 }
 
 export async function getPlayerStats(
   league: League,
   seasonKey: string | undefined,
   sort: PlayerStatsSort,
-  limit = 20,
+  limit = 50,
 ): Promise<PlayerStatsData> {
   if (league === 'pl') {
     const entries = await fetchPlPlayerLeaderboard(
@@ -190,34 +198,17 @@ export async function getPlayerStats(
     );
     return sortPlayerStats(sportomediaPlayersToDomain(players), sort);
   }
-  // CL/Conference League: the ranking endpoint serves one metric per request.
+  // UEFA competitions: one ranking request carries goals, assists and
+  // appearances (or cards), ranked by the view's leading metric.
   const competitionId = uefaCompetitionId(league);
   const year = uefaSeasonYear(league, seasonKey);
-  if (sort === 'cards') {
-    const [yellow, red] = await Promise.all([
-      fetchClPlayerRanking(
-        competitionId,
-        year,
-        UCL_PLAYER_STATS.yellowCards,
-        limit,
-      ),
-      fetchClPlayerRanking(
-        competitionId,
-        year,
-        UCL_PLAYER_STATS.redCards,
-        limit,
-      ),
-    ]);
-    return clCardsToPlayers(yellow, red, competitionId, year);
-  }
-  const metric = sort === 'goals' ? 'G' : 'A';
   const rows = await fetchClPlayerRanking(
     competitionId,
     year,
-    UCL_PLAYER_STATS[sort],
+    UEFA_RANKING_STATS[sort],
     limit,
   );
-  return clRankingToPlayers(rows, metric, competitionId, year);
+  return clRankingToPlayers(rows, HIGHLIGHT[sort], competitionId, year);
 }
 
 /**
@@ -282,15 +273,18 @@ export async function getTeams(
     );
     return teams.map(sportomediaTeamToDomain);
   }
-  // CL/Conference League: the teams host is origin-locked, so derive teams
-  // from the standings (falling back to the schedule before standings exist).
+  // UEFA leagues: the teams host is origin-locked, so derive teams from the
+  // standings (falling back to the schedule before standings exist, and for
+  // matches-only leagues).
   const competitionId = uefaCompetitionId(league);
   const year = uefaSeasonYear(league, seasonKey);
-  const groups = await fetchClStandings(competitionId, year);
-  const fromStandings = groups.flatMap((g) =>
-    g.items.map((item) => clTeamToDomain(item.team)),
-  );
-  if (fromStandings.length > 0) return fromStandings;
+  if (hasStandingsAndStats(league)) {
+    const groups = await fetchClStandings(competitionId, year);
+    const fromStandings = groups.flatMap((g) =>
+      g.items.map((item) => clTeamToDomain(item.team)),
+    );
+    if (fromStandings.length > 0) return fromStandings;
+  }
 
   const byCode = new Map<string, TeamInfo>();
   for (const match of clMatchesToDomain(

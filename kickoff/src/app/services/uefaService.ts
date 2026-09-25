@@ -83,25 +83,26 @@ export async function fetchClStandings(
 }
 
 /**
- * Ranked leaderboard for a single stats metric (goals, assists, …). The
- * compstats host only answers requests with a uefa.com Origin header.
+ * Player leaderboard carrying every metric in `stats`, ranked by the first.
+ * The compstats host only answers requests with a uefa.com Origin header.
  */
 export async function fetchClPlayerRanking(
   competitionId: string,
   seasonYear: string,
-  stat: string,
-  limit = 20,
+  stats: readonly string[],
+  limit = 50,
 ): Promise<UefaPlayerRankingRow[]> {
+  const statsParam = stats.join(',');
   return getCachedData(
     generateCacheKey('uefa-players', {
       comp: competitionId,
       season: seasonYear,
-      stat,
+      stats: statsParam,
       limit: String(limit),
     }),
     () =>
       fetchJson<UefaPlayerRankingRow[]>(
-        `${UEFA_COMPSTATS_API}/player-ranking?competitionId=${competitionId}&seasonYear=${seasonYear}&phase=TOURNAMENT&stats=${stat}&limit=${limit}&offset=0&order=DESC&optionalFields=PLAYER,TEAM`,
+        `${UEFA_COMPSTATS_API}/player-ranking?competitionId=${competitionId}&seasonYear=${seasonYear}&phase=TOURNAMENT&stats=${statsParam}&limit=${limit}&offset=0&order=DESC&optionalFields=PLAYER,TEAM`,
         {
           headers: { Origin: UEFA_ORIGIN, Referer: `${UEFA_ORIGIN}/` },
           // Not published before the season starts.

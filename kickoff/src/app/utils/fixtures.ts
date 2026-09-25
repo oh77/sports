@@ -103,6 +103,16 @@ const FIXTURE_TEAMS: Record<League, TeamInfo[]> = {
     team('molde', 'MOL', 'Molde'),
     team('legia', 'LEG', 'Legia Warszawa'),
   ],
+  nl: [
+    team('swe', 'SWE', 'Sverige'),
+    team('den', 'DEN', 'Danmark'),
+    team('nor', 'NOR', 'Norge'),
+    team('fin', 'FIN', 'Finland'),
+    team('isl', 'ISL', 'Island'),
+    team('irl', 'IRL', 'Irland'),
+    team('wal', 'WAL', 'Wales'),
+    team('sco', 'SCO', 'Skottland'),
+  ],
 };
 
 export function fixtureTeams(league: League): TeamInfo[] {
@@ -322,6 +332,18 @@ const PLAYER_NAMES: Record<League, string[]> = {
     'Yannis Papadakis',
     'Ivan Marković',
   ],
+  nl: [
+    'Oskar Tidholm',
+    'Mads Kjærgaard',
+    'Eirik Hovland',
+    'Aleksi Rantanen',
+    'Gunnar Sveinsson',
+    'Ciarán Hollis',
+    'Rhys Pritchard',
+    'Fraser McAlister',
+    'Jesper Halldén',
+    'Tor Aasheim',
+  ],
 };
 
 const NATIONALITY: Record<League, string> = {
@@ -331,6 +353,7 @@ const NATIONALITY: Record<League, string> = {
   cl: 'ESP',
   el: 'ITA',
   col: 'ITA',
+  nl: 'SWE',
 };
 
 function fixturePlayer(
@@ -424,6 +447,13 @@ const KEEPER_NAMES: Record<League, string[]> = {
     'Petr Svoboda',
     'Goran Ilić',
     'Henrik Sørland',
+  ],
+  nl: [
+    'Viggo Almqvist',
+    'Frederik Østergaard',
+    'Sindre Mykland',
+    'Joonas Heikura',
+    'Aron Halldórsson',
   ],
 };
 

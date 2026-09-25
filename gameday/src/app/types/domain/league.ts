@@ -7,7 +7,8 @@ export type FootballLeague =
   | 'pl'
   | 'cl'
   | 'el'
-  | 'col';
+  | 'col'
+  | 'nl';
 
 /** League keys as used by faceoff. */
 export type HockeyLeague = 'shl' | 'sdhl' | 'ha' | 'chl' | 'nhl';

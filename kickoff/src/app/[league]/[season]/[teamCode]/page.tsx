@@ -5,7 +5,13 @@ import { MatchList } from '@/app/components/match-list';
 import { MatchupTable, matchupRows } from '@/app/components/matchup-table';
 import { TeamBadge } from '@/app/components/team-badge';
 import { isLeague } from '@/app/config/leagues';
-import { getMatches, getStandings, getTeams } from '@/app/services/leagueData';
+import {
+  getMatches,
+  getStandings,
+  getTeamLeaders,
+  getTeams,
+} from '@/app/services/leagueData';
+import type { PlayerStats } from '@/app/types/domain/player-stats';
 import type { TeamCountry, TeamInfo } from '@/app/types/domain/team';
 import { outcomeFor } from '@/app/utils/form';
 import { teamCodeMatches } from '@/app/utils/leaguePaths';
@@ -48,10 +54,17 @@ export default async function TeamPage({
   const form = previous.map((m) => outcomeFor(team.code, m)).reverse();
 
   // Where the team sits in the table, with its neighbours for context.
-  const standings = await getStandings(league, season).catch((error) => {
-    console.error(`Failed to fetch standings for ${league}:`, error);
-    return undefined;
-  });
+  // Both are optional context: a failure hides the excerpt / top scorer.
+  const [standings, leaders] = await Promise.all([
+    getStandings(league, season).catch((error) => {
+      console.error(`Failed to fetch standings for ${league}:`, error);
+      return undefined;
+    }),
+    getTeamLeaders(league, season, [team]).catch((error) => {
+      console.error(`Failed to fetch team leaders for ${league}:`, error);
+      return undefined;
+    }),
+  ]);
   const tableRows = matchupRows(
     standings?.stats ?? [],
     [team.code],
@@ -69,7 +82,7 @@ export default async function TeamPage({
       </div>
 
       <div className="flex flex-col gap-8">
-        <TeamHero team={team} />
+        <TeamHero team={team} topScorer={leaders?.get(team.code)?.topScorer} />
 
         {tableRows.length > 0 && (
           <section aria-label="Läget i tabellen">
@@ -113,8 +126,17 @@ export default async function TeamPage({
   );
 }
 
-/** The page's team on its own: logo, name and country centered in a card. */
-function TeamHero({ team }: { team: TeamInfo }) {
+/**
+ * The page's team on its own: logo, name and country centered in a card, with
+ * the team's top scorer underneath when the leaderboard has one.
+ */
+function TeamHero({
+  team,
+  topScorer,
+}: {
+  team: TeamInfo;
+  topScorer?: PlayerStats;
+}) {
   return (
     <section
       aria-label="Lag"
@@ -125,6 +147,16 @@ function TeamHero({ team }: { team: TeamInfo }) {
         {team.full}
       </span>
       {team.country && <CountryLabel country={team.country} />}
+      {topScorer && (
+        <p className="flex items-baseline gap-2 text-sm text-soft">
+          <span className="display text-[10px] font-bold uppercase tracking-[0.08em] text-dim">
+            Toppskytt
+          </span>
+          <span>
+            {topScorer.info.fullName} ({topScorer.G})
+          </span>
+        </p>
+      )}
     </section>
   );
 }
