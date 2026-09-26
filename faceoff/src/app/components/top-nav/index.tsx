@@ -9,7 +9,7 @@ import { leagueMeta } from '@/app/theme/nhl';
 import type { League } from '@/app/types/domain/league';
 import { leagueBasePath, standingsPath } from '@/app/utils/leaguePaths';
 
-type Section = 'matcher' | 'tabell' | 'statistik' | 'lag';
+type Section = 'matcher' | 'tabell' | 'placeringar' | 'statistik' | 'lag';
 
 interface TopNavProps {
   league: League;
@@ -23,6 +23,7 @@ function activeSection(pathname: string): Section | null {
   // /<league>/<season>/<seg>/...
   const seg = pathname.split('/')[3] ?? '';
   if (seg === 'standings') return 'tabell';
+  if (seg === 'positions') return 'placeringar';
   if (seg === 'stats') return 'statistik';
   if (seg === 'teams') return 'lag';
   if (seg === '') return 'matcher';
@@ -39,8 +40,18 @@ export function TopNav({ league, season }: TopNavProps) {
   const items: { id: Section; label: string; href: string }[] = [
     { id: 'matcher', label: 'Matcher', href: base },
     { id: 'tabell', label: 'Tabell', href: standingsPath(league, season) },
-    { id: 'statistik', label: 'Statistik', href: `${base}/stats` },
   ];
+
+  // Rebuilt from the Statnet schedules, so the Swedish leagues only for now.
+  if (league === 'shl' || league === 'sdhl' || league === 'ha') {
+    items.push({
+      id: 'placeringar',
+      label: 'Placeringar',
+      href: `${base}/positions`,
+    });
+  }
+
+  items.push({ id: 'statistik', label: 'Statistik', href: `${base}/stats` });
 
   // Rosters only come from the NHL roster feed, so LAG is NHL-only for now.
   if (league === 'nhl') {
