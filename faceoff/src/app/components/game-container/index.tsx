@@ -74,6 +74,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
             <ClickableTeamLogo
               league={league}
               teamInfo={game.homeTeamInfo.teamInfo}
+              opponent={game.awayTeamInfo.teamInfo}
               size={variant === 'card' ? 'lg' : dense ? 'sm' : 'md'}
             />
             {showForm && <TeamForm entries={homeForm} className="mt-1.5" />}
@@ -102,6 +103,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
             <ClickableTeamLogo
               league={league}
               teamInfo={game.awayTeamInfo.teamInfo}
+              opponent={game.homeTeamInfo.teamInfo}
               size={variant === 'card' ? 'lg' : dense ? 'sm' : 'md'}
             />
             {showForm && <TeamForm entries={awayForm} className="mt-1.5" />}

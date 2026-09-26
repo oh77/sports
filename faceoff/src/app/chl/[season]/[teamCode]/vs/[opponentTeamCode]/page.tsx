@@ -1,16 +1,13 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
-import { CountryFlag } from '../../../../../components/country-flag';
+import { MatchupTeams } from '@/app/components/matchup-teams';
 import GameStatsContainer from '../../../../../components/gamestats-container';
 import NextGame from '../../../../../components/next-game';
-import PreviousGames from '../../../../../components/previous-games';
 import { CompactStandings } from '../../../../../components/standings/compact-standings';
 import { TopGoalie } from '../../../../../components/top-goalie';
 import { TopPlayer } from '../../../../../components/top-player';
-import UpcomingGames from '../../../../../components/upcoming-games';
 import type {
   GameInfo,
   LeagueResponse,
@@ -36,8 +33,7 @@ export default function TeamPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
-  const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
-  const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
+  const [opponentInfo, setOpponentInfo] = useState<TeamInfo | null>(null);
   const [standings, setStandings] = useState<StandingsData | null>(null);
   const [allGames, setAllGames] = useState<GameInfo[]>([]);
 
@@ -113,6 +109,7 @@ export default function TeamPage({
           setError('Motståndare inte hittad');
           return;
         }
+        setOpponentInfo(opponentTeam);
 
         // Find games between the two specific teams (using foundTeam.short and opponentTeam.short)
         const teamGames = allGamesData.filter(
@@ -155,42 +152,6 @@ export default function TeamPage({
 
         // Set the game (even if null to show empty game box)
         setGame(nextGame || null);
-
-        // Get previous and upcoming games between these two teams
-        const previous = teamGames
-          .filter((game: GameInfo) => {
-            const gameDate = new Date(game.startDateTime);
-            const gameDateString = gameDate.toISOString().split('T')[0];
-            // Exclude games from today - only show games from before today
-            return game.state === 'finished' && gameDateString !== todayString;
-          })
-          .sort(
-            (a: GameInfo, b: GameInfo) =>
-              new Date(b.startDateTime).getTime() -
-              new Date(a.startDateTime).getTime(),
-          )
-          .slice(0, 3); // Show up to 3 previous games
-
-        const upcoming = teamGames
-          .filter((game: GameInfo) => {
-            const gameDate = new Date(game.startDateTime);
-            const gameDateString = gameDate.toISOString().split('T')[0];
-            // Exclude games from today and the next game - they're shown in the "next game" container
-            return (
-              game.state === 'not-started' &&
-              gameDateString !== todayString &&
-              game.uuid !== nextGame?.uuid
-            );
-          })
-          .sort(
-            (a: GameInfo, b: GameInfo) =>
-              new Date(a.startDateTime).getTime() -
-              new Date(b.startDateTime).getTime(),
-          )
-          .slice(0, 3); // Show up to 3 upcoming games (excluding today's games and the next game)
-
-        setPreviousGames(previous);
-        setUpcomingGames(upcoming);
 
         // Load standings data
         try {
@@ -258,49 +219,10 @@ export default function TeamPage({
 
   return (
     <main className="relative py-6 md:py-8">
-      {/* Background Team Logo */}
-      <div
-        className="absolute inset-0 flex items-center justify-center z-0 px-8"
-        aria-hidden="true"
-      >
-        <div className="opacity-[0.05] w-full h-full flex items-center justify-center">
-          <Image
-            src={teamInfo.logo || '/placeholder-team.png'}
-            alt=""
-            width={400}
-            height={400}
-            className="w-96 h-96 object-contain transform rotate-12"
-            role="presentation"
-            unoptimized
-          />
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 relative z-10">
-        {/* Header Row */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6">
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-surface-3 rounded-full flex items-center justify-center">
-            <Image
-              src={teamInfo.logo || '/placeholder-team.png'}
-              alt={`${teamInfo.full} logo`}
-              width={64}
-              height={64}
-              className="w-16 h-16 object-contain"
-              unoptimized
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <h1 className="display text-3xl md:text-5xl font-bold text-ink uppercase tracking-[0.04em] text-center md:text-left">
-              {teamInfo.full}
-            </h1>
-            {teamInfo.country && (
-              <CountryFlag
-                country={teamInfo.country}
-                className="h-6 w-[34px] md:h-7 md:w-[40px]"
-              />
-            )}
-          </div>
-        </div>
+        <h1 className="sr-only">
+          {teamInfo.full} mot {opponentInfo?.full ?? opponentTeamCode}
+        </h1>
 
         <NextGame
           game={game}
@@ -357,22 +279,17 @@ export default function TeamPage({
           </div>
         )}
 
-        {/* Previous and Upcoming Games */}
-        <div className="max-w-6xl mx-auto mt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <PreviousGames
-              games={previousGames}
-              currentTeamCode={teamCode}
-              league="chl"
-            />
-
-            <UpcomingGames
-              games={upcomingGames}
-              currentTeamCode={teamCode}
-              league="chl"
-            />
-          </div>
-        </div>
+        {/* Both teams' last and next games, home team first */}
+        <MatchupTeams
+          games={allGames}
+          homeTeamCode={game ? game.homeTeamInfo.teamInfo.code : teamInfo.short}
+          awayTeamCode={
+            game
+              ? game.awayTeamInfo.teamInfo.code
+              : (opponentInfo?.short ?? opponentTeamCode)
+          }
+          league="chl"
+        />
       </div>
     </main>
   );

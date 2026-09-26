@@ -1,19 +1,15 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
-import GameStatsContainer from '../../../components/gamestats-container';
-import NextGame from '../../../components/next-game';
-import PreviousGames from '../../../components/previous-games';
-import { CompactStandings } from '../../../components/standings/compact-standings';
-import { TopGoalie } from '../../../components/top-goalie';
-import { TopPlayer } from '../../../components/top-player';
-import UpcomingGames from '../../../components/upcoming-games';
-import type { GameInfo, LeagueResponse } from '../../../types/domain/game';
-import type { StandingsData } from '../../../types/domain/standings';
-import type { TeamInfo } from '../../../types/domain/team';
-import { leagueBasePath, withSeason } from '../../../utils/leaguePaths';
+import React, { useEffect, useState } from 'react';
+import {
+  TeamOverview,
+  TeamPageError,
+  TeamPageLoading,
+} from '@/app/components/team-overview';
+import type { GameInfo, LeagueResponse } from '@/app/types/domain/game';
+import type { StandingsData } from '@/app/types/domain/standings';
+import type { TeamInfo } from '@/app/types/domain/team';
+import { leagueBasePath, withSeason } from '@/app/utils/leaguePaths';
 
 export default function TeamPage({
   params,
@@ -23,22 +19,11 @@ export default function TeamPage({
   const resolvedParams = React.use(params);
   const season = resolvedParams.season;
   const teamCode = decodeURIComponent(resolvedParams.teamCode);
-  const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
-  const [previousGames, setPreviousGames] = useState<GameInfo[]>([]);
-  const [upcomingGames, setUpcomingGames] = useState<GameInfo[]>([]);
-  const [standings, setStandings] = useState<StandingsData | null>(null);
   const [allGames, setAllGames] = useState<GameInfo[]>([]);
-
-  // Helper function to match team code with short name
-  const matchTeamCode = useCallback(
-    (teamCode: string, teamShortName: string): boolean => {
-      return teamShortName.toUpperCase() === teamCode.toUpperCase();
-    },
-    [],
-  );
+  const [standings, setStandings] = useState<StandingsData | null>(null);
 
   useEffect(() => {
     const loadTeamData = async () => {
@@ -71,109 +56,22 @@ export default function TeamPage({
           await upcomingGamesResponse.json();
         const recentGamesData: LeagueResponse =
           await recentGamesResponse.json();
-        const teamsData: TeamInfo[] = await teamsResponse.json();
+        const teams: TeamInfo[] = await teamsResponse.json();
 
-        // Combine all games from both responses
-        const allGamesData = [
+        setAllGames([
           ...(recentGamesData.gameInfo || []),
           ...(upcomingGamesData.gameInfo || []),
-        ];
-        const teams = teamsData;
+        ]);
 
-        // Store all games for trend indicators
-        setAllGames(allGamesData);
-
-        // Find the team by matching the team code with team short names
-        const foundTeam = teams.find((team: TeamInfo) =>
-          matchTeamCode(teamCode, team.short),
+        // CHL team codes are the teams' short names, in any case.
+        const foundTeam = teams.find(
+          (team) => team.short.toUpperCase() === teamCode.toUpperCase(),
         );
-
         if (!foundTeam) {
           setError('Lag inte hittat');
           return;
         }
-
         setTeamInfo(foundTeam);
-
-        // Find games for this team (now using domain GameInfo models)
-        const teamGames = allGamesData.filter(
-          (game: GameInfo) =>
-            game.homeTeamInfo.teamInfo.code === foundTeam.short ||
-            game.awayTeamInfo.teamInfo.code === foundTeam.short,
-        );
-
-        // Find next game - prioritize games from today (including started ones), then upcoming games
-        const now = new Date();
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0];
-
-        // First check if there's a game today (regardless of whether it's started)
-        const todaysGames = teamGames.filter((game: GameInfo) => {
-          const gameDate = new Date(game.startDateTime);
-          return gameDate.toISOString().split('T')[0] === todayString;
-        });
-
-        let nextGame: GameInfo | undefined;
-
-        if (todaysGames.length > 0) {
-          // Return the earliest game today (in case there are multiple)
-          nextGame = todaysGames.sort(
-            (a: GameInfo, b: GameInfo) =>
-              new Date(a.startDateTime).getTime() -
-              new Date(b.startDateTime).getTime(),
-          )[0];
-        } else {
-          // No games today, find the next upcoming game
-          nextGame = teamGames
-            .filter(
-              (game: GameInfo) =>
-                game.state === 'not-started' &&
-                new Date(game.startDateTime) > now,
-            )
-            .sort(
-              (a: GameInfo, b: GameInfo) =>
-                new Date(a.startDateTime).getTime() -
-                new Date(b.startDateTime).getTime(),
-            )[0];
-        }
-
-        setGame(nextGame || null);
-
-        // Get previous and upcoming games
-        const previous = teamGames
-          .filter((game: GameInfo) => {
-            const gameDate = new Date(game.startDateTime);
-            const gameDateString = gameDate.toISOString().split('T')[0];
-            // Exclude games from today - only show games from before today
-            return game.state === 'finished' && gameDateString !== todayString;
-          })
-          .sort(
-            (a: GameInfo, b: GameInfo) =>
-              new Date(b.startDateTime).getTime() -
-              new Date(a.startDateTime).getTime(),
-          )
-          .slice(0, 3); // Show up to 3 previous games
-
-        const upcoming = teamGames
-          .filter((game: GameInfo) => {
-            const gameDate = new Date(game.startDateTime);
-            const gameDateString = gameDate.toISOString().split('T')[0];
-            // Exclude games from today and the next game - they're shown in the "next game" container
-            return (
-              game.state === 'not-started' &&
-              gameDateString !== todayString &&
-              game.uuid !== nextGame?.uuid
-            );
-          })
-          .sort(
-            (a: GameInfo, b: GameInfo) =>
-              new Date(a.startDateTime).getTime() -
-              new Date(b.startDateTime).getTime(),
-          )
-          .slice(0, 3); // Show up to 3 upcoming games (excluding today's games and the next game)
-
-        setPreviousGames(previous);
-        setUpcomingGames(upcoming);
 
         // Load standings data
         try {
@@ -181,8 +79,7 @@ export default function TeamPage({
             withSeason('/api/chl-standings', season),
           );
           if (standingsResponse.ok) {
-            const standingsData = await standingsResponse.json();
-            setStandings(standingsData);
+            setStandings(await standingsResponse.json());
           }
         } catch (err) {
           console.error('Failed to load standings:', err);
@@ -198,178 +95,26 @@ export default function TeamPage({
     if (teamCode) {
       loadTeamData();
     }
-  }, [teamCode, matchTeamCode, season]);
+  }, [teamCode, season]);
 
-  if (loading) {
-    return (
-      <main className="relative py-6 md:py-8">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="animate-pulse">
-            <div className="h-8 bg-surface-3 rounded mb-8 w-1/3 mx-auto"></div>
-            <div className="h-64 bg-surface rounded mb-4"></div>
-            <div className="h-4 bg-surface-3 rounded"></div>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  if (loading) return <TeamPageLoading />;
 
   if (error || !teamInfo) {
     return (
-      <main className="relative py-6 md:py-8">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center">
-            <div className="text-loss text-6xl mb-4">⚠️</div>
-            <h1 className="display text-3xl font-bold uppercase tracking-[0.02em] text-ink mb-4">
-              {error || 'inget lag hittat'}
-            </h1>
-            <p className="text-dim mb-6">
-              {error ||
-                `Inga kommande matcher hittades för lagkod: ${teamCode}`}
-            </p>
-            <Link
-              href={leagueBasePath('chl', season)}
-              className="display inline-block rounded-lg bg-accent px-6 py-3 font-bold uppercase tracking-[0.04em] text-white transition-opacity hover:opacity-90"
-            >
-              Tillbaka till CHL
-            </Link>
-          </div>
-        </div>
-      </main>
+      <TeamPageError
+        message={error || 'Lag inte hittat'}
+        backHref={leagueBasePath('chl', season)}
+        leagueName="CHL"
+      />
     );
   }
 
   return (
-    <main className="relative py-6 md:py-8">
-      {/* Background Team Logo */}
-      <div
-        className="absolute inset-0 flex items-center justify-center z-0 px-8"
-        aria-hidden="true"
-      >
-        <div className="opacity-[0.05] w-full h-full flex items-center justify-center">
-          <Image
-            src={teamInfo.logo || '/placeholder-team.png'}
-            alt=""
-            width={400}
-            height={400}
-            className="w-96 h-96 object-contain transform rotate-12"
-            role="presentation"
-            unoptimized
-          />
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Header Row */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 py-6">
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-surface-3 rounded-full flex items-center justify-center">
-            <Image
-              src={teamInfo.logo || '/placeholder-team.png'}
-              alt={`${teamInfo.full} logo`}
-              width={64}
-              height={64}
-              className="w-16 h-16 object-contain"
-              unoptimized
-            />
-          </div>
-          <h1 className="display text-3xl md:text-5xl font-bold text-ink uppercase tracking-[0.04em] text-center md:text-left">
-            {teamInfo.full}
-          </h1>
-        </div>
-
-        <NextGame
-          game={game}
-          currentTeamCode={teamCode}
-          league="chl"
-          allGames={allGames}
-        />
-
-        {/* Game Stats - Home/Away and Last 5 Games */}
-        {game && (
-          <div className="max-w-6xl mx-auto mb-8">
-            <GameStatsContainer allGames={allGames} currentGame={game} />
-          </div>
-        )}
-
-        {/* Top Scorers and Goalies for Both Teams */}
-        {game && (
-          <div className="max-w-6xl mx-auto mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Home Team */}
-              <div>
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
-                    <TopPlayer
-                      league="chl"
-                      teamCode={game.homeTeamInfo.teamInfo.code}
-                    />
-                  </div>
-                  <div>
-                    <TopGoalie
-                      league="chl"
-                      teamCode={game.homeTeamInfo.teamInfo.code}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Away Team */}
-              <div>
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
-                    <TopPlayer
-                      league="chl"
-                      teamCode={game.awayTeamInfo.teamInfo.code}
-                    />
-                  </div>
-                  <div>
-                    <TopGoalie
-                      league="chl"
-                      teamCode={game.awayTeamInfo.teamInfo.code}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Compact Standings */}
-        {standings && (
-          <div className="max-w-6xl mx-auto mt-8">
-            <CompactStandings
-              standings={standings}
-              league="chl"
-              teamCode={teamCode}
-              opponentTeamCode={
-                game
-                  ? game.homeTeamInfo.teamInfo.code === teamCode
-                    ? game.awayTeamInfo.teamInfo.code
-                    : game.homeTeamInfo.teamInfo.code
-                  : undefined
-              }
-            />
-          </div>
-        )}
-
-        {/* Previous and Upcoming Games */}
-        <div className="max-w-6xl mx-auto mt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <PreviousGames
-              games={previousGames}
-              currentTeamCode={teamCode}
-              league="chl"
-            />
-
-            <UpcomingGames
-              games={upcomingGames}
-              currentTeamCode={teamCode}
-              league="chl"
-            />
-          </div>
-        </div>
-
-      </div>
-    </main>
+    <TeamOverview
+      team={teamInfo}
+      games={allGames}
+      standings={standings}
+      league="chl"
+    />
   );
 }

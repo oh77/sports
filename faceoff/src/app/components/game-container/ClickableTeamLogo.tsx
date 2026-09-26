@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type React from 'react';
 import type { League } from '@/app/types/domain/league';
 import type { TeamInfo } from '@/app/types/domain/team';
-import { teamPath } from '@/app/utils/leaguePaths';
+import { vsPath } from '@/app/utils/leaguePaths';
 import { useSeason } from '@/app/utils/useSeason';
 
 /** lg — hero cards; md — game rows; sm — the dense rows of previous days. */
@@ -14,12 +14,15 @@ export type LogoSize = 'lg' | 'md' | 'sm';
 interface ClickableTeamLogoProps {
   league: League;
   teamInfo: TeamInfo;
+  /** The other team of the game; the logo links to the two teams' matchup. */
+  opponent: TeamInfo;
   size?: LogoSize;
 }
 
 const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
   league,
   teamInfo,
+  opponent,
   size = 'md',
 }) => {
   const season = useSeason();
@@ -38,8 +41,8 @@ const ClickableTeamLogo: React.FC<ClickableTeamLogoProps> = ({
 
   return (
     <Link
-      href={teamPath(league, season, teamInfo.code)}
-      title={teamInfo.full}
+      href={vsPath(league, season, teamInfo.code, opponent.code)}
+      title={`${teamInfo.full} mot ${opponent.full}`}
       className="text-lg font-medium text-accent hover:text-ink hover:underline"
     >
       <div

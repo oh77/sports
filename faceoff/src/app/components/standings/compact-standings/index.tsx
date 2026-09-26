@@ -19,6 +19,12 @@ interface CompactStandingsProps {
   league: League;
   teamCode: string;
   opponentTeamCode?: string;
+  /**
+   * Single-team mode: always show this many rows around the team, shifted
+   * down at the top of the table and up at the bottom (1st → the four below).
+   * Ignored when an opponent is given.
+   */
+  rows?: number;
 }
 
 export function CompactStandings({
@@ -26,6 +32,7 @@ export function CompactStandings({
   league,
   teamCode,
   opponentTeamCode,
+  rows,
 }: CompactStandingsProps) {
   const season = useSeason();
   const getTeams = () => {
@@ -36,6 +43,10 @@ export function CompactStandings({
   const getCompactTeams = () => {
     const teams = getTeams();
     if (!teams.length) return [];
+
+    if (rows && !opponentTeamCode) {
+      return windowAround(teams, teamCode, rows);
+    }
 
     const selectedTeams = new Set<string>();
     const result: Array<{ team: TeamStats; index: number; rank: number }> = [];
@@ -255,4 +266,36 @@ export function CompactStandings({
       </div>
     </div>
   );
+}
+
+/** Table order: rank, then goal difference — as FullStandings sorts. */
+function byTableOrder(a: TeamStats, b: TeamStats): number {
+  const aRank = a.Rank || 0;
+  const bRank = b.Rank || 0;
+  if (aRank !== bRank) return aRank - bRank;
+  return b.G - b.GA - (a.G - a.GA);
+}
+
+/**
+ * `size` consecutive table rows containing the team, as centred on it as the
+ * table's ends allow. Empty when the team isn't in the table.
+ */
+function windowAround(
+  teams: TeamStats[],
+  teamCode: string,
+  size: number,
+): Array<{ team: TeamStats; index: number; rank: number }> {
+  const ordered = [...teams].sort(byTableOrder);
+  const index = ordered.findIndex((team) => getTeamCode(team) === teamCode);
+  if (index === -1) return [];
+
+  const start = Math.max(
+    0,
+    Math.min(index - Math.floor(size / 2), ordered.length - size),
+  );
+  return ordered.slice(start, start + size).map((team, offset) => ({
+    team,
+    index: start + offset,
+    rank: team.Rank || start + offset + 1,
+  }));
 }

@@ -7,6 +7,10 @@ interface ScoreOrStatusProps {
   isHomeTeam: boolean;
 }
 
+/**
+ * A finished game's score from one team's side, with the overtime/shootout
+ * marker on the same line. Games without a reported result show a status.
+ */
 export const ScoreOrStatus: React.FC<ScoreOrStatusProps> = ({
   gameInfo,
   isHomeTeam,
@@ -39,15 +43,15 @@ export const ScoreOrStatus: React.FC<ScoreOrStatusProps> = ({
   const opponentScore = isHomeTeam ? awayScore : homeScore;
 
   return (
-    <>
-      <div className="display num text-sm font-bold text-ink">
-        {currentTeamScore} - {opponentScore}
-      </div>
+    <span className="inline-flex items-baseline gap-1.5">
+      <span className="display num text-sm font-bold text-ink">
+        {currentTeamScore}–{opponentScore}
+      </span>
       {(gameInfo.overtime || gameInfo.shootout) && (
-        <div className="text-xs text-otl font-medium">
+        <span className="display text-[0.625rem] font-medium uppercase tracking-[0.08em] text-otl">
           {gameInfo.shootout ? 'Str' : 'ÖT'}
-        </div>
+        </span>
       )}
-    </>
+    </span>
   );
 };

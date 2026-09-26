@@ -45,28 +45,31 @@ const NextGame: React.FC<NextGameProps> = ({ game, allGames = [] }) => {
           ].join(', '),
         }}
       >
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-8 md:gap-6 md:px-10 md:py-10">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 py-6 md:gap-6 md:px-10 md:py-10">
           {/* Home */}
           <TeamColumn team={home} accent={homeAccent} />
 
           {/* Center */}
-          <div className="flex flex-col items-center text-center">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-dim md:text-xs">
+          <div className="flex min-w-0 flex-col items-center text-center">
+            <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.12em] md:tracking-[0.22em] text-dim md:text-xs">
               {formatDateLabel(game.startDateTime)}
             </p>
-            <p className="display num mt-1 text-5xl font-bold leading-none text-ink md:text-6xl">
+            <p className="display num mt-1 text-4xl font-bold leading-none text-ink md:text-6xl">
               {formatTime(game.startDateTime)}
             </p>
 
             <div className="my-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.25em] text-mute">
-              <span className="h-px w-8 bg-line" />
+              <span className="h-px w-4 bg-line md:w-8" />
               VS
-              <span className="h-px w-8 bg-line" />
+              <span className="h-px w-4 bg-line md:w-8" />
             </div>
 
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-sm text-soft">
-              <StadiumIcon className="h-4 w-auto text-dim" />
-              <span className="truncate">{game.venueInfo.name}</span>
+            {/* Stacked on phones (icon over name), a pill from md up. */}
+            <div className="flex max-w-full flex-col items-center gap-1 text-[10px] text-soft md:flex-row md:gap-1.5 md:rounded-full md:border md:border-line md:px-3 md:py-1.5 md:text-sm">
+              <StadiumIcon className="h-4 w-auto shrink-0 text-dim" />
+              <span className="min-w-0 max-w-full truncate">
+                {game.venueInfo.name}
+              </span>
             </div>
           </div>
 
@@ -93,9 +96,9 @@ export default NextGame;
 function TeamColumn({ team, accent }: { team: GameTeamInfo; accent: RGB }) {
   const { teamInfo } = team;
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex min-w-0 flex-col items-center">
       <div
-        className="relative flex h-24 w-24 items-center justify-center rounded-full md:h-28 md:w-28"
+        className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full md:h-28 md:w-28"
         style={{
           backgroundColor: rgba(accent, 0.14),
           border: `1px solid ${rgba(accent, 0.3)}`,
@@ -108,16 +111,17 @@ function TeamColumn({ team, accent }: { team: GameTeamInfo; accent: RGB }) {
             alt={`${teamInfo.full} logo`}
             width={112}
             height={112}
-            className="h-16 w-16 object-contain md:h-20 md:w-20"
+            className="h-11 w-11 object-contain md:h-20 md:w-20"
             unoptimized
           />
         ) : (
-          <span className="text-4xl text-mute">🏒</span>
+          <span className="text-2xl text-mute md:text-4xl">🏒</span>
         )}
       </div>
 
-      <p className="display mt-3 text-center text-lg font-bold uppercase tracking-[0.02em] text-ink md:text-2xl">
-        {teamInfo.full}
+      <p className="display mt-3 max-w-full break-words text-center text-base font-bold uppercase leading-tight tracking-[0.02em] text-ink md:text-2xl">
+        <span className="md:hidden">{teamInfo.long || teamInfo.full}</span>
+        <span className="hidden md:inline">{teamInfo.full}</span>
       </p>
       {teamInfo.country && (
         <CountryFlag country={teamInfo.country} className="mt-2 h-4 w-[26px]" />
