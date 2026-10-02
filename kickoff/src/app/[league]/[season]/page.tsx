@@ -11,8 +11,30 @@ import {
   getStandings,
 } from '@/app/services/leagueData';
 import { leagueMeta } from '@/app/theme/pitch';
+import type { MatchInfo } from '@/app/types/domain/match';
 import { seasonChampion } from '@/app/utils/champion';
+import { dateKeyFromString } from '@/app/utils/dateUtils';
 import { standingsPath, statsPath } from '@/app/utils/leaguePaths';
+
+/** At least this many matches in each of the upcoming and previous lists. */
+const MIN_MATCHES = 8;
+
+/**
+ * The first `min` matches of a date-sorted list (either direction), extended
+ * to the end of the last day reached, so a match day is never cut in half.
+ */
+function wholeDays(matches: MatchInfo[], min: number): MatchInfo[] {
+  if (matches.length <= min) return matches;
+  const lastDay = dateKeyFromString(matches[min - 1].startDateTime);
+  let end = min;
+  while (
+    end < matches.length &&
+    dateKeyFromString(matches[end].startDateTime) === lastDay
+  ) {
+    end++;
+  }
+  return matches.slice(0, end);
+}
 
 export default async function LeagueOverviewPage({
   params,
@@ -36,14 +58,18 @@ export default async function LeagueOverviewPage({
   ]);
 
   const live = matches.filter((m) => m.state === 'live');
-  const upcoming = matches
-    .filter((m) => m.state === 'not-started')
-    .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime))
-    .slice(0, 8);
-  const previous = matches
-    .filter((m) => m.state === 'finished')
-    .sort((a, b) => b.startDateTime.localeCompare(a.startDateTime))
-    .slice(0, 4);
+  const upcoming = wholeDays(
+    matches
+      .filter((m) => m.state === 'not-started')
+      .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime)),
+    MIN_MATCHES,
+  );
+  const previous = wholeDays(
+    matches
+      .filter((m) => m.state === 'finished')
+      .sort((a, b) => b.startDateTime.localeCompare(a.startDateTime)),
+    MIN_MATCHES,
+  );
 
   // A fully played season has a champion; it replaces the upcoming section.
   const champion = seasonChampion(league, matches, standings);
