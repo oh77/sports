@@ -56,6 +56,52 @@ export function nextMeeting(
   );
 }
 
+/** Two teams' finished meetings, summed up from the first team's side. */
+export interface MeetingTally {
+  team: TeamInfo;
+  opponent: TeamInfo;
+  played: number;
+  wins: number;
+  losses: number;
+  draws: number;
+}
+
+/**
+ * The season's finished meetings between two teams, either way round, as
+ * wins and losses for the first. Null when they haven't met.
+ */
+export function meetingTally(
+  games: GameInfo[],
+  teamCode: string,
+  opponentCode: string,
+): MeetingTally | null {
+  const meetings = games.filter(
+    (game) =>
+      game.state === 'finished' &&
+      involves(game, teamCode) &&
+      involves(game, opponentCode),
+  );
+  const first = meetings[0];
+  if (!first) return null;
+
+  const tally = { played: meetings.length, wins: 0, losses: 0, draws: 0 };
+  for (const game of meetings) {
+    const isHome = game.homeTeamInfo.teamInfo.code === teamCode;
+    const own = isHome ? game.homeTeamInfo.score : game.awayTeamInfo.score;
+    const other = isHome ? game.awayTeamInfo.score : game.homeTeamInfo.score;
+    if (own > other) tally.wins++;
+    else if (own < other) tally.losses++;
+    else tally.draws++;
+  }
+
+  const firstIsHome = first.homeTeamInfo.teamInfo.code === teamCode;
+  return {
+    team: (firstIsHome ? first.homeTeamInfo : first.awayTeamInfo).teamInfo,
+    opponent: (firstIsHome ? first.awayTeamInfo : first.homeTeamInfo).teamInfo,
+    ...tally,
+  };
+}
+
 /** A team's info as the schedule carries it, from any of its games. */
 export function teamInfoFromGames(
   games: GameInfo[],

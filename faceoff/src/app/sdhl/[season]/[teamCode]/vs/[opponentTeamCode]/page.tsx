@@ -163,6 +163,7 @@ export default function SDHLTeamPage({
         <NextGame
           game={game}
           currentTeamCode={teamCode}
+          opponentTeamCode={opponentTeamCode}
           league="sdhl"
           allGames={allGames}
         />

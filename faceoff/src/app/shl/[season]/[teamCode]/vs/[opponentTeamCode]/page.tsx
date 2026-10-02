@@ -162,6 +162,7 @@ export default function TeamPage({
         <NextGame
           game={game}
           currentTeamCode={teamCode}
+          opponentTeamCode={opponentTeamCode}
           league="shl"
           allGames={allGames}
         />

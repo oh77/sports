@@ -109,6 +109,7 @@ export default function NhlMatchupPage({
         <NextGame
           game={game}
           currentTeamCode={team.code}
+          opponentTeamCode={opponent.code}
           league="nhl"
           allGames={seasonGames}
         />

@@ -226,7 +226,9 @@ export default function TeamPage({
 
         <NextGame
           game={game}
-          currentTeamCode={teamCode}
+          // CHL games carry the clubs' short names as codes.
+          currentTeamCode={teamInfo.short}
+          opponentTeamCode={opponentInfo?.short}
           league="chl"
           allGames={allGames}
         />

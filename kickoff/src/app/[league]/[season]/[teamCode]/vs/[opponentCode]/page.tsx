@@ -96,7 +96,7 @@ export default async function MatchupPage({
           <NoMeetingHero
             home={homeSide}
             away={awaySide}
-            hasPlayed={played.length > 0}
+            played={played}
             league={league}
             season={season}
           />
@@ -494,42 +494,72 @@ function HeroTeam({
 
 /**
  * Hero fallback when the two teams have no match left to play: same card and
- * same two-team layout as the featured match, with a note where the kick-off
- * would be. Any earlier meetings are listed below it with their results.
+ * same two-team layout as the featured match. Where the kick-off would be, it
+ * sums up the season's meetings as wins for each side (draws noted below);
+ * with no meeting at all, a note says so. The meetings themselves are listed
+ * below it with their results.
  */
 function NoMeetingHero({
   home,
   away,
-  hasPlayed,
+  played,
   league,
   season,
 }: {
   home: TeamInfo;
   away: TeamInfo;
-  hasPlayed: boolean;
+  played: MatchInfo[];
   league: League;
   season: string;
 }) {
+  const outcomes = played.map((m) => outcomeFor(home.code, m));
+  const count = (outcome: MatchOutcome) =>
+    outcomes.filter((o) => o === outcome).length;
+  const [wins, draws, losses] = [count('W'), count('D'), count('L')];
+
   return (
     <section
-      aria-label="Inget kommande möte"
+      aria-label={played.length > 0 ? 'Säsongens möten' : 'Inget möte'}
       className="rounded-xl border border-line bg-surface px-4 py-6 sm:px-6"
     >
+      {played.length > 0 && (
+        <p className="display mb-5 text-center text-[13px] font-bold uppercase tracking-[0.08em] text-dim">
+          Säsongens möten
+        </p>
+      )}
+
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
         <HeroTeam team={home} league={league} season={season} />
 
         <div className="flex flex-col items-center gap-1.5 px-2 pt-3">
-          <span
-            aria-hidden="true"
-            className="display text-3xl font-bold text-mute"
-          >
-            –
-          </span>
-          <span className="max-w-[10rem] text-balance text-center text-sm text-dim">
-            {hasPlayed
-              ? 'Inga fler möten den här säsongen'
-              : 'Inget möte inplanerat den här säsongen'}
-          </span>
+          {played.length > 0 ? (
+            <>
+              <span className="num display text-3xl font-bold text-ink">
+                <span aria-hidden="true">
+                  {wins}–{losses}
+                </span>
+                <span className="sr-only">
+                  {home.full} {wins} vinster, {away.full} {losses} vinster
+                </span>
+              </span>
+              <span className="text-center text-sm text-dim">
+                {played.length} {played.length === 1 ? 'match' : 'matcher'}
+                {draws > 0 && ` · ${draws} oavgjord${draws === 1 ? '' : 'a'}`}
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                aria-hidden="true"
+                className="display text-3xl font-bold text-mute"
+              >
+                –
+              </span>
+              <span className="max-w-[10rem] text-balance text-center text-sm text-dim">
+                Inget möte inplanerat den här säsongen
+              </span>
+            </>
+          )}
         </div>
 
         <HeroTeam team={away} league={league} season={season} />

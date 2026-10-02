@@ -6,13 +6,20 @@ import { CountryFlag } from '@/app/components/country-flag';
 import { StadiumIcon } from '@/app/components/icons/stadium-icon';
 import type { League } from '@/app/types/domain/league';
 import { formatTimeFromDate } from '@/app/utils/dateUtils';
+import { type MeetingTally, meetingTally } from '@/app/utils/teamGames';
 import { type RGB, rgba, useDominantColor } from '@/app/utils/useDominantColor';
-import type { GameInfo, GameTeamInfo } from '../../types/domain/game';
+import type { GameInfo } from '../../types/domain/game';
+import type { TeamInfo } from '../../types/domain/team';
 import { TrendMarkers } from '../trend-markers';
 
 interface NextGameProps {
   game: GameInfo | null;
   currentTeamCode: string;
+  /**
+   * The other team. With no meeting left to play, the hero sums up the
+   * season's meetings between the two instead of showing a kick-off.
+   */
+  opponentTeamCode?: string;
   league: League;
   allGames?: GameInfo[];
 }
@@ -20,16 +27,26 @@ interface NextGameProps {
 // Neutral slate used until a logo color resolves, or when a logo has none.
 const DEFAULT_ACCENT: RGB = { r: 82, g: 98, b: 128 };
 
-const NextGame: React.FC<NextGameProps> = ({ game, allGames = [] }) => {
-  const homeColor = useDominantColor(game?.homeTeamInfo.teamInfo.logo);
-  const awayColor = useDominantColor(game?.awayTeamInfo.teamInfo.logo);
+const NextGame: React.FC<NextGameProps> = ({
+  game,
+  currentTeamCode,
+  opponentTeamCode,
+  allGames = [],
+}) => {
+  const tally =
+    !game && opponentTeamCode
+      ? meetingTally(allGames, currentTeamCode, opponentTeamCode)
+      : null;
+  const home = game ? game.homeTeamInfo.teamInfo : (tally?.team ?? null);
+  const away = game ? game.awayTeamInfo.teamInfo : (tally?.opponent ?? null);
 
-  if (!game) {
+  const homeColor = useDominantColor(home?.logo);
+  const awayColor = useDominantColor(away?.logo);
+
+  if (!home || !away) {
     return null;
   }
 
-  const home = game.homeTeamInfo;
-  const away = game.awayTeamInfo;
   const homeAccent = homeColor ?? DEFAULT_ACCENT;
   const awayAccent = awayColor ?? DEFAULT_ACCENT;
 
@@ -47,42 +64,25 @@ const NextGame: React.FC<NextGameProps> = ({ game, allGames = [] }) => {
       >
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 py-6 md:gap-6 md:px-10 md:py-10">
           {/* Home */}
-          <TeamColumn team={home} accent={homeAccent} />
+          <TeamColumn teamInfo={home} accent={homeAccent} />
 
           {/* Center */}
-          <div className="flex min-w-0 flex-col items-center text-center">
-            <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.12em] md:tracking-[0.22em] text-dim md:text-xs">
-              {formatDateLabel(game.startDateTime)}
-            </p>
-            <p className="display num mt-1 text-4xl font-bold leading-none text-ink md:text-6xl">
-              {formatTime(game.startDateTime)}
-            </p>
-
-            <div className="my-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.25em] text-mute">
-              <span className="h-px w-4 bg-line md:w-8" />
-              VS
-              <span className="h-px w-4 bg-line md:w-8" />
-            </div>
-
-            {/* Stacked on phones (icon over name), a pill from md up. */}
-            <div className="flex max-w-full flex-col items-center gap-1 text-[10px] text-soft md:flex-row md:gap-1.5 md:rounded-full md:border md:border-line md:px-3 md:py-1.5 md:text-sm">
-              <StadiumIcon className="h-4 w-auto shrink-0 text-dim" />
-              <span className="min-w-0 max-w-full truncate">
-                {game.venueInfo.name}
-              </span>
-            </div>
-          </div>
+          {game ? (
+            <KickoffCenter game={game} />
+          ) : (
+            tally && <TallyCenter tally={tally} />
+          )}
 
           {/* Away */}
-          <TeamColumn team={away} accent={awayAccent} />
+          <TeamColumn teamInfo={away} accent={awayAccent} />
         </div>
 
         {allGames.length > 0 && (
           <div className="relative z-10 border-t border-white/5 px-4 pb-4 pt-4 md:px-8">
             <TrendMarkers
               games={allGames}
-              homeTeamCode={home.teamInfo.code}
-              awayTeamCode={away.teamInfo.code}
+              homeTeamCode={home.code}
+              awayTeamCode={away.code}
             />
           </div>
         )}
@@ -93,8 +93,72 @@ const NextGame: React.FC<NextGameProps> = ({ game, allGames = [] }) => {
 
 export default NextGame;
 
-function TeamColumn({ team, accent }: { team: GameTeamInfo; accent: RGB }) {
-  const { teamInfo } = team;
+/** Date, time and venue of the coming meeting. */
+function KickoffCenter({ game }: { game: GameInfo }) {
+  return (
+    <div className="flex min-w-0 flex-col items-center text-center">
+      <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.12em] md:tracking-[0.22em] text-dim md:text-xs">
+        {formatDateLabel(game.startDateTime)}
+      </p>
+      <p className="display num mt-1 text-4xl font-bold leading-none text-ink md:text-6xl">
+        {formatTime(game.startDateTime)}
+      </p>
+
+      <VsDivider />
+
+      {/* Stacked on phones (icon over name), a pill from md up. */}
+      <div className="flex max-w-full flex-col items-center gap-1 text-[10px] text-soft md:flex-row md:gap-1.5 md:rounded-full md:border md:border-line md:px-3 md:py-1.5 md:text-sm">
+        <StadiumIcon className="h-4 w-auto shrink-0 text-dim" />
+        <span className="min-w-0 max-w-full truncate">
+          {game.venueInfo.name}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The season's meetings summed up, wins left team–right team, for when the
+ * two have no meeting left to play.
+ */
+function TallyCenter({ tally }: { tally: MeetingTally }) {
+  const { played, wins, losses, draws } = tally;
+  return (
+    <div className="flex min-w-0 flex-col items-center text-center">
+      <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.12em] md:tracking-[0.22em] text-dim md:text-xs">
+        Säsongens möten
+      </p>
+      <p className="display num mt-1 text-4xl font-bold leading-none text-ink md:text-6xl">
+        <span aria-hidden="true">
+          {wins}–{losses}
+        </span>
+        <span className="sr-only">
+          {tally.team.full} {wins} vinster, {tally.opponent.full} {losses}{' '}
+          vinster
+        </span>
+      </p>
+
+      <VsDivider />
+
+      <p className="text-[10px] text-soft md:rounded-full md:border md:border-line md:px-3 md:py-1.5 md:text-sm">
+        {played} {played === 1 ? 'match' : 'matcher'}
+        {draws > 0 && ` · ${draws} oavgjord${draws === 1 ? '' : 'a'}`}
+      </p>
+    </div>
+  );
+}
+
+function VsDivider() {
+  return (
+    <div className="my-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.25em] text-mute">
+      <span className="h-px w-4 bg-line md:w-8" />
+      VS
+      <span className="h-px w-4 bg-line md:w-8" />
+    </div>
+  );
+}
+
+function TeamColumn({ teamInfo, accent }: { teamInfo: TeamInfo; accent: RGB }) {
   return (
     <div className="flex min-w-0 flex-col items-center">
       <div
