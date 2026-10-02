@@ -48,85 +48,8 @@ export function CompactStandings({
       return windowAround(teams, teamCode, rows);
     }
 
-    const selectedTeams = new Set<string>();
-    const result: Array<{ team: TeamStats; index: number; rank: number }> = [];
-
-    const getTeamIndex = (teamCode: string) => {
-      return teams.findIndex((team) => getTeamCode(team) === teamCode);
-    };
-
-    const getTeamIndices = () => {
-      if (opponentTeamCode) {
-        return [getTeamIndex(teamCode), getTeamIndex(opponentTeamCode)];
-      }
-
-      return [getTeamIndex(teamCode)];
-    };
-
-    // Add teams and their neighbors
-    getTeamIndices().forEach((teamIndex) => {
-      if (teamIndex === -1) return; // Team not found
-
-      const team = teams[teamIndex];
-      const teamCode = getTeamCode(team);
-      const rank = team.Rank || teamIndex + 1;
-
-      // Add the team itself
-      if (!selectedTeams.has(teamCode)) {
-        selectedTeams.add(teamCode);
-        result.push({
-          team,
-          index: teamIndex,
-          rank,
-        });
-      }
-
-      // Add team above (if exists and not already added)
-      if (teamIndex > 0) {
-        const teamAbove = teams[teamIndex - 1];
-        const teamAboveCode = getTeamCode(teamAbove);
-        const teamAboveRank = teamAbove.Rank || teamIndex;
-
-        if (!selectedTeams.has(teamAboveCode)) {
-          selectedTeams.add(teamAboveCode);
-          result.push({
-            team: teamAbove,
-            index: teamIndex - 1,
-            rank: teamAboveRank,
-          });
-        }
-      }
-
-      // Add team below (if exists and not already added)
-      if (teamIndex < teams.length - 1) {
-        const teamBelow = teams[teamIndex + 1];
-        const teamBelowCode = getTeamCode(teamBelow);
-        const teamBelowRank = teamBelow.Rank || teamIndex + 2;
-
-        if (!selectedTeams.has(teamBelowCode)) {
-          selectedTeams.add(teamBelowCode);
-          result.push({
-            team: teamBelow,
-            index: teamIndex + 1,
-            rank: teamBelowRank,
-          });
-        }
-      }
-    });
-
-    // Sort by rank first, then by goal difference descending
-    return result.sort((a, b) => {
-      // First sort by rank
-      if (a.rank !== b.rank) {
-        return a.rank - b.rank;
-      }
-
-      // If ranks are equal, sort by goal difference (descending)
-      const aGoalDiff = a.team.G - a.team.GA;
-      const bGoalDiff = b.team.G - b.team.GA;
-
-      return bGoalDiff - aGoalDiff; // Descending order
-    });
+    const codes = opponentTeamCode ? [teamCode, opponentTeamCode] : [teamCode];
+    return excerptAround(teams, codes);
   };
 
   // Helper function to get full standings position for a team
@@ -274,6 +197,46 @@ function byTableOrder(a: TeamStats, b: TeamStats): number {
   const bRank = b.Rank || 0;
   if (aRank !== bRank) return aRank - bRank;
   return b.G - b.GA - (a.G - a.GA);
+}
+
+/** Tables this small are always shown whole. */
+const SMALL_TABLE = 4;
+
+/** Rows kept below 1st and above last when a shown team holds either. */
+const EDGE_ROWS = 2;
+
+/**
+ * Each team's row plus its neighbours above and below, merged in table order.
+ * A team in 1st also brings 2nd and 3rd, a team in last the two places above
+ * it, and a table of four or fewer is shown whole.
+ */
+function excerptAround(
+  teams: TeamStats[],
+  codes: string[],
+): Array<{ team: TeamStats; index: number; rank: number }> {
+  const ordered = [...teams].sort(byTableOrder);
+  const last = ordered.length - 1;
+  const picked = new Set<number>();
+  for (const code of codes) {
+    const i = ordered.findIndex((team) => getTeamCode(team) === code);
+    if (i === -1) continue;
+    let from = i - 1;
+    let to = i + 1;
+    if (ordered.length <= SMALL_TABLE) {
+      from = 0;
+      to = last;
+    }
+    if (i === 0) to = Math.max(to, EDGE_ROWS);
+    if (i === last) from = Math.min(from, last - EDGE_ROWS);
+    for (let j = Math.max(from, 0); j <= Math.min(to, last); j++) picked.add(j);
+  }
+  return [...picked]
+    .sort((a, b) => a - b)
+    .map((index) => ({
+      team: ordered[index],
+      index,
+      rank: ordered[index].Rank || index + 1,
+    }));
 }
 
 /**

@@ -16,10 +16,18 @@ type Props = {
   caption: string;
 };
 
+/** Tables this small are always shown whole. */
+const SMALL_TABLE = 4;
+
+/** Rows kept below 1st and above last when a named team holds either. */
+const EDGE_ROWS = 2;
+
 /**
  * Rows for a table excerpt: each named team's standing plus the `radius`
- * positions above and below it, within that team's own table/group. Deduped
- * and in table order, so overlapping windows merge into one run of rows.
+ * positions above and below it, within that team's own table/group. A team
+ * in 1st also brings 2nd and 3rd, a team in last the two places above it,
+ * and a group of four or fewer is shown whole. Deduped and in table order,
+ * so overlapping windows merge into one run of rows.
  */
 export function matchupRows(
   stats: TeamStanding[],
@@ -28,12 +36,20 @@ export function matchupRows(
 ): TeamStanding[] {
   const picked = new Set<TeamStanding>();
   for (const code of codes) {
-    const i = stats.findIndex((s) => s.info.code === code);
-    if (i === -1) continue;
-    for (let j = i - radius; j <= i + radius; j++) {
-      const row = stats[j];
-      if (row && row.group === stats[i].group) picked.add(row);
+    const team = stats.find((s) => s.info.code === code);
+    if (!team) continue;
+    const group = stats.filter((row) => row.group === team.group);
+    const i = group.indexOf(team);
+    const last = group.length - 1;
+    let from = i - radius;
+    let to = i + radius;
+    if (group.length <= SMALL_TABLE) {
+      from = 0;
+      to = last;
     }
+    if (i === 0) to = Math.max(to, EDGE_ROWS);
+    if (i === last) from = Math.min(from, last - EDGE_ROWS);
+    for (const row of group.slice(Math.max(from, 0), to + 1)) picked.add(row);
   }
   return stats.filter((row) => picked.has(row));
 }
