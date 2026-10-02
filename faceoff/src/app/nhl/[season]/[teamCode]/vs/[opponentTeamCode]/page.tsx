@@ -86,6 +86,9 @@ export default function NhlMatchupPage({
   }
 
   const game = nextMeeting(allGames, team.code, opponent.code);
+  // Preseason games are exhibitions: they stay in the schedules, but never
+  // count towards the meetings, trends or stat tables.
+  const seasonGames = allGames.filter((g) => g.phase !== 'preseason');
   // Home team first when the two have a meeting left; URL order otherwise.
   const [home, away] =
     game?.homeTeamInfo.teamInfo.code === opponent.code
@@ -107,18 +110,18 @@ export default function NhlMatchupPage({
           game={game}
           currentTeamCode={team.code}
           league="nhl"
-          allGames={allGames}
+          allGames={seasonGames}
         />
 
         <HeadToHead
-          games={allGames}
+          games={seasonGames}
           teamCode1={team.code}
           teamCode2={opponent.code}
         />
 
         {game && (
           <div className="max-w-6xl mx-auto mb-8">
-            <GameStatsContainer allGames={allGames} currentGame={game} />
+            <GameStatsContainer allGames={seasonGames} currentGame={game} />
           </div>
         )}
 
