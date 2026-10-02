@@ -14,6 +14,7 @@ import type { GameInfo } from '@/app/types/domain/game';
 import type { StandingsData } from '@/app/types/domain/standings';
 import type { TeamInfo } from '@/app/types/domain/team';
 import { leagueBasePath } from '@/app/utils/leaguePaths';
+import { nhlMatchupTable } from '@/app/utils/nhlStandingsGroups';
 import {
   fetchNhlMatchupGames,
   fetchNhlStandings,
@@ -90,6 +91,10 @@ export default function NhlMatchupPage({
     game?.homeTeamInfo.teamInfo.code === opponent.code
       ? [opponent, team]
       : [team, opponent];
+  // Division rivals see their division, conference rivals their conference,
+  // cross-conference games the whole league.
+  const table =
+    standings && nhlMatchupTable(standings, team.code, opponent.code);
 
   return (
     <main className="relative py-6 md:py-8">
@@ -129,10 +134,13 @@ export default function NhlMatchupPage({
           </div>
         </div>
 
-        {standings && (
+        {table && (
           <div className="max-w-6xl mx-auto mb-8">
+            <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.04em] text-ink">
+              {table.title}
+            </h2>
             <CompactStandings
-              standings={standings}
+              standings={table.standings}
               league="nhl"
               teamCode={team.code}
               opponentTeamCode={opponent.code}

@@ -11,6 +11,7 @@ import type { GameInfo } from '@/app/types/domain/game';
 import type { StandingsData } from '@/app/types/domain/standings';
 import type { TeamInfo } from '@/app/types/domain/team';
 import { leagueBasePath } from '@/app/utils/leaguePaths';
+import { nhlDivisionTable } from '@/app/utils/nhlStandingsGroups';
 import { fetchNhlStandings, fetchNhlTeamGames } from '@/app/utils/nhlTeamData';
 
 export default function NhlTeamPage({
@@ -75,11 +76,15 @@ export default function NhlTeamPage({
     );
   }
 
+  // The division is the club's closest race; show that, not all 32 clubs.
+  const table = standings && nhlDivisionTable(standings, teamInfo.code);
+
   return (
     <TeamOverview
       team={teamInfo}
       games={allGames}
-      standings={standings}
+      standings={table?.standings ?? null}
+      standingsTitle={table?.title}
       league="nhl"
     />
   );

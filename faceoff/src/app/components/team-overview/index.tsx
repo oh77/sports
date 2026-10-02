@@ -33,6 +33,8 @@ interface TeamOverviewProps {
   /** Games to read the team's schedule from; other teams' games are ignored. */
   games: GameInfo[];
   standings: StandingsData | null;
+  /** Heading above the standings, for a table that needs naming (NHL division). */
+  standingsTitle?: string;
   league: League;
 }
 
@@ -44,6 +46,7 @@ export const TeamOverview: React.FC<TeamOverviewProps> = ({
   team,
   games,
   standings,
+  standingsTitle,
   league,
 }) => {
   const form = useMemo(
@@ -63,6 +66,11 @@ export const TeamOverview: React.FC<TeamOverviewProps> = ({
 
         {standings && (
           <div className="max-w-6xl mx-auto mb-8">
+            {standingsTitle && (
+              <h2 className="display mb-3 text-lg font-bold uppercase tracking-[0.04em] text-ink">
+                {standingsTitle}
+              </h2>
+            )}
             <CompactStandings
               standings={standings}
               league={league}
