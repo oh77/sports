@@ -9,6 +9,8 @@ export interface UefaTeam {
   logoUrl?: string;
   mediumLogoUrl?: string;
   bigLogoUrl?: string;
+  /** "NATIONAL" for national teams (Nations League); clubs are "CLUB". */
+  typeTeam?: string;
   translations?: {
     displayOfficialName?: UefaTranslations;
   };

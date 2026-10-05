@@ -18,6 +18,8 @@ export interface MatchTeamInfo {
 
 export interface VenueInfo {
   name: string;
+  /** City, when the source gives it apart from the venue name (UEFA). */
+  city?: string;
 }
 
 export interface MatchInfo {

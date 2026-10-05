@@ -354,7 +354,7 @@ function MatchHero({
         {started && ` kl. ${formatTimeFromString(match.startDateTime)}`}
       </p>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3">
         <HeroTeam
           team={homeTeamInfo.teamInfo}
           league={league}
@@ -392,8 +392,15 @@ function MatchHero({
           )}
           <MatchMetaRow match={match} />
           <AggregateLine match={match} />
-          <span className="text-center text-sm text-dim">
+          {/* Narrow on phones so the team columns keep their room; the city
+              goes on its own line. */}
+          <span className="max-w-[8.5rem] text-balance text-center text-sm text-dim sm:max-w-[14rem]">
             {match.venueInfo.name}
+            {match.venueInfo.city && (
+              <span className="block text-xs text-mute">
+                {match.venueInfo.city}
+              </span>
+            )}
           </span>
         </div>
 
@@ -481,7 +488,7 @@ function HeroTeam({
   season: string;
 }) {
   return (
-    <span className="flex flex-col items-center gap-2 text-center">
+    <span className="flex min-w-0 flex-col items-center gap-2 text-center">
       <TeamBadge team={team} size="lg" />
       <Link
         href={teamPath(league, season, team.code)}
@@ -498,7 +505,7 @@ function HeroTeam({
 /**
  * Hero fallback when the two teams have no match left to play: same card and
  * same two-team layout as the featured match. Where the kick-off would be, it
- * sums up the season's meetings as wins for each side (draws noted below);
+ * sums up the season's meetings: wins for each side with the draws between;
  * with no meeting at all, a note says so. The meetings themselves are listed
  * below it with their results.
  */
@@ -531,23 +538,45 @@ function NoMeetingHero({
         </p>
       )}
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3">
         <HeroTeam team={home} league={league} season={season} />
 
         <div className="flex flex-col items-center gap-1.5 px-2 pt-3">
           {played.length > 0 ? (
             <>
-              <span className="num display text-3xl font-bold text-ink">
-                <span aria-hidden="true">
-                  {wins}–{losses}
-                </span>
-                <span className="sr-only">
-                  {home.full} {wins} vinster, {away.full} {losses} vinster
-                </span>
-              </span>
+              <dl className="flex items-start gap-4">
+                {[
+                  {
+                    label: home.short,
+                    title: `Vinster ${home.full}`,
+                    value: wins,
+                  },
+                  { label: 'Oavgj.', title: 'Oavgjorda', value: draws },
+                  {
+                    label: away.short,
+                    title: `Vinster ${away.full}`,
+                    value: losses,
+                  },
+                ].map((cell) => (
+                  <div
+                    key={cell.title}
+                    className="flex flex-col-reverse items-center gap-0.5"
+                  >
+                    <dt
+                      title={cell.title}
+                      className="display text-[10px] font-bold uppercase tracking-[0.08em] text-dim"
+                    >
+                      <span aria-hidden="true">{cell.label}</span>
+                      <span className="sr-only">{cell.title}</span>
+                    </dt>
+                    <dd className="num display text-3xl font-bold text-ink">
+                      {cell.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
               <span className="text-center text-sm text-dim">
                 {played.length} {played.length === 1 ? 'match' : 'matcher'}
-                {draws > 0 && ` · ${draws} oavgjord${draws === 1 ? '' : 'a'}`}
               </span>
             </>
           ) : (
@@ -578,18 +607,28 @@ function NoMeetingHero({
  */
 function CountryLabel({ country }: { country: TeamCountry }) {
   return (
-    <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-dim">
+    <span
+      title={country.name}
+      className="flex max-w-full items-start justify-center gap-1.5 text-[11px] uppercase tracking-wide text-dim"
+    >
       <Image
         src={country.flag}
         alt=""
         aria-hidden="true"
         width={16}
         height={16}
-        className="shrink-0 object-contain"
+        className="mt-px shrink-0 object-contain"
         style={{ width: 16, height: 'auto' }}
         unoptimized
       />
-      {country.name}
+      {/* The association code on phones, where the hero's columns are
+          narrow; the full name from sm up, and always for screen readers. */}
+      <span aria-hidden="true" className="sm:hidden">
+        {country.code}
+      </span>
+      <span className="sr-only min-w-0 break-words sm:not-sr-only">
+        {country.name}
+      </span>
     </span>
   );
 }

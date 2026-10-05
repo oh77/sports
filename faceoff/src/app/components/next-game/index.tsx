@@ -118,31 +118,57 @@ function KickoffCenter({ game }: { game: GameInfo }) {
 }
 
 /**
- * The season's meetings summed up, wins left team–right team, for when the
- * two have no meeting left to play.
+ * The season's meetings summed up for when the two have no meeting left to
+ * play: wins for each side, with a draws column between them only when a
+ * meeting actually ended level (rare in hockey, decided in overtime).
  */
 function TallyCenter({ tally }: { tally: MeetingTally }) {
-  const { played, wins, losses, draws } = tally;
+  const { played, wins, losses, draws, team, opponent } = tally;
+  const cells = [
+    {
+      label: team.code.toUpperCase(),
+      title: `Vinster ${team.full}`,
+      value: wins,
+    },
+    ...(draws > 0
+      ? [{ label: 'Oavgj.', title: 'Oavgjorda', value: draws }]
+      : []),
+    {
+      label: opponent.code.toUpperCase(),
+      title: `Vinster ${opponent.full}`,
+      value: losses,
+    },
+  ];
+
   return (
     <div className="flex min-w-0 flex-col items-center text-center">
       <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.12em] md:tracking-[0.22em] text-dim md:text-xs">
         Säsongens möten
       </p>
-      <p className="display num mt-1 text-4xl font-bold leading-none text-ink md:text-6xl">
-        <span aria-hidden="true">
-          {wins}–{losses}
-        </span>
-        <span className="sr-only">
-          {tally.team.full} {wins} vinster, {tally.opponent.full} {losses}{' '}
-          vinster
-        </span>
-      </p>
+      <dl className="mt-1 flex items-start gap-3 md:gap-5">
+        {cells.map((cell) => (
+          <div
+            key={cell.title}
+            className="flex flex-col-reverse items-center gap-1"
+          >
+            <dt
+              title={cell.title}
+              className="display text-[10px] font-bold uppercase tracking-[0.08em] text-dim md:text-xs"
+            >
+              <span aria-hidden="true">{cell.label}</span>
+              <span className="sr-only">{cell.title}</span>
+            </dt>
+            <dd className="display num text-4xl font-bold leading-none text-ink md:text-6xl">
+              {cell.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
 
       <VsDivider />
 
       <p className="text-[10px] text-soft md:rounded-full md:border md:border-line md:px-3 md:py-1.5 md:text-sm">
         {played} {played === 1 ? 'match' : 'matcher'}
-        {draws > 0 && ` · ${draws} oavgjord${draws === 1 ? '' : 'a'}`}
       </p>
     </div>
   );

@@ -7,6 +7,7 @@ import type {
   MatchesData,
   MatchInfo,
   MatchState,
+  VenueInfo,
 } from '@/app/types/domain/match';
 import type {
   PlayerInfo,
@@ -29,6 +30,29 @@ import type { UefaStandingsGroup } from '@/app/types/uefa/standings';
 import { playerColumns, STANDINGS_COLUMNS } from '@/app/utils/footballColumns';
 import { lastFiveForm, sideRecordFor } from '@/app/utils/form';
 
+/**
+ * A national team is its own country, so it gets no country label. The
+ * schedule's team objects aren't sampled for `typeTeam`, so a team code equal
+ * to the country code (DEN/DEN) counts too — clubs never share theirs.
+ */
+function isNationalTeam(team: UefaTeam): boolean {
+  return (
+    team.typeTeam === 'NATIONAL' ||
+    (!!team.teamCode && team.teamCode === team.countryCode)
+  );
+}
+
+/**
+ * Swedish name for a national team ("Denmark" → "Danmark"), from the static
+ * association-code map — the feed has no Swedish translation. Clubs, and
+ * nations the map doesn't cover, keep the feed's name.
+ */
+function nationalTeamName(team: UefaTeam): string | undefined {
+  if (!team.countryCode || !isNationalTeam(team)) return undefined;
+  const name = uefaCountryName(team.countryCode);
+  return name === team.countryCode ? undefined : name;
+}
+
 export function clTeamToDomain(team: UefaTeam): TeamInfo {
   const short =
     team.teamCode ?? team.internationalName.slice(0, 3).toUpperCase();
@@ -36,10 +60,13 @@ export function clTeamToDomain(team: UefaTeam): TeamInfo {
     code: (team.teamCode ?? team.id).toLowerCase(),
     externalId: team.id,
     short,
-    long: team.internationalName,
-    full: team.translations?.displayOfficialName?.EN ?? team.internationalName,
+    long: nationalTeamName(team) ?? team.internationalName,
+    full:
+      nationalTeamName(team) ??
+      team.translations?.displayOfficialName?.EN ??
+      team.internationalName,
     logo: team.logoUrl ?? team.mediumLogoUrl ?? '',
-    ...(team.countryCode
+    ...(team.countryCode && !isNationalTeam(team)
       ? {
           country: {
             code: team.countryCode,
@@ -117,11 +144,12 @@ function roundLabel(m: UefaMatch): string | undefined {
   return roundName ?? m.matchday?.longName;
 }
 
-function venueName(m: UefaMatch): string {
+/** Stadium and city apart, so the city can go on a line of its own. */
+function venueInfo(m: UefaMatch): VenueInfo {
   const stadium = m.stadium?.translations?.officialName?.EN;
   const city = m.stadium?.city?.translations?.name?.EN;
-  if (stadium && city) return `${stadium}, ${city}`;
-  return stadium ?? city ?? '';
+  if (stadium && city) return { name: stadium, city };
+  return { name: stadium ?? city ?? '' };
 }
 
 /** UEFA ties run over two legs; the provider only says first or second. */
@@ -240,7 +268,7 @@ export function clMatchesToDomain(
           ...(m.score?.penalty ? { penaltyScore: m.score.penalty.away } : {}),
           ...(aggregate ? { aggregateScore: aggregate.away } : {}),
         },
-        venueInfo: { name: venueName(m) },
+        venueInfo: venueInfo(m),
         ...(round !== undefined ? { round } : {}),
         ...(leg !== undefined
           ? { leg: { number: leg, of: LEGS_PER_TIE } }
@@ -354,7 +382,7 @@ function clPlayerInfo(
       (id ? uefaPlayerPhotoUrl(competitionId, id, seasonYear) : undefined),
     team: {
       externalId: team?.id ?? row.teamId ?? '',
-      name: team?.internationalName ?? '',
+      name: (team && nationalTeamName(team)) ?? team?.internationalName ?? '',
       code: team?.teamCode?.toLowerCase() ?? '',
       logo: team?.logoUrl,
     },

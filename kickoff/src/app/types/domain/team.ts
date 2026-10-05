@@ -9,7 +9,8 @@ export interface TeamInfo {
   logo: string;
   /**
    * Home country of the club. Only meaningful for multi-nation competitions
-   * (Champions League); single-country leagues leave it undefined.
+   * (Champions League); single-country leagues and national teams (Nations
+   * League) leave it undefined.
    */
   country?: TeamCountry;
 }
