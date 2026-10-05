@@ -4,12 +4,25 @@ import type { MatchInfo } from '@/app/types/domain/match';
 type MetaTag = { label: string; title: string };
 
 /**
- * Qualifiers that apply to a match, as one line: "Semifinal · 2:2". The
- * shorthand labels carry a spelled-out title for hover and screen readers.
- * Renders nothing for an ordinary one-off league match.
+ * Qualifiers that apply to a match, as one line: "Semifinal · 2:2" or
+ * "Grupp A2". The shorthand labels carry a spelled-out title for hover and
+ * screen readers. Renders nothing for an ordinary one-off league match.
  */
-export function MatchMetaRow({ match }: { match: MatchInfo }) {
+export function MatchMetaRow({
+  match,
+  showGroup = true,
+}: {
+  match: MatchInfo;
+  /** Off where the group is given by context, e.g. a team's own matches. */
+  showGroup?: boolean;
+}) {
   const tags: MetaTag[] = [];
+  if (showGroup && match.groupLabel) {
+    tags.push({
+      label: match.groupLabel,
+      title: `Nations League, ${match.groupLabel}`,
+    });
+  }
   if (match.qualifying) tags.push({ label: 'Kval', title: 'Kvalmatch' });
   if (match.knockout && match.roundLabel) {
     tags.push({ label: match.roundLabel, title: match.roundLabel });

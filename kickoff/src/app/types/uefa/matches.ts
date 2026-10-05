@@ -74,6 +74,16 @@ export interface UefaMatch {
     metaData?: { name?: string; type?: string };
     mode?: string;
   };
+  /**
+   * Nations League: the group the match belongs to ("Group A2"), within its
+   * league tier ("League A").
+   */
+  group?: {
+    metaData?: { groupName?: string; groupShortName?: string };
+    league?: {
+      metaData?: { leagueName?: string; leagueShortName?: string };
+    };
+  };
   stadium?: {
     id?: string;
     translations?: { officialName?: UefaTranslations };

@@ -107,6 +107,7 @@ export default async function TeamPage({
               perspective={team.code}
               league={league}
               season={season}
+              showGroup={false}
             />
           </section>
           <section>
@@ -118,6 +119,7 @@ export default async function TeamPage({
               perspective={team.code}
               league={league}
               season={season}
+              showGroup={false}
             />
           </section>
         </div>

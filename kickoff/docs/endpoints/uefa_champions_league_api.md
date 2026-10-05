@@ -111,6 +111,7 @@ Returns an **array of match objects**. A `status` of `UPCOMING` / `LIVE` / `FINI
 - **Fixture vs result:** `status` (`UPCOMING`/`LIVE`/`FINISHED`), `kickOffTime.dateTime`, `fullTimeAt`.
 - **Result:** `score.regular` / `score.penalty` / `score.total`, plus `winner.match.reason` (`WIN_REGULAR`, `WIN_ON_PENALTIES`, `WIN_ON_EXTRA_TIME`, `DRAW`, …).
 - **Round/stage:** `round.metaData.name` (`Final`, `Semi-finals`, `League phase`…), `matchday.name`.
+- **Nations League group / tier:** each match carries `group.metaData.groupName` (`Group A2`, short `GrpA2`) and, nested, its tier `group.league.metaData.leagueName` (`League A`, short `LA`; localized names in `group.league.translations`). The group is mapped to `MatchInfo.groupLabel` ("Grupp A2") and shown as a tag in the match meta row. Verified in a captured 2026/27 sample.
 - **Goals in‑line:** `playerEvents.scorers[]` and `playerEvents.penaltyScorers[]` (with player, team, minute).
 - Every team & player object carries ready‑made image URLs (see §5).
 

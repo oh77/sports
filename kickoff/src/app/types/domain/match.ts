@@ -50,6 +50,12 @@ export interface MatchInfo {
   qualifying?: boolean;
   /** Cup competitions: the match is the final (decides the champion). */
   isFinal?: boolean;
+  /**
+   * Nations League: the group the match is played in, as a display label
+   * ("Grupp A2" — the letter is the league tier). Filled from the UEFA feed;
+   * absent elsewhere.
+   */
+  groupLabel?: string;
 }
 
 export interface MatchesData {

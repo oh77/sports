@@ -45,6 +45,11 @@ type Props = {
    * kick-off time — for lists that carry no date headings of their own.
    */
   dateInsteadOfTime?: boolean;
+  /**
+   * Tag each match with its group (Nations League). Off for lists about one
+   * team or one pairing, where the group is the same row after row.
+   */
+  showGroup?: boolean;
 };
 
 /**
@@ -61,6 +66,7 @@ export function MatchList({
   league,
   season,
   dateInsteadOfTime = false,
+  showGroup = true,
 }: Props) {
   if (matches.length === 0) {
     return <p className="py-6 text-center text-sm text-mute">Inga matcher.</p>;
@@ -75,6 +81,7 @@ export function MatchList({
         perspective={perspective}
         season={season}
         dateInsteadOfTime={dateInsteadOfTime}
+        showGroup={showGroup}
       />
     </li>
   );
@@ -120,6 +127,7 @@ function MatchRow({
   perspective,
   season,
   dateInsteadOfTime,
+  showGroup,
 }: {
   match: MatchInfo;
   /** Which league's pages the row links into. */
@@ -129,6 +137,7 @@ function MatchRow({
   perspective?: string;
   season?: string;
   dateInsteadOfTime?: boolean;
+  showGroup?: boolean;
 }) {
   const { homeTeamInfo, awayTeamInfo, state } = match;
 
@@ -166,6 +175,7 @@ function MatchRow({
             outcome={outcome}
             inlineAggregate
             dateInsteadOfTime={dateInsteadOfTime}
+            showGroup={showGroup}
           />
         </div>
         {state === 'live' && <LiveTag />}
@@ -200,7 +210,11 @@ function MatchRow({
       />
 
       {/* Score / kickoff */}
-      <MatchCenter match={match} dateInsteadOfTime={dateInsteadOfTime} />
+      <MatchCenter
+        match={match}
+        dateInsteadOfTime={dateInsteadOfTime}
+        showGroup={showGroup}
+      />
 
       {/* Away */}
       <TeamCell
@@ -342,6 +356,7 @@ function MatchCenter({
   outcome,
   inlineAggregate = false,
   dateInsteadOfTime = false,
+  showGroup = true,
 }: {
   match: MatchInfo;
   showStatusTag?: boolean;
@@ -354,6 +369,7 @@ function MatchCenter({
   inlineAggregate?: boolean;
   /** Short date instead of kick-off time for upcoming matches. */
   dateInsteadOfTime?: boolean;
+  showGroup?: boolean;
 }) {
   const { homeTeamInfo, awayTeamInfo, state } = match;
   const aggregate = <AggregateLine match={match} />;
@@ -369,7 +385,7 @@ function MatchCenter({
           </span>
           {inlineAggregate && aggregate}
         </span>
-        <MatchMetaRow match={match} />
+        <MatchMetaRow match={match} showGroup={showGroup} />
         {!inlineAggregate && aggregate}
       </span>
     );
@@ -405,7 +421,7 @@ function MatchCenter({
           Slut
         </span>
       )}
-      <MatchMetaRow match={match} />
+      <MatchMetaRow match={match} showGroup={showGroup} />
       {!inlineAggregate && aggregate}
       {hasPenalties && (
         <span className="num text-[11px] text-dim" title="Straffar">

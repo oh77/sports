@@ -178,7 +178,14 @@ function runningTieTotals(matches: UefaMatch[]): Map<string, UefaScorePair> {
   return totals;
 }
 
-export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
+/**
+ * `groups`: label each match with its Nations League group. Off for the club
+ * competitions, whose league-phase matches carry no group of their own.
+ */
+export function clMatchesToDomain(
+  matches: UefaMatch[],
+  { groups = false }: { groups?: boolean } = {},
+): MatchesData {
   const runningTotals = runningTieTotals(matches);
   const domainMatches: MatchInfo[] = matches
     // Knockout fixtures without decided participants can't be rendered yet.
@@ -213,6 +220,9 @@ export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
       // `round.mode` is the machine-readable round identifier; the display
       // name is localizable, so the mode is what we key the final off.
       const isFinal = m.round?.mode === 'FINAL';
+      const group = groups
+        ? groupLabel(m.group?.metaData?.groupName)
+        : undefined;
 
       return {
         uuid: m.id,
@@ -241,6 +251,7 @@ export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
         ...(penalties ? { penalties } : {}),
         ...(qualifying ? { qualifying } : {}),
         ...(isFinal ? { isFinal } : {}),
+        ...(group ? { groupLabel: group } : {}),
       };
     });
 
@@ -249,6 +260,17 @@ export function clMatchesToDomain(matches: UefaMatch[]): MatchesData {
       a.startDateTime.localeCompare(b.startDateTime),
     ),
   };
+}
+
+/**
+ * Swedish label for a Nations League group: "Group A2" → "Grupp A2". Anything
+ * not shaped like that passes through as given.
+ */
+function groupLabel(groupName: string | undefined): string | undefined {
+  const name = groupName?.trim();
+  if (!name) return undefined;
+  const id = /^group\s+(\S+)$/i.exec(name)?.[1];
+  return id ? `Grupp ${id}` : name;
 }
 
 /**

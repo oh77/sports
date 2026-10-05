@@ -112,6 +112,7 @@ export default async function MatchupPage({
               league={league}
               season={season}
               headingLevel="h3"
+              showGroup={false}
             />
           </section>
         )}
@@ -238,6 +239,7 @@ function TeamColumn({
           league={league}
           season={season}
           showDateHeadings={false}
+          showGroup={false}
         />
       </div>
 
@@ -252,6 +254,7 @@ function TeamColumn({
           season={season}
           showDateHeadings={false}
           dateInsteadOfTime
+          showGroup={false}
         />
       </div>
     </section>

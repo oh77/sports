@@ -137,6 +137,8 @@ export async function getMatches(
       uefaCompetitionId(league),
       uefaSeasonYear(league, seasonKey),
     ),
+    // Only Nations League matches are labelled with their group (Grupp A2).
+    { groups: league === 'nl' },
   );
 }
 
