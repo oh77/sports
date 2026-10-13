@@ -14,6 +14,7 @@ export const UCL_COMPETITION_ID = '1';
 export const UEL_COMPETITION_ID = '14';
 export const UECL_COMPETITION_ID = '2019';
 export const UNL_COMPETITION_ID = '2014';
+export const UWEQ_COMPETITION_ID = '39';
 
 /**
  * player-ranking `stats` codes per stats view. One request returns every

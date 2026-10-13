@@ -36,7 +36,8 @@ export function seasonChampion(
     league === 'cl' ||
     league === 'el' ||
     league === 'col' ||
-    league === 'nl'
+    league === 'nl' ||
+    league === 'weq'
   ) {
     // The champion is the winner of the final — the last tournament match of
     // the season. The official UEFA site reads it from the tournament matches

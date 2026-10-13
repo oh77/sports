@@ -33,6 +33,7 @@ export const leagueAccent: Record<League, string> = {
   el: '#f97316', // Europa League orange
   col: '#34d399', // Conference League green
   nl: '#22d3ee', // Nations League cyan
+  weq: '#f472b6', // Women's European Qualifiers pink
 };
 
 /**
@@ -79,6 +80,11 @@ export const leagueMeta: Record<
     name: 'Nations League',
     short: 'UNL',
     logo: 'https://img.uefa.com/imgml/uefacom/elements/logos/competitions/color/full/2014.svg',
+  },
+  weq: {
+    name: 'VM-kval (dam)',
+    short: 'VMK',
+    logo: 'https://img.uefa.com/imgml/uefacom/elements/logos/competitions/color/full/39.svg',
   },
 };
 

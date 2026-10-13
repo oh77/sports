@@ -113,6 +113,16 @@ const FIXTURE_TEAMS: Record<League, TeamInfo[]> = {
     team('wal', 'WAL', 'Wales'),
     team('sco', 'SCO', 'Skottland'),
   ],
+  weq: [
+    team('swe', 'SWE', 'Sverige'),
+    team('ned', 'NED', 'Nederländerna'),
+    team('ita', 'ITA', 'Italien'),
+    team('irl', 'IRL', 'Irland'),
+    team('den', 'DEN', 'Danmark'),
+    team('esp', 'ESP', 'Spanien'),
+    team('bel', 'BEL', 'Belgien'),
+    team('cze', 'CZE', 'Tjeckien'),
+  ],
 };
 
 export function fixtureTeams(league: League): TeamInfo[] {
@@ -344,6 +354,18 @@ const PLAYER_NAMES: Record<League, string[]> = {
     'Jesper Halldén',
     'Tor Aasheim',
   ],
+  weq: [
+    'Elin Strandberg',
+    'Fenna de Wit',
+    'Giulia Moretti',
+    'Aoife Brennan',
+    'Signe Holm',
+    'Lucía Ortega',
+    'Lotte Peeters',
+    'Tereza Králová',
+    'Hanna Lindqvist',
+    'Ida Kjeldsen',
+  ],
 };
 
 const NATIONALITY: Record<League, string> = {
@@ -354,6 +376,7 @@ const NATIONALITY: Record<League, string> = {
   el: 'ITA',
   col: 'ITA',
   nl: 'SWE',
+  weq: 'SWE',
 };
 
 function fixturePlayer(
@@ -454,6 +477,13 @@ const KEEPER_NAMES: Record<League, string[]> = {
     'Sindre Mykland',
     'Joonas Heikura',
     'Aron Halldórsson',
+  ],
+  weq: [
+    'Maja Ekdahl',
+    'Sanne Visser',
+    'Chiara Ferri',
+    'Niamh Gallagher',
+    'Freja Mortensen',
   ],
 };
 

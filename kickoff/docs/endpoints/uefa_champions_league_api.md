@@ -13,6 +13,7 @@ Captured live on **2026‑07‑08**. All examples use the **2025/26 season** (`s
 | UEFA Europa League | `14` |
 | UEFA Europa Conference League | `2019` |
 | UEFA Nations League | `2014` |
+| Women's European Qualifiers | `39` |
 
 `seasonYear` is the year the season **ends** (2025/26 → `2026`).
 
@@ -21,6 +22,10 @@ Captured live on **2026‑07‑08**. All examples use the **2025/26 season** (`s
 > The **Nations League** (`nl` league, `competitionId=2014`) is wired for **matches only** — standings and player stats are not integrated yet. Verified request for the 2026/27 edition (`seasonYear=2027`):
 > `https://match.uefa.com/v5/matches?competitionId=2014&fromDate=2026-09-24&limit=50&offset=0&order=ASC&phase=ALL&seasonYear=2027&toDate=2026-09-24&utcOffset=2`
 > The app pages the full season with the same query as the other competitions (no `fromDate`/`toDate`).
+>
+> The **Women's European Qualifiers** (`weq` league, "VM-kval (dam)", `competitionId=39`) are wired for **matches only**, like the Nations League. The whole competition is `phase=QUALIFYING`; `seasonYear` is the World Cup year. Verified request for the 2027 edition:
+> `https://match.uefa.com/v5/matches?competitionId=39&fromDate=2026-10-13&limit=50&offset=0&order=ASC&phase=QUALIFYING&seasonYear=2027&toDate=2026-10-13&utcOffset=2`
+> The app pages the full season with `phase=ALL`. No response sample captured yet — the shape is assumed to match the other competitions.
 
 ## Host quick‑reference
 

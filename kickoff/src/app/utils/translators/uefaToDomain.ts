@@ -207,12 +207,17 @@ function runningTieTotals(matches: UefaMatch[]): Map<string, UefaScorePair> {
 }
 
 /**
- * `groups`: label each match with its Nations League group. Off for the club
- * competitions, whose league-phase matches carry no group of their own.
+ * `groups`: label each match with its group (Nations League, women's
+ * qualifiers). Off for the club competitions, whose league-phase matches carry
+ * no group of their own. `tagQualifying`: flag qualifying-phase matches; off
+ * for competitions that are qualifiers throughout.
  */
 export function clMatchesToDomain(
   matches: UefaMatch[],
-  { groups = false }: { groups?: boolean } = {},
+  {
+    groups = false,
+    tagQualifying = true,
+  }: { groups?: boolean; tagQualifying?: boolean } = {},
 ): MatchesData {
   const runningTotals = runningTieTotals(matches);
   const domainMatches: MatchInfo[] = matches
@@ -243,8 +248,9 @@ export function clMatchesToDomain(
       const label = roundLabel(m);
       const knockout = knockoutRound(m) !== undefined;
       const qualifying =
-        m.competitionPhase === 'QUALIFYING' ||
-        m.matchday?.phase === 'QUALIFYING';
+        tagQualifying &&
+        (m.competitionPhase === 'QUALIFYING' ||
+          m.matchday?.phase === 'QUALIFYING');
       // `round.mode` is the machine-readable round identifier; the display
       // name is localizable, so the mode is what we key the final off.
       const isFinal = m.round?.mode === 'FINAL';
@@ -291,7 +297,7 @@ export function clMatchesToDomain(
 }
 
 /**
- * Swedish label for a Nations League group: "Group A2" → "Grupp A2". Anything
+ * Swedish label for a national-team group: "Group A2" → "Grupp A2". Anything
  * not shaped like that passes through as given.
  */
 function groupLabel(groupName: string | undefined): string | undefined {

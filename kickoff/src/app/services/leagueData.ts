@@ -10,6 +10,7 @@ import {
   UEFA_RANKING_STATS,
   UEL_COMPETITION_ID,
   UNL_COMPETITION_ID,
+  UWEQ_COMPETITION_ID,
 } from '@/app/config/uefa';
 import type { KeeperStatsData } from '@/app/types/domain/keeper-stats';
 import type { League } from '@/app/types/domain/league';
@@ -107,9 +108,10 @@ function uefaSeasonYear(league: League, seasonKey?: string | null): string {
 
 /**
  * UEFA competition id for a UEFA league (Champions/Europa/Conference/Nations
- * League).
+ * League, Women's European Qualifiers).
  */
 function uefaCompetitionId(league: League): string {
+  if (league === 'weq') return UWEQ_COMPETITION_ID;
   if (league === 'nl') return UNL_COMPETITION_ID;
   if (league === 'col') return UECL_COMPETITION_ID;
   if (league === 'el') return UEL_COMPETITION_ID;
@@ -137,8 +139,13 @@ export async function getMatches(
       uefaCompetitionId(league),
       uefaSeasonYear(league, seasonKey),
     ),
-    // Only Nations League matches are labelled with their group (Grupp A2).
-    { groups: league === 'nl' },
+    // Only the national-team competitions label matches with their group
+    // (Grupp A2). The women's qualifiers are all qualifying, so a "Kval" tag
+    // on every match would say nothing.
+    {
+      groups: league === 'nl' || league === 'weq',
+      tagQualifying: league !== 'weq',
+    },
   );
 }
 
@@ -172,8 +179,9 @@ export async function getStandings(
     fetchClMatches(competitionId, year),
   ]);
   // UEFA supplies no form; derive it from the schedule. Zones follow the
-  // club competitions' format, so matches-only leagues (the Nations League,
-  // with promotion/relegation between leagues) get none.
+  // club competitions' format, so matches-only leagues (the Nations League
+  // and the women's qualifiers, with promotion/relegation between leagues)
+  // get none.
   return clStandingsToDomain(groups, clMatchesToDomain(matches), {
     zones: hasStandingsAndStats(league),
   });

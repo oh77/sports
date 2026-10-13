@@ -20,7 +20,7 @@ export function MatchMetaRow({
   if (showGroup && match.groupLabel) {
     tags.push({
       label: match.groupLabel,
-      title: `Nations League, ${match.groupLabel}`,
+      title: match.groupLabel,
     });
   }
   if (match.qualifying) tags.push({ label: 'Kval', title: 'Kvalmatch' });

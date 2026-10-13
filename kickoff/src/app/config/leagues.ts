@@ -8,6 +8,7 @@ export const ALL_LEAGUES: League[] = [
   'el',
   'col',
   'nl',
+  'weq',
 ];
 
 export function isLeague(value: string): value is League {
@@ -20,7 +21,7 @@ export function isLeague(value: string): value is League {
  * team and matchup pages may still show a table excerpt from
  * `getStandings`, which callers there already treat as optional.
  */
-const MATCHES_ONLY_LEAGUES: League[] = ['nl'];
+const MATCHES_ONLY_LEAGUES: League[] = ['nl', 'weq'];
 
 /** True if the league has standings and player stats (not matches only). */
 export function hasStandingsAndStats(league: League): boolean {
@@ -93,6 +94,10 @@ export const LEAGUE_SEASONS: Record<League, SeasonConfig[]> = {
   // Nations League editions run every other season on the same UEFA API
   // (seasonYear = end year). Only the 2026/27 edition is verified so far.
   nl: [{ key: '26-27', externalId: '2027' }],
+  // Women's European Qualifiers (for the 2027 Women's World Cup) on the same
+  // UEFA API. The whole competition is the qualifying phase; seasonYear is
+  // the tournament year. Only the 2027 edition is verified.
+  weq: [{ key: '26-27', externalId: '2027' }],
 };
 
 /**

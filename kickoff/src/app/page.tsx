@@ -125,7 +125,8 @@ export default async function Home() {
         </h1>
         <p className="mt-2 max-w-xl text-soft">
           Spelscheman, tabeller och statistik för Allsvenskan, Premier League,
-          Champions League, Europa League, Conference League och Nations League.
+          Champions League, Europa League, Conference League, Nations League och
+          VM-kval (dam).
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

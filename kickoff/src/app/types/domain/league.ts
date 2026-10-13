@@ -5,4 +5,5 @@ export type League =
   | 'cl'
   | 'el'
   | 'col'
-  | 'nl';
+  | 'nl'
+  | 'weq';
