@@ -6,8 +6,7 @@ import { MatchupTeams } from '@/app/components/matchup-teams';
 import GameStatsContainer from '../../../../../components/gamestats-container';
 import NextGame from '../../../../../components/next-game';
 import { CompactStandings } from '../../../../../components/standings/compact-standings';
-import { TopGoalie } from '../../../../../components/top-goalie';
-import { TopPlayer } from '../../../../../components/top-player';
+import { TopPlayers } from '../../../../../components/top-players';
 import type {
   GameInfo,
   LeagueResponse,
@@ -241,33 +240,11 @@ export default function TeamPage({
         )}
 
         {/* Top Scorers and Goalies for Both Teams */}
-        <div className="max-w-6xl mx-auto mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Team 1 */}
-            <div>
-              <div className="grid grid-cols-1 gap-6">
-                <div>
-                  <TopPlayer league="chl" teamCode={teamCode} />
-                </div>
-                <div>
-                  <TopGoalie league="chl" teamCode={teamCode} />
-                </div>
-              </div>
-            </div>
-
-            {/* Team 2 */}
-            <div>
-              <div className="grid grid-cols-1 gap-6">
-                <div>
-                  <TopPlayer league="chl" teamCode={opponentTeamCode} />
-                </div>
-                <div>
-                  <TopGoalie league="chl" teamCode={opponentTeamCode} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <TopPlayers
+          teamCode1={teamCode}
+          teamCode2={opponentTeamCode}
+          league="chl"
+        />
 
         {/* Compact Standings */}
         {standings && (

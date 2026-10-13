@@ -255,9 +255,18 @@ function LeagueStatsContent({ league, nationalityFilters }: LeagueStatsProps) {
                         secondaryValue={`${pair.goalsAgainstAverage.toFixed(2)} GAA`}
                         rank={index + 1}
                         nationality=""
-                        club={pair.goalies
-                          .map((g) => `${g.info.fullName} (${g.GP})`)
-                          .join(' · ')}
+                        club={pair.goalies.map((g, i) => (
+                          <span key={g.info.uuid}>
+                            {i > 0 && ' · '}
+                            {/* First names only where there is room */}
+                            {g.info.firstName && (
+                              <span className="hidden md:inline">
+                                {g.info.firstName}{' '}
+                              </span>
+                            )}
+                            {g.info.lastName} ({g.GP})
+                          </span>
+                        ))}
                       />
                     );
                   })}

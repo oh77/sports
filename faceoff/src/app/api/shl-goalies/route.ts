@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import {
-  fetchStatnet,
   FULL_GOALIE_COUNT,
+  fetchStatnet,
   getSeasonParam,
   wantsFullList,
 } from '../../utils/statnetSource';
@@ -12,7 +12,8 @@ export async function GET(request: Request) {
     const teamCode = new URL(request.url).searchParams.get('teamCode');
     const raw = await fetchStatnet('shl', 'goalies', {
       season: getSeasonParam(request),
-      count: wantsFullList(request) ? FULL_GOALIE_COUNT : undefined,
+      // A team filter needs the whole leaderboard, not just the league's top.
+      count: teamCode || wantsFullList(request) ? FULL_GOALIE_COUNT : undefined,
     });
     return NextResponse.json(transformGoalies(raw, teamCode));
   } catch (error) {

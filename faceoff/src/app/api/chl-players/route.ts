@@ -34,17 +34,9 @@ export async function GET(request: Request) {
 
         // Transform CHL data to domain model
         // Data is already sorted by points (P), so we assign ranks based on position
-        let domainStats = data.data.map((player, index) =>
+        const domainStats = data.data.map((player, index) =>
           translateCHLPlayerStatsToDomain(player, index + 1),
         );
-
-        // Filter by team if teamCode is provided
-        if (teamCode) {
-          domainStats = domainStats.filter(
-            (player) =>
-              player.info.team.code.toLowerCase() === teamCode.toLowerCase(),
-          );
-        }
 
         const dataColumns = [
           {
@@ -76,6 +68,17 @@ export async function GET(request: Request) {
         };
       },
     );
+
+    // Filter outside the cached loader: the cache key is per season, not team.
+    if (teamCode) {
+      return NextResponse.json({
+        ...domainData,
+        stats: domainData.stats.filter(
+          (player) =>
+            player.info.team.code.toLowerCase() === teamCode.toLowerCase(),
+        ),
+      });
+    }
 
     return NextResponse.json(domainData);
   } catch (error) {

@@ -7,8 +7,7 @@ import { MatchupTeams } from '@/app/components/matchup-teams';
 import NextGame from '@/app/components/next-game';
 import { CompactStandings } from '@/app/components/standings/compact-standings';
 import { TeamPageError, TeamPageLoading } from '@/app/components/team-overview';
-import { TopGoalie } from '@/app/components/top-goalie';
-import { TopPlayer } from '@/app/components/top-player';
+import { TopPlayers } from '@/app/components/top-players';
 import { NHL_TEAMS } from '@/app/config/nhlTeams';
 import type { GameInfo } from '@/app/types/domain/game';
 import type { StandingsData } from '@/app/types/domain/standings';
@@ -126,17 +125,8 @@ export default function NhlMatchupPage({
           </div>
         )}
 
-        {/* Top scorer + goalie per club, home team first */}
-        <div className="max-w-6xl mx-auto mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[home, away].map((club) => (
-              <div key={club.code} className="grid grid-cols-1 gap-6">
-                <TopPlayer league="nhl" teamCode={club.code} />
-                <TopGoalie league="nhl" teamCode={club.code} />
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Top scorers + goalies per club, home team first */}
+        <TopPlayers teamCode1={home.code} teamCode2={away.code} league="nhl" />
 
         {table && (
           <div className="max-w-6xl mx-auto mb-8">

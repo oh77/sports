@@ -30,12 +30,13 @@ function currentTeam(value: string): string {
 /**
  * Ice time behind a goalie's numbers, in minutes.
  *
- * The feeds carry no time on ice, but GAA is goals against per 60 minutes, so
- * it inverts back to the minutes played. A goalie who has yet to concede (or
- * whose GAA is missing) leaves nothing to invert, so his games are counted as
- * full ones instead.
+ * Statnet reports it directly (`MIP`). Elsewhere it is estimated: GAA is
+ * goals against per 60 minutes, so it inverts back to the minutes played. A
+ * goalie who has yet to concede (or whose GAA is missing) leaves nothing to
+ * invert, so his games are counted as full ones instead.
  */
 function estimatedMinutes(goalie: GoalieStats): number {
+  if (goalie.minutes != null) return goalie.minutes;
   const gaa = Number(goalie.GAA);
   if (goalie.GA > 0 && Number.isFinite(gaa) && gaa > 0) {
     return (goalie.GA / gaa) * 60;

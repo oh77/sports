@@ -2,85 +2,62 @@
 
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { withSeason } from '@/app/utils/leaguePaths';
+import {
+  fetchTeamScorers,
+  SCORERS_PER_TEAM,
+} from '@/app/components/top-players/teamLeaders';
 import { useSeason } from '@/app/utils/useSeason';
-import type {
-  PlayerStats,
-  PlayerStatsData,
-} from '../../types/domain/player-stats';
+import type { PlayerStats } from '../../types/domain/player-stats';
 import { PlayerCard } from '../player-card';
+import { LeadersLoading, LeadersSection } from './leaders-section';
 
 interface TopPlayerProps {
   league: string;
-  teamCode?: string;
+  teamCode: string;
+  /** How many of the team's scorers to list. */
+  count?: number;
 }
 
-export const TopPlayer: React.FC<TopPlayerProps> = ({ league, teamCode }) => {
+/** A team's top scorers by points, under a "Poängliga" heading. */
+export const TopPlayer: React.FC<TopPlayerProps> = ({
+  league,
+  teamCode,
+  count = SCORERS_PER_TEAM,
+}) => {
   const season = useSeason();
-  const [topPlayer, setTopPlayer] = useState<PlayerStats | null>(null);
+  const [players, setPlayers] = useState<PlayerStats[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTopPlayer = async () => {
-      try {
-        setLoading(true);
-
-        const url = teamCode
-          ? `/api/${league}-players?teamCode=${encodeURIComponent(teamCode)}`
-          : `/api/${league}-players`;
-        const response = await fetch(withSeason(url, season));
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch player data');
-        }
-
-        const data: PlayerStatsData = await response.json();
-
-        // Get top player (already sorted by points, rank applies)
-        const top = data.stats && data.stats.length > 0 ? data.stats[0] : null;
-        setTopPlayer(top);
-      } catch (err) {
-        // Player stats may be unavailable (e.g. early in a new season). Log for
-        // diagnostics but stay silent for the user — the section just collapses.
-        // Use console.warn (not error) so it doesn't trip the Next.js dev
-        // error overlay.
-        console.warn('Error fetching top player:', err);
-        setTopPlayer(null);
-      } finally {
-        setLoading(false);
-      }
+    let active = true;
+    setLoading(true);
+    fetchTeamScorers(league, season, teamCode, count).then((top) => {
+      if (!active) return;
+      setPlayers(top);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
     };
+  }, [league, teamCode, season, count]);
 
-    fetchTopPlayer();
-  }, [league, teamCode, season]);
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-300 rounded mb-4"></div>
-          <div className="h-20 bg-gray-300 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!topPlayer) {
-    return null;
-  }
+  if (loading) return <LeadersLoading rows={count} />;
+  if (players.length === 0) return null;
 
   return (
-    <div className="space-y-4">
-      <PlayerCard
-        key={topPlayer.info.uuid}
-        playerName={topPlayer.info.fullName}
-        playerNumber={topPlayer.info.number}
-        primaryValue={`${topPlayer.TP} p`}
-        secondaryValue={`${topPlayer.G} + ${topPlayer.A}`}
-        rank={topPlayer.Rank}
-        nationality={topPlayer.info.nationality}
-        club={topPlayer.info.team.name}
-      />
-    </div>
+    <LeadersSection title="Poängliga">
+      {players.map((player) => (
+        <PlayerCard
+          bare
+          key={player.info.uuid}
+          playerName={player.info.fullName}
+          playerNumber={player.info.number}
+          primaryValue={`${player.TP} p`}
+          secondaryValue={`${player.G} + ${player.A}`}
+          rank={player.Rank}
+          nationality={player.info.nationality}
+        />
+      ))}
+    </LeadersSection>
   );
 };

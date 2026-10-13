@@ -32,6 +32,13 @@ type FetchOptions = {
  */
 export const FULL_GOALIE_COUNT = 100;
 
+/**
+ * Result count that pulls the whole scoring leaderboard. A team filter needs
+ * it: the default top slice leaves out every player of a club with no one
+ * among the league's top scorers.
+ */
+export const FULL_PLAYER_COUNT = 1000;
+
 /** True when the request asks for a full leaderboard (`?full=1`). */
 export function wantsFullList(request: Request): boolean {
   return new URL(request.url).searchParams.get('full') !== null;

@@ -2,83 +2,65 @@
 
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { withSeason } from '@/app/utils/leaguePaths';
+import {
+  LeadersLoading,
+  LeadersSection,
+} from '@/app/components/top-player/leaders-section';
+import {
+  fetchTeamGoalies,
+  GOALIES_PER_TEAM,
+} from '@/app/components/top-players/teamLeaders';
 import { useSeason } from '@/app/utils/useSeason';
-import type {
-  GoalieStats,
-  GoalieStatsData,
-} from '../../types/domain/goalie-stats';
+import type { GoalieStats } from '../../types/domain/goalie-stats';
 import { PlayerCard } from '../player-card';
 
 interface TopGoalieProps {
   league: string;
-  teamCode?: string;
+  teamCode: string;
+  /** How many of the team's goalies to list. */
+  count?: number;
 }
 
-export const TopGoalie: React.FC<TopGoalieProps> = ({ league, teamCode }) => {
+/** A team's most-used goalies, under a "Målvakter" heading. */
+export const TopGoalie: React.FC<TopGoalieProps> = ({
+  league,
+  teamCode,
+  count = GOALIES_PER_TEAM,
+}) => {
   const season = useSeason();
-  const [topGoalie, setTopGoalie] = useState<GoalieStats | null>(null);
+  const [goalies, setGoalies] = useState<GoalieStats[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTopGoalie = async () => {
-      try {
-        setLoading(true);
-
-        const url = teamCode
-          ? `/api/${league}-goalies?teamCode=${encodeURIComponent(teamCode)}`
-          : `/api/${league}-goalies`;
-        const response = await fetch(withSeason(url, season));
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch goalie data');
-        }
-
-        const data: GoalieStatsData = await response.json();
-
-        // Get top goalie (already sorted by SVS%, rank applies)
-        const top = data.stats && data.stats.length > 0 ? data.stats[0] : null;
-        setTopGoalie(top);
-      } catch (err) {
-        // Goalie stats may be unavailable (e.g. early in a new season). Warn for
-        // diagnostics but stay silent for the user — the section collapses.
-        console.warn('Error fetching top goalie:', err);
-        setTopGoalie(null);
-      } finally {
-        setLoading(false);
-      }
+    let active = true;
+    setLoading(true);
+    fetchTeamGoalies(league, season, teamCode, count).then((top) => {
+      if (!active) return;
+      setGoalies(top);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
     };
+  }, [league, teamCode, season, count]);
 
-    fetchTopGoalie();
-  }, [league, teamCode, season]);
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-300 rounded mb-4"></div>
-          <div className="h-20 bg-gray-300 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!topGoalie) {
-    return null;
-  }
+  if (loading) return <LeadersLoading rows={count} />;
+  if (goalies.length === 0) return null;
 
   return (
-    <div className="space-y-4">
-      <PlayerCard
-        key={topGoalie.info.uuid}
-        playerName={topGoalie.info.fullName}
-        playerNumber={topGoalie.info.number}
-        primaryValue={`${topGoalie.SVSPerc} %`}
-        secondaryValue={topGoalie.GAA}
-        rank={topGoalie.Rank}
-        nationality={topGoalie.info.nationality}
-        club={topGoalie.info.team.name}
-      />
-    </div>
+    <LeadersSection title="Målvakter">
+      {goalies.map((goalie) => (
+        <PlayerCard
+          bare
+          key={goalie.info.uuid}
+          playerName={goalie.info.fullName}
+          playerNumber={goalie.info.number}
+          primaryValue={`${goalie.SVSPerc} %`}
+          secondaryValue={goalie.GAA}
+          rank={goalie.Rank}
+          nationality={goalie.info.nationality}
+        />
+      ))}
+    </LeadersSection>
   );
 };

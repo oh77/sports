@@ -34,17 +34,9 @@ export async function GET(request: Request) {
 
         // Transform CHL data to domain model
         // Data is already sorted by SVS%, so we assign ranks based on position
-        let domainStats = data.data.map((goalie, index) =>
+        const domainStats = data.data.map((goalie, index) =>
           translateCHLGoalieStatsToDomain(goalie, index + 1),
         );
-
-        // Filter by team if teamCode is provided
-        if (teamCode) {
-          domainStats = domainStats.filter(
-            (goalie) =>
-              goalie.info.team.code.toLowerCase() === teamCode.toLowerCase(),
-          );
-        }
 
         const dataColumns = [
           {
@@ -83,6 +75,17 @@ export async function GET(request: Request) {
         };
       },
     );
+
+    // Filter outside the cached loader: the cache key is per season, not team.
+    if (teamCode) {
+      return NextResponse.json({
+        ...domainData,
+        stats: domainData.stats.filter(
+          (goalie) =>
+            goalie.info.team.code.toLowerCase() === teamCode.toLowerCase(),
+        ),
+      });
+    }
 
     return NextResponse.json(domainData);
   } catch (error) {

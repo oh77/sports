@@ -39,7 +39,7 @@ interface TeamOverviewProps {
 }
 
 /**
- * A team on its own: form, top scorer and goalie, its place in the table and
+ * A team on its own: form, top scorers and goalies, its place in the table and
  * its last and next games. Opponents only appear as rows in the lists.
  */
 export const TeamOverview: React.FC<TeamOverviewProps> = ({

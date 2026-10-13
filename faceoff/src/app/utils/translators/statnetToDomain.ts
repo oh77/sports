@@ -167,14 +167,32 @@ export function translateStatnetGoalieStatsToDomain(
     Rank: statnetStats.Rank,
     Player: statnetStats.Player,
     Team: statnetStats.Team,
-    GP: statnetStats.GP,
+    // Statnet's GP counts every game the goalie was dressed for, backing up
+    // included; GPI ("spelade matcher med speltid") only those with ice time.
+    GP: Number(statnetStats.GPI ?? statnetStats.GP) || 0,
     SVS: statnetStats.SVS,
     GA: statnetStats.GA,
     SVSPerc: statnetStats.SVSPerc,
     GAA: statnetStats.GAA,
     SO: statnetStats.SO,
+    minutes: parseMinutes(statnetStats.MIP),
     info: translateStatnetGoalieInfoToDomain(statnetStats.info),
   };
+}
+
+/**
+ * "332:27" (minutes:seconds) to minutes. Typed as a string, but checked at
+ * runtime as providers differ: a plain number is taken as minutes, anything
+ * else unreadable yields undefined.
+ */
+function parseMinutes(value: unknown): number | undefined {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined;
+  }
+  if (typeof value !== 'string') return undefined;
+  const match = value.trim().match(/^(\d+):(\d{2})$/);
+  if (!match) return undefined;
+  return Number(match[1]) + Number(match[2]) / 60;
 }
 
 // Helper function to get stat value from CHL properties array

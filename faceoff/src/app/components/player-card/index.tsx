@@ -10,13 +10,27 @@ interface PlayerCardProps {
   secondaryValue: string;
   rank: number | null;
   nationality: string;
-  club?: string;
+  /** Second line under the name; markup allowed (e.g. the goalie pairs). */
+  club?: React.ReactNode;
   /**
    * Club logo, shown in the jersey badge's slot. For rows whose subject is a
    * club rather than a single player (the goalie pairs), where a jersey number
    * would mean nothing.
    */
   logo?: { src: string; alt: string };
+  /**
+   * Narrow layout for two cards side by side on a phone: below `md` it drops
+   * rank and flag, shrinks the number badge, and shows `shortName` instead of
+   * the full name.
+   */
+  compact?: boolean;
+  /** Name for the compact phone layout, e.g. the last name. */
+  shortName?: string;
+  /**
+   * A row inside a shared container rather than a card of its own: no border,
+   * background or rounding.
+   */
+  bare?: boolean;
 }
 
 /**
@@ -61,58 +75,101 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   nationality,
   club,
   logo,
-}) => (
-  <div className="flex items-center gap-3 rounded-lg border border-line bg-surface px-3 py-2.5 transition-colors hover:border-line-strong">
-    {/* Rank with medal accent bar */}
-    <span className="flex w-9 items-center gap-2">
-      <span
-        className="inline-block h-[18px] w-[3px] rounded-sm"
-        style={{ background: rankAccent(rank) }}
-        aria-hidden="true"
-      />
-      {rank != null && (
-        <span className="display num text-base font-bold text-ink">{rank}</span>
-      )}
+  compact = false,
+  shortName,
+  bare = false,
+}) => {
+  // Classes for the parts a compact card hides on phones.
+  const wide = compact ? 'hidden md:inline-flex' : 'inline-flex';
+  const showShort = compact && shortName;
+  // With no club line the name is a single line, so the secondary value moves
+  // to its own line below, keeping number, name and primary value on one row.
+  const stacked = !club;
+  const secondary = (
+    <span className="num block text-right text-xs leading-tight text-dim">
+      {secondaryValue}
     </span>
+  );
 
-    {/* Club logo, or the jersey number badge (hidden when unknown, e.g. an NHL
-        player with no current roster entry) */}
-    {logo ? (
-      <span className="inline-flex h-[26px] w-[34px] items-center justify-center">
-        <Image
-          src={logo.src}
-          alt={logo.alt}
-          width={26}
-          height={26}
-          className="h-[26px] w-[26px] object-contain"
-          unoptimized
-        />
-      </span>
-    ) : (
-      playerNumber > 0 && (
-        <span className="display num inline-flex h-[26px] min-w-[34px] items-center justify-center rounded-md bg-surface-3 px-1.5 text-[13px] font-bold text-soft">
-          #{playerNumber}
+  return (
+    <div
+      className={`py-2.5 ${bare ? '' : 'rounded-lg border border-line bg-surface transition-colors hover:border-line-strong'} ${compact ? 'px-2.5 md:px-3' : 'px-3'}`}
+    >
+      <div
+        className={`flex items-center ${compact ? 'gap-2 md:gap-3' : 'gap-3'}`}
+      >
+        {/* Rank with medal accent bar */}
+        <span className={`${wide} w-9 items-center gap-2`}>
+          <span
+            className="inline-block h-[18px] w-[3px] rounded-sm"
+            style={{ background: rankAccent(rank) }}
+            aria-hidden="true"
+          />
+          {rank != null && (
+            <span className="display num text-base font-bold text-ink">
+              {rank}
+            </span>
+          )}
         </span>
-      )
-    )}
 
-    {/* Name + club */}
-    <div className="min-w-0 flex-1">
-      <h3 className="truncate text-[15px] font-semibold leading-tight text-ink">
-        {playerName}
-      </h3>
-      {club && <p className="truncate text-xs text-dim">{club}</p>}
+        {/* Club logo, or the jersey number badge (hidden when unknown, e.g. an NHL
+        player with no current roster entry) */}
+        {logo ? (
+          <span
+            className={`${wide} h-[26px] w-[34px] items-center justify-center`}
+          >
+            <Image
+              src={logo.src}
+              alt={logo.alt}
+              width={26}
+              height={26}
+              className="h-[26px] w-[26px] object-contain"
+              unoptimized
+            />
+          </span>
+        ) : (
+          playerNumber > 0 && (
+            <span
+              className={`display num inline-flex h-[26px] shrink-0 items-center justify-center rounded-md bg-surface-3 font-bold text-soft ${compact ? 'min-w-[28px] px-1 text-[12px] md:min-w-[34px] md:px-1.5 md:text-[13px]' : 'min-w-[34px] px-1.5 text-[13px]'}`}
+            >
+              #{playerNumber}
+            </span>
+          )
+        )}
+
+        {/* Name + club */}
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-[15px] font-semibold leading-tight text-ink">
+            {showShort ? (
+              <>
+                <span className="md:hidden">{shortName}</span>
+                <span className="hidden md:inline">{playerName}</span>
+              </>
+            ) : (
+              playerName
+            )}
+          </h3>
+          {club && <p className="truncate text-xs text-dim">{club}</p>}
+        </div>
+
+        {/* Nationality flag */}
+        {nationality && (
+          <span className={`${wide} items-center`}>
+            <NationalityFlag nationality={nationality} />
+          </span>
+        )}
+
+        {/* Stats: primary value with the secondary on a second line */}
+        <div className="min-w-[44px] text-right leading-tight">
+          <span
+            className={`display num block font-bold text-ink ${compact ? 'text-base md:text-xl' : 'text-xl'}`}
+          >
+            {primaryValue}
+          </span>
+          {!stacked && secondary}
+        </div>
+      </div>
+      {stacked && secondary}
     </div>
-
-    {/* Nationality flag */}
-    {nationality && <NationalityFlag nationality={nationality} />}
-
-    {/* Stats: primary value with the secondary on a second line */}
-    <div className="min-w-[44px] text-right leading-tight">
-      <span className="display num block text-xl font-bold text-ink">
-        {primaryValue}
-      </span>
-      <span className="num block text-xs text-dim">{secondaryValue}</span>
-    </div>
-  </div>
-);
+  );
+};

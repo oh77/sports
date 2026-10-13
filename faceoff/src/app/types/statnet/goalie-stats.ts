@@ -39,12 +39,16 @@ export interface StatnetGoalieStats {
   Rank: number | null;
   Player: number;
   Team: number;
-  GP: number; // Games Played
+  GP: number; // Games on the roster, played in or not
+  /** Games played in, with ice time. Sent by both SHL (statnet) and SDHL (impleo). */
+  GPI?: number;
   SVS: number; // Saves
   GA: number; // Goals Against
   SVSPerc: string; // Save Percentage (may be SVSper or SVS%)
   GAA: string; // Goals Against Average
   SO: number; // Shutouts
+  /** Minutes in play, "mm:ss" (e.g. "332:27"). */
+  MIP?: string;
   info: StatnetGoalieInfo;
 }
 
