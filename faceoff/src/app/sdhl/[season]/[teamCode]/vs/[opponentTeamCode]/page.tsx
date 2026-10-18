@@ -151,6 +151,9 @@ export default function SDHLTeamPage({
     );
   }
 
+  // Player comparison puts the home team on the left, like the game box.
+  const opponentIsHome = game?.homeTeamInfo.teamInfo.code === opponentTeamCode;
+
   return (
     <main className="relative py-6 md:py-8">
       <div className="container mx-auto px-4 relative z-10">
@@ -181,10 +184,10 @@ export default function SDHLTeamPage({
           </div>
         )}
 
-        {/* Top Players */}
+        {/* Top Players, home team first */}
         <TopPlayers
-          teamCode1={teamCode}
-          teamCode2={opponentTeamCode}
+          teamCode1={opponentIsHome ? opponentTeamCode : teamCode}
+          teamCode2={opponentIsHome ? teamCode : opponentTeamCode}
           league="sdhl"
         />
 
