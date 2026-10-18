@@ -158,6 +158,7 @@ export const PositionChart: React.FC<PositionChartProps> = ({ games }) => {
                 xOf(i + 1),
                 yOf(pos),
               ])}
+              played={history.played[team.code]}
               state={
                 highlighted === null
                   ? 'normal'
@@ -230,30 +231,47 @@ export const PositionChart: React.FC<PositionChartProps> = ({ games }) => {
   );
 };
 
-/** One team's path: a 2px line with a dot per game. */
+/**
+ * One team's path: a 2px line with a dot per game played. A team behind on
+ * games continues as a dotted line, without dots, out to the last round.
+ */
 function TeamLine({
   points,
+  played,
   state,
 }: {
   points: [number, number][];
+  /** Games the team has played; points past this are dotted. */
+  played: number;
   state: 'normal' | 'highlight' | 'muted';
 }) {
-  const d = points
-    .map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x},${y}`)
-    .join(' ');
+  const playedPoints = points.slice(0, played);
+  const pendingPoints = points.slice(Math.max(0, played - 1));
   const highlight = state === 'highlight';
+  const stroke = highlight ? 'stroke-accent' : 'stroke-mute';
 
   return (
     <g opacity={state === 'muted' ? 0.25 : 1} className="pointer-events-none">
       <path
-        d={d}
+        d={pathOf(playedPoints)}
         fill="none"
         strokeWidth={highlight ? 2.5 : 1.5}
         strokeLinejoin="round"
         strokeLinecap="round"
-        className={highlight ? 'stroke-accent' : 'stroke-mute'}
+        className={stroke}
       />
-      {points.map(([x, y]) => (
+      {pendingPoints.length > 1 && (
+        <path
+          d={pathOf(pendingPoints)}
+          fill="none"
+          strokeWidth={highlight ? 2 : 1.25}
+          strokeDasharray="2 4"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          className={stroke}
+        />
+      )}
+      {playedPoints.map(([x, y]) => (
         <circle
           key={x}
           cx={x}
@@ -424,6 +442,10 @@ function xTicks(rounds: number): number[] {
     if (rounds - round >= 2) ticks.add(round);
   }
   return [...ticks].sort((a, b) => a - b);
+}
+
+function pathOf(points: [number, number][]): string {
+  return points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x},${y}`).join(' ');
 }
 
 function clamp(value: number, min: number, max: number): number {
